@@ -23,6 +23,8 @@ const char* fragmentShaderSource = "#version 330 core\n"
 
 // Processing inputs with the Method processInput
 void processInput(GLFWwindow* window);
+void helloTriangleLesson(GLuint& vertexArrayObject, GLuint& vertexBufferObject, GLuint& shaderProgram);
+
 
 int main() {
 	// Initialize GLFW
@@ -53,69 +55,16 @@ int main() {
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 600
 	glViewport(0, 0, WIDTH, HEIGHT);
 
-	// Create a vertex shader object
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	// Vertex shader sources
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	// Compile the object into machine code
-	glCompileShader(vertexShader);
-
-	// Create a Fragment shader object
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	// Fragment shader Soruce
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	// Compile the fragment shader object to machine code
-	glCompileShader(fragmentShader);
-
-	// Create a shader program
-	GLuint shaderProgram = glCreateProgram();
-	// Basically subscribing something to a delegate myDelegate += myMethod()
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	// Links all the shaders together
-	glLinkProgram(shaderProgram);
-
-	// After you link them into the shader program you can delete the shaders
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
-	// Vertices coordinates
-	GLfloat vertices[] =
-	{
-		-0.0f, -0.5f, 0.0f, // Lower left corner
-		0.5f, -0.5f, 0.0f, // Lower right corner
-		0.0f, 0.5f, 0.0f // Upper corner
-	};
-
-	GLuint vertexArrayObject, vertexBufferObject;
-
-	// VertexArrayObject need to be generated before the VertextBufferObject
-	glGenVertexArrays(1, &vertexArrayObject);
-	glBindVertexArray(vertexArrayObject);
-
-	glGenBuffers(1, &vertexBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-
-
-
-
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-
-
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cerr << "GLAD did not initialize correctly";
 		glfwTerminate();
 		return -1;
 	}
+
+	GLuint vertexArrayObject, vertexBufferObject;
+
+	// Create a shader program
+	GLuint shaderProgram = glCreateProgram();
 
 	while (!glfwWindowShouldClose(window)) {
 		// Inputs
@@ -124,8 +73,7 @@ int main() {
 		// Rendering
 		glClearColor(0.1f, 0.3f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glUseProgram(shaderProgram);
-		glBindVertexArray(vertexArrayObject);
+		helloTriangleLesson(vertexArrayObject, vertexBufferObject, shaderProgram);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		// Events and buffers
@@ -133,6 +81,7 @@ int main() {
 		glfwPollEvents();
 	}
 
+	// Deleting the shaders
 	glDeleteVertexArrays(1, &vertexArrayObject);
 	glDeleteBuffers(1, &vertexBufferObject);
 	glDeleteProgram(shaderProgram);
@@ -147,4 +96,64 @@ void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE)) {
 		glfwSetWindowShouldClose(window, true);
 	}
+}
+
+void helloTriangleLesson(GLuint& vertexArrayObject, GLuint& vertexBufferObject, GLuint& shaderProgram) {
+	// Create a vertex shader object
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// Vertex shader sources
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	// Compile the object into machine code
+	glCompileShader(vertexShader);
+
+	// Create a Fragment shader object
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	// Fragment shader Soruce
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	// Compile the fragment shader object to machine code
+	glCompileShader(fragmentShader);
+
+	// Basically subscribing something to a delegate myDelegate += myMethod()
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	// Links all the shaders together
+	glLinkProgram(shaderProgram);
+
+	// After you link them into the shader program you can delete the shaders
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	// Vertices coordinates
+	GLfloat vertices[] =
+	{
+		// This is the first Triangle
+		-0.5f, -0.5f, 0.0f, // Lower left corner
+		0.5f, -0.5f, 0.0f, // Lower right corner
+		0.0f, 0.5f, 0.0f, // Upper corner
+	};
+
+	// VertexArrayObject need to be generated before the VertextBufferObject
+	glGenVertexArrays(1, &vertexArrayObject);
+	glBindVertexArray(vertexArrayObject);
+
+	glGenBuffers(1, &vertexBufferObject);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	float timeValue = glfwGetTime();
+	float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+	GLuint vertexColorLocation = glGetUniformLocation(shaderProgram, "vertexShaderSource");
+	glUseProgram(shaderProgram);
+	glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+	glUseProgram(shaderProgram);
+	glBindVertexArray(vertexArrayObject);
 }
