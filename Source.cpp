@@ -3,7 +3,7 @@
 #include <glfw/glfw3.h>
 
 const int WIDTH = 800;
-const int HEIGHT = 600;
+const int HEIGHT = 800;
 
 // Vertex Shader source code
 const char* vertexShaderSource = "#version 330 core\n"
@@ -18,7 +18,7 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(0.8f, 0.4f, 0.8f, 1.0f);\n"
+"   FragColor = vec4(0.0f, 0.8f, 0.4f, 1.0f);\n"
 "}\n\0";
 
 // Processing inputs with the Method processInput
@@ -51,25 +51,21 @@ int main() {
 
 	// Specify the viewport of OpenGL in the Window
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 600
+	// Area of the window we want OpenGL to render
 	glViewport(0, 0, WIDTH, HEIGHT);
 
 	// Create a vertex shader object
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	// Vertex shader sources
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	// Compile the object into machine code
 	glCompileShader(vertexShader);
 
 	// Create a Fragment shader object
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	// Fragment shader Soruce
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	// Compile the fragment shader object to machine code
 	glCompileShader(fragmentShader);
 
 	// Create a shader program
 	GLuint shaderProgram = glCreateProgram();
-	// Basically subscribing something to a delegate myDelegate += myMethod()
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 	// Links all the shaders together
@@ -79,36 +75,67 @@ int main() {
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	/* 
+		- Sending data from GPU to CPU is slow so we need to send them in big batches which are called buffers
+		- Binding in OpenGL means that you make a certain object the current object
+	*/
+
 	// Vertices coordinates
+
+	/*
+			   /\
+			  /  \
+			 /    \
+			/______\
+	*/
+	
 	GLfloat vertices[] =
 	{
-		-0.0f, -0.5f, 0.0f, // Lower left corner
-		0.5f, -0.5f, 0.0f, // Lower right corner
-		0.0f, 0.5f, 0.0f // Upper corner
-	};
+	//	  X		 Y		 Z
+		// First Triangle
+		+0.0f,	+0.40f,	+0.0f,  // top
+		-0.25f,	+0.0f,	+0.0f,  // left
+		+0.25f,	+0.0f,	+0.0f,  // right
 
-	GLuint vertexArrayObject, vertexBufferObject;
+		// Second Triangle
+		-0.5f,	-0.4f,	+0.0f,  // left
+		+0.0f,	-0.4f,	+0.0f,  // right
+
+		// Third Triangle
+		+0.5f,	-0.4f,	+0.0f,  // right
+	};	
+
+	// Indices
+	GLuint indices[] =
+	{
+		0, 1, 2,	// first triangle
+		1, 3, 4,	// second triangle
+		2, 4, 5		// second triangle
+	};
+	
+
+	GLuint VAO, VBO, EBO;
 
 	// VertexArrayObject need to be generated before the VertextBufferObject
-	glGenVertexArrays(1, &vertexArrayObject);
-	glBindVertexArray(vertexArrayObject);
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
-	glGenBuffers(1, &vertexBufferObject);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-
-
-
-
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+	// glVertexAttribPointer(position of the VAO, # of values per vertex, GL_FLOAT, GL_FALSE, Amount of Data between each vertex, Offset: Where the vertex begins in the array);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+	// glEnableVertexAttribArray(position of VAO);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -122,23 +149,25 @@ int main() {
 		processInput(window);
 
 		// Rendering
-		glClearColor(0.1f, 0.3f, 0.1f, 1.0f);
+		glClearColor(0.0f, 0.2f, 0.4f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
-		glBindVertexArray(vertexArrayObject);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-		// Events and buffers
+		// Events, buffers, and Resizing 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	glDeleteVertexArrays(1, &vertexArrayObject);
-	glDeleteBuffers(1, &vertexBufferObject);
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 	glDeleteProgram(shaderProgram);
 
+	// Destroys the Window
 	glfwDestroyWindow(window);
-
 	glfwTerminate();
 	return 0;
 }
