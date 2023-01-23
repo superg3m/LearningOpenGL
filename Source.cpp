@@ -6,19 +6,24 @@ const int WIDTH = 800;
 const int HEIGHT = 800;
 
 // Vertex Shader source code
-const char* vertexShaderSource = "#version 330 core\n"
+const char* vertexShaderSource = "#version 330 core\n" // the position variable has attribute position 0
 "layout (location = 0) in vec3 aPos;\n"
+"out vec4 vertexColor;\n" // specify a color output to the fragment shader
 "void main()\n"
 "{\n"
-"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"   gl_Position = vec4(aPos, 1.0);\n"
+"   vertexColor = vec4(0.8, 0.0, 0.0, 1.0);\n"
 "}\0";
 
 //Fragment Shader source code
 const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
+
+"in vec4 vertexColor;\n"
+
 "void main()\n"
 "{\n"
-"   FragColor = vec4(0.0f, 0.8f, 0.4f, 1.0f);\n"
+"   FragColor = vertexColor\n"
 "}\n\0";
 
 // Processing inputs with the Method processInput
@@ -55,21 +60,52 @@ int main() {
 	// Area of the window we want OpenGL to render
 	glViewport(0, 0, WIDTH, HEIGHT);
 
+	
+
 	// Create a vertex shader object
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
+	
+	int  success;
+	char infoLog[512];
+	// Checking if the vertexShader compiled properly
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
 
 	// Create a Fragment shader object
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
+	// Checking if the fragmentShader compiled properly
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+
+	if (!success)
+	{
+		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
 
 	// Create a shader program
 	GLuint shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
 	// Links all the shaders together
+	//checking if vertex shader compiles successfully
+	
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
 	glLinkProgram(shaderProgram);
 
 	// After you link them into the shader program you can delete the shaders
@@ -111,7 +147,9 @@ int main() {
 	{
 		0, 1, 2,	// first triangle
 		1, 3, 4,	// second triangle
-		2, 4, 5		// second triangle
+		2, 4, 5,		// third triangle
+		1, 2, 4
+
 	};
 	
 
