@@ -86,7 +86,7 @@ int main() {
 
 	};
 
-	Shader shaderProgram("default.vert", "default.frag");
+	Shader shaderProgram("./default.vert", "./default.frag");
 
 	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -124,6 +124,15 @@ int main() {
 		shaderProgram.use();
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+
+		// Update the uniform color
+		float time = glfwGetTime();
+		float changingColorValue = sin(time) / 2.0f + 0.5f;
+		float changingColorValue2 = cos(time) / 2.0f + 0.5f;
+		float changingAlphaValue = sin(time) / 2.0f + 0.5f;
+		int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "vertexColor");
+		glUseProgram(shaderProgram.ID);
+		glUniform4f(vertexColorLocation, 0.0f, changingColorValue2, changingColorValue, 1.0f);
 
 		// Events and updates
 		glfwSwapBuffers(window);

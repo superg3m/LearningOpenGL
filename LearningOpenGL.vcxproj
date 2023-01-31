@@ -138,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
