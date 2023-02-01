@@ -59,32 +59,33 @@ int main() {
 			 /    \
 			/______\
 	*/
-	
+
 	GLfloat vertices[] =
 	{
-	//	  X		 Y		 Z
-		// First Triangle
-		+0.0f,	+0.40f,	+0.0f,  // top
-		-0.25f,	+0.0f,	+0.0f,  // left
-		+0.25f,	+0.0f,	+0.0f,  // right
+		//	  X		 Y		 Z
+			// First Triangle
+			+0.0f,	+0.40f, +0.0f,  1.0f, 0.0f, 0.0f, // top
+			-0.25f,	+0.0f,  +0.0f,  0.0f, 1.0f, 0.0f, // middle left
+			+0.25f,	+0.0f,  +0.0f,  0.0f, 0.0f, 1.0f, // middle right
 
-		// Second Triangle
-		-0.5f,	-0.4f,	+0.0f,  // left
-		+0.0f,	-0.4f,	+0.0f,  // right
+			// Second Triangle
+			-0.5f,	-0.4f,  +0.0f,  0.0f, 0.0f, 1.0f, // bottom left
+			+0.0f,	-0.4f,  +0.0f,  1.0f, 0.0f, 0.0f, // bottom middle
 
-		// Third Triangle
-		+0.5f,	-0.4f,	+0.0f,  // right
-	};	
+			// Third Triangle
+			+0.5f,	-0.4f,  +0.0f,  0.0f, 1.0f, 0.0f, // bottom right
+	};
 
 	// Indices
 	GLuint indices[] =
 	{
 		0, 1, 2,	// first triangle
 		1, 3, 4,	// second triangle
-		2, 4, 5,		// third triangle
+		2, 4, 5,	// third triangle
 		1, 2, 4
 
 	};
+
 
 	Shader shaderProgram("./default.vert", "./default.frag");
 
@@ -102,17 +103,23 @@ int main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
+
 		// input
 		processInput(window);
 
@@ -125,14 +132,18 @@ int main() {
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
-		// Update the uniform color
+		/* Update the uniform color
 		float time = glfwGetTime();
+
 		float changingColorValue = sin(time) / 2.0f + 0.5f;
 		float changingColorValue2 = cos(time) / 2.0f + 0.5f;
+		float changingColorValue3 = sin(time / 0.5f + 0.5f) / 2.0f + 0.5f;
+
 		float changingAlphaValue = sin(time) / 2.0f + 0.5f;
 		int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "vertexColor");
 		glUseProgram(shaderProgram.ID);
-		glUniform4f(vertexColorLocation, 0.0f, changingColorValue2, changingColorValue, 1.0f);
+		glUniform4f(vertexColorLocation, changingColorValue3, changingColorValue2, changingColorValue, 1.0f);
+		*/
 
 		// Events and updates
 		glfwSwapBuffers(window);
@@ -142,7 +153,6 @@ int main() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-
 	glfwTerminate();
 	return 0;
 }
