@@ -2,7 +2,8 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
-#include"shaderClass.h"
+#include "./shaderClass.h"
+#include "./stb_image.h"
 
 const int WIDTH = 800;
 const int HEIGHT = 800;
@@ -60,21 +61,48 @@ int main() {
 			/______\
 	*/
 
+	// Textures
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// load and generate the texture
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("wall.jpg", &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	
+
+
 	GLfloat vertices[] =
 	{
 		//	  X		 Y		 Z
-			// First Triangle
-			+0.0f,	+0.40f, +0.0f,  1.0f, 0.0f, 0.0f, // top
-			-0.25f,	+0.0f,  +0.0f,  0.0f, 1.0f, 0.0f, // middle left
-			+0.25f,	+0.0f,  +0.0f,  0.0f, 0.0f, 1.0f, // middle right
+			// positions                colors         texture coords
+			+0.0f,	+0.40f, +0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top
+			-0.25f,	+0.0f,  +0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // middle left
+			+0.25f,	+0.0f,  +0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // middle right
 
-			// Second Triangle
-			-0.5f,	-0.4f,  +0.0f,  0.0f, 0.0f, 1.0f, // bottom left
-			+0.0f,	-0.4f,  +0.0f,  1.0f, 0.0f, 0.0f, // bottom middle
+			-0.5f,	-0.4f,  +0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+			+0.0f,	-0.4f,  +0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom middle
 
-			// Third Triangle
-			+0.5f,	-0.4f,  +0.0f,  0.0f, 1.0f, 0.0f, // bottom right
+			+0.5f,	-0.4f,  +0.0f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f, // bottom right
 	};
+
 
 	// Indices
 	GLuint indices[] =
@@ -85,6 +113,15 @@ int main() {
 		1, 2, 4
 
 	};
+
+	GLfloat texCoords[] = {
+		0.0f, 0.0f,  // lower-left corner  
+		1.0f, 0.0f,  // lower-right corner
+		0.5f, 1.0f   // top-center corner
+	};
+
+	GLfloat borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
 
 	Shader shaderProgram("./default.vert", "./default.frag");
@@ -103,12 +140,15 @@ int main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
 	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -124,11 +164,12 @@ int main() {
 		processInput(window);
 
 		// render background
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// render the triangle
 		shaderProgram.use();
+		glBindTexture(GL_TEXTURE, texture);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
