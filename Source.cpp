@@ -1,6 +1,7 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
+#include <numbers>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,6 +9,9 @@
 
 #include "./shaderClass.h"
 #include "./stb_image.h"
+
+const float PI = 3.1415926;
+const float TAU = 6.2831853;
 
 const int WIDTH = 800;
 const int HEIGHT = 800;
@@ -91,20 +95,21 @@ int main() {
 	}
 	stbi_image_free(data);
 	
-
+	float offSet = 0.0f;
+	float divisor = 0.2f;
 
 	GLfloat vertices[] =
 	{
 		//	  X		 Y		 Z
 			// positions                colors         texture coords
-			+0.0f,	+0.40f, +0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top
-			-0.25f,	+0.0f,  +0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // middle left
-			+0.25f,	+0.0f,  +0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // middle right
+			+0.00f,	+0.4f,  +0.0f,  +1.0f, +0.0f, +0.0f, (+0.00f + offSet) / divisor, (+0.4f + offSet) / divisor, // top
+			-0.25f,	+0.0f,  +0.0f,  +0.0f, +1.0f, +0.0f, (-0.25f + offSet) / divisor, (+0.0f + offSet) / divisor, // middle left
+			+0.25f,	+0.0f,  +0.0f,  +0.0f, +0.0f, +1.0f, (+0.25f + offSet) / divisor, (+0.0f + offSet) / divisor, // middle right
 
-			-0.5f,	-0.4f,  +0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-			+0.0f,	-0.4f,  +0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // bottom middle
+			-0.50f,	-0.4f,  +0.0f,  +0.0f, +0.0f, +1.0f, (-0.50f + offSet) / divisor, (-0.4f + offSet) / divisor, // bottom left
+			+0.00f,	-0.4f,  +0.0f,  +1.0f, +0.0f, +0.0f, (+0.00f + offSet) / divisor, (-0.4f + offSet) / divisor, // bottom middle
 
-			+0.5f,	-0.4f,  +0.0f,  0.0f, 1.0f, 1.0f, 0.0f, 1.0f, // bottom right
+			+0.50f,	-0.4f,  +0.0f,  +0.0f, +1.0f, +1.0f, (+0.50f + offSet) / divisor, (-0.4f + offSet) / divisor, // bottom right
 	};
 
 
@@ -177,18 +182,26 @@ int main() {
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
-		/* Update the uniform color
+		// Update the uniform color
 		float time = glfwGetTime();
+		float period = 2.0f; // Bigger period means lower speed
+		float brightnessFactor = sin(TAU * time / period) / 2.0f;
 
-		float changingColorValue = sin(time) / 2.0f + 0.5f;
-		float changingColorValue2 = cos(time) / 2.0f + 0.5f;
-		float changingColorValue3 = sin(time / 0.5f + 0.5f) / 2.0f + 0.5f;
+		float fac1 = TAU * time;
+		float changingColorValue = (sinf(fac1 / period) / 2.0f) + 0.5f;
+		changingColorValue *= brightnessFactor;
 
-		float changingAlphaValue = sin(time) / 2.0f + 0.5f;
-		int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "vertexColor");
+		float fac2 = TAU * (time + (1.0f * period / 3.0f));
+		float changingColorValue2 = (sinf(fac2 / period) / 2.0f) + 0.5f;
+		changingColorValue2 *= brightnessFactor;
+
+		float fac3 = TAU * (time + (2.0f * period / 3.0f));
+		float changingColorValue3 = (sin(fac3 / period) / 2.0f) + 0.5f;
+		changingColorValue3 *= brightnessFactor;
+		
+		int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "uniColor");
 		glUseProgram(shaderProgram.ID);
 		glUniform4f(vertexColorLocation, changingColorValue3, changingColorValue2, changingColorValue, 1.0f);
-		*/
 
 		// Events and updates
 		glfwSwapBuffers(window);

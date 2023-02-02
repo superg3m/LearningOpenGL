@@ -5,6 +5,7 @@ layout (location = 2) in vec2 aTexCoord;
 
 out vec3 ourColor;
 out vec2 TexCoord;
+out vec4 uniColor;
 
 void main()
 {
