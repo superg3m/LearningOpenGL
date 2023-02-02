@@ -1,14 +1,14 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
-#include <numbers>
+#include <admin.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "./shaderClass.h"
-#include "./stb_image.h"
+#include <shaderClass.h>
+#include <stb_image.h>
 
 const float PI = 3.1415926;
 const float TAU = 6.2831853;
@@ -198,6 +198,8 @@ int main() {
 		float fac3 = TAU * (time + (2.0f * period / 3.0f));
 		float changingColorValue3 = (sin(fac3 / period) / 2.0f) + 0.5f;
 		changingColorValue3 *= brightnessFactor;
+
+		DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
 		
 		int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "uniColor");
 		glUseProgram(shaderProgram.ID);

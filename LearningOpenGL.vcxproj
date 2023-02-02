@@ -71,11 +71,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>./OpenGLStuff/include;$(IncludePath)</IncludePath>
+    <IncludePath>./OpenGLStuff/include;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>./OpenGLStuff/Library;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>./OpenGLStuff/include;$(IncludePath)</IncludePath>
+    <IncludePath>./OpenGLStuff/include;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>./OpenGLStuff/Library;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -147,6 +147,7 @@
     <None Include="default.vert" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="admin.h" />
     <ClInclude Include="shaderClass.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
