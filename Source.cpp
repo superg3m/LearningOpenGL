@@ -17,7 +17,6 @@ const int WIDTH = 800;
 const int HEIGHT = 800;
 
 // Processing inputs with the Method processInput
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 
@@ -30,12 +29,16 @@ int main() {
 	glfwWindowHint(GLFW_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_VERSION_MINOR, 3);
 
+	#ifdef __APPLE__
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	#endif
+
 	// Make a Pointer to a GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OPEN GL", NULL, NULL);
 
 	// If Window is NULL then terminate the GLFW and return the program
 	if (window == NULL) {
-		std::cerr << "Window is NUL";
+		std::cerr << "Window is NULL";
 		glfwTerminate();
 		return -1;
 	}
@@ -52,10 +55,8 @@ int main() {
 	// Area of the window we want OpenGL to render
 	glViewport(0, 0, WIDTH, HEIGHT);
 
-	
-
-
-	/* 
+	#pragma region Position Data
+	/*
 		- Sending data from GPU to CPU is slow so we need to send them in big batches which are called buffers
 		- Binding in OpenGL means that you make a certain object the current object
 	*/
@@ -68,33 +69,6 @@ int main() {
 			 /    \
 			/______\
 	*/
-
-	// Textures
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// load and generate the texture
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("wall.jpg", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-	
 	float offSet = 0.0f;
 	float divisor = 0.2f;
 
@@ -128,11 +102,9 @@ int main() {
 		1.0f, 0.0f,  // lower-right corner
 		0.5f, 1.0f   // top-center corner
 	};
+	#pragma endregion
 
-	GLfloat borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-
+	#pragma region Shaders
 	Shader shaderProgram("./default.vert", "./default.frag");
 
 	unsigned int VBO, VAO, EBO;
@@ -163,7 +135,49 @@ int main() {
 	glBindVertexArray(0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	#pragma endregion
 
+	#pragma region Textures
+		// Textures
+		unsigned int texture;
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		// set the texture wrapping/filtering options (on the currently bound texture object)
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// load and generate the texture
+		int width, height, nrChannels;
+		unsigned char* data = stbi_load("wall.jpg", &width, &height, &nrChannels, 0);
+
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+		}
+		stbi_image_free(data);
+
+		GLfloat borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	#pragma endregion
+
+	#pragma region OpenGL Mathmatics
+	// GLM
+	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+	glm::mat4 translation = glm::mat4(1.0f);
+	translation = glm::translate(translation, glm::vec3(1.0f, 1.0f, 0.0f));
+	vec *= translation * vec;
+	DEBUG_WRAP(std::cout << "Vec1: " << vec.x << " | Vec2: " << vec.y << " | Vec3: " << vec.z << "\n";);
+	#pragma endregion
+
+	#pragma region Render Loop
 	// render loop
 	// -----------
 	while (!glfwWindowShouldClose(window))
@@ -199,8 +213,8 @@ int main() {
 		float changingColorValue3 = (sin(fac3 / period) / 2.0f) + 0.5f;
 		changingColorValue3 *= brightnessFactor;
 
-		DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
-		
+		//DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
+
 		int vertexColorLocation = glGetUniformLocation(shaderProgram.ID, "uniColor");
 		glUseProgram(shaderProgram.ID);
 		glUniform4f(vertexColorLocation, changingColorValue3, changingColorValue2, changingColorValue, 1.0f);
@@ -209,10 +223,14 @@ int main() {
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
+	#pragma endregion
 
+	#pragma region Delete Objects
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
+	#pragma endregion
+
 	glfwTerminate();
 	return 0;
 }
