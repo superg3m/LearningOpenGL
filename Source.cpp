@@ -168,15 +168,6 @@ int main() {
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	#pragma endregion
 
-	#pragma region OpenGL Mathmatics
-	// GLM
-	glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
-	glm::mat4 translation = glm::mat4(1.0f);
-	translation = glm::translate(translation, glm::vec3(1.0f, 1.0f, 0.0f));
-	vec *= translation * vec;
-	DEBUG_WRAP(std::cout << "Vec1: " << vec.x << " | Vec2: " << vec.y << " | Vec3: " << vec.z << "\n";);
-	#pragma endregion
-
 	#pragma region Render Loop
 	// render loop
 	// -----------
@@ -190,8 +181,25 @@ int main() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		// GLM
+		// create transformations
+		
+		float speed = glfwGetTime();
+		float functionTranslation_y = sin(PI * speed / 2.0f) / 2.0f;
+		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f + functionTranslation_y, 0.0f));
+		transform = glm::rotate(transform, speed, glm::vec3(0.25f, 0.25f, 0.25f));
+
+		unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
 		// render the triangle
 		shaderProgram.use();
+
+		// GLM
+		unsigned int transformLocation = glGetUniformLocation(shaderProgram.ID, "transform");
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+
 		glBindTexture(GL_TEXTURE, texture);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
