@@ -185,10 +185,11 @@ int main() {
 		// create transformations
 		
 		float speed = glfwGetTime();
-		float functionTranslation_y = sin(PI * speed / 2.0f) / 2.0f;
+		float functionTranslation = sin(PI * speed / 2.0f) / 2.0f;
+
 		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f + functionTranslation_y, 0.0f));
-		transform = glm::rotate(transform, speed, glm::vec3(0.25f, 0.25f, 0.25f));
+		transform = glm::translate(transform, glm::vec3(0.0f, 0.0f + functionTranslation, 0.0f));
+		transform = glm::rotate(transform, speed, glm::vec3(0.25f, 0.25f, 0.0f));
 
 		unsigned int transformLoc = glGetUniformLocation(shaderProgram.ID, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
