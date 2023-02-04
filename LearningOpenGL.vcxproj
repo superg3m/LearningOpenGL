@@ -148,6 +148,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="admin.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="PositionData.h" />
     <ClInclude Include="shaderClass.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>

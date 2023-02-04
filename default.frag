@@ -12,5 +12,4 @@ void main()
 {
     FragColor = texture(ourTexture, TexCoord) * ourColor;
     FragColor += uniColor;
-
 }
