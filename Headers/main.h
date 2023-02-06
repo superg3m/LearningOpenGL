@@ -10,10 +10,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 // Our includes
-#include <shaderClass.h>
-#include <stb_image.h>
-#include<PositionData.h>
-#include <admin.h>
+#include <Headers/shaderClass.h>
+#include <Headers/stb_image.h>
+#include<Headers/PositionData.h>
+#include <Headers/admin.h>
 
 // Methods
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);

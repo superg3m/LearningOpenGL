@@ -10,7 +10,7 @@
 float offSet = 0.0f;
 float divisor = 0.2f;
 
-GLfloat vertices[] =
+GLfloat vertices_with_color[] =
 {
 	// X	 Y	    Z
 	// positions                 colors         texture coords
@@ -61,6 +61,59 @@ GLfloat vertices[] =
 	+0.5f, +0.5f, +0.5f,  +0.0f, +0.0f, +1.0f, 1.0f / divisor, 0.0f / divisor,
 	-0.5f, +0.5f, -0.5f,  +1.0f, +0.0f, +0.0f, 0.0f / divisor, 0.0f / divisor,
 	-0.5f, +0.5f, +0.5f,  +0.0f, +1.0f, +1.0f, 0.0f / divisor, 1.0f / divisor,
+};
+
+GLfloat vertices_without_color[] =
+{
+	// X	 Y	    Z
+	// positions                 colors         texture coords
+	-0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 0.0f / divisor,
+	+0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 0.0f / divisor,
+	+0.5f, +0.5f, -0.5f,  +0.0f, +0.0f, +1.0f, 1.0f / divisor, 1.0f / divisor,
+
+	+0.5f, +0.5f, -0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 1.0f / divisor,
+	-0.5f, +0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 1.0f / divisor,
+	-0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 0.0f / divisor,
+
+	-0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 0.0f / divisor,
+	+0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 0.0f / divisor,
+	+0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 1.0f / divisor,
+
+	+0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 1.0f / divisor,
+	-0.5f,  0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 1.0f / divisor,
+	-0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 0.0f / divisor,
+
+	-0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 0.0f / divisor,
+	-0.5f, +0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 1.0f / divisor,
+	-0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 1.0f / divisor,
+
+	-0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 1.0f / divisor,
+	-0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 0.0f / divisor,
+	-0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor,
+
+	+0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 0.0f / divisor,
+	+0.5f, +0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 1.0f / divisor,
+	+0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 1.0f / divisor,
+
+	+0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 1.0f / divisor,
+	+0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 0.0f / divisor,
+	+0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor,
+
+	-0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 1.0f / divisor,
+	+0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 1.0f / divisor,
+	+0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor,
+
+	+0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor,
+	-0.5f, -0.5f, +0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 0.0f / divisor,
+	-0.5f, -0.5f, -0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 1.0f / divisor,
+
+	-0.5f, +0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 1.0f / divisor,
+	+0.5f, +0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 1.0f / divisor, 1.0f / divisor,
+	+0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor,
+
+	+0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor,
+	-0.5f, +0.5f, -0.5f,  +1.0f, +1.0f, +0.0f, 0.0f / divisor, 0.0f / divisor,
+	-0.5f, +0.5f, +0.5f,  +1.0f, +1.0f, +1.0f, 0.0f / divisor, 1.0f / divisor,
 };
 
 // world space positions of our cubes
