@@ -21,7 +21,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 // Constants
-const bool coolShit = true;
+const bool tranlsations_rotations = true;
 const bool rainbowColors = true;
 
 const float PI = 3.1415926;

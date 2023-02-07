@@ -38,8 +38,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Vertices\default.vert" />
-    <None Include="Shaders\Fragments\default.frag" />
+    <None Include="Shaders\Vertex\default.vert" />
+    <None Include="Shaders\Fragment\default.frag" />
     <None Include="Include\glm\detail\func_common.inl">
       <Filter>Header Files</Filter>
     </None>
@@ -448,6 +448,10 @@
     <None Include="Include\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="Shaders\Fragment\light_color.frag" />
+    <None Include="Shaders\Fragment\light_cube.frag" />
+    <None Include="Shaders\Vertex\light_color.vert" />
+    <None Include="Shaders\Vertex\light_cube.vert" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Library\glfw3.lib" />
@@ -1324,6 +1328,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Headers\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

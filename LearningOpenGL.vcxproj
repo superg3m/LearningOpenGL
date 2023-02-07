@@ -162,14 +162,19 @@
     <None Include="Include\glm\gtx\vector_angle.inl" />
     <None Include="Include\glm\gtx\vector_query.inl" />
     <None Include="Include\glm\gtx\wrap.inl" />
-    <None Include="Shaders\Fragments\default.frag" />
-    <None Include="Shaders\Vertices\default.vert" />
+    <None Include="Shaders\Fragment\default.frag" />
+    <None Include="Shaders\Fragment\light_color.frag" />
+    <None Include="Shaders\Fragment\light_cube.frag" />
+    <None Include="Shaders\Vertex\default.vert" />
+    <None Include="Shaders\Vertex\light_color.vert" />
+    <None Include="Shaders\Vertex\light_cube.vert" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Library\glfw3.lib" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\admin.h" />
+    <ClInclude Include="Headers\camera.h" />
     <ClInclude Include="Headers\main.h" />
     <ClInclude Include="Headers\PositionData.h" />
     <ClInclude Include="Headers\shaderClass.h" />
