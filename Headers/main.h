@@ -16,13 +16,14 @@
 #include <Headers/admin.h>
 
 // Methods
+std::pair<float, float> circle_points(float radius, float angle, glm::vec3 origin);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 // Constants
-const bool tranlsations_rotations = true;
-const bool rainbowColors = true;
+const bool tranlsations_rotations = false;
+const bool rainbowColors = false;
 
 const float PI = 3.1415926;
 const float TAU = 6.2831853;

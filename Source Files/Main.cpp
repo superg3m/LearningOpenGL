@@ -14,6 +14,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Light Cube
+const float lightRotationSpeed = 2.0f;
 glm::vec3 lightPos(1.2f, 0.5f, 2.0f);
 
 int main() {
@@ -69,21 +70,27 @@ int main() {
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_with_color), vertices_with_color, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_without_color), vertices_without_color, GL_STATIC_DRAW);
 
 	glBindVertexArray(cubeVAO);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(0 * sizeof(float)));
 	glEnableVertexAttribArray(0);
 
 	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	// Texture Attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+	// Normal Attribute
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+
+
 
 	// Light Shaders
 	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
@@ -99,16 +106,22 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(0 * sizeof(float)));
 	glEnableVertexAttribArray(0);
 
-	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	/*
+	//Color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	// Texture Attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+
+	// Normal Attribute
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	*/
 	#pragma endregion
 
 	#pragma region Textures
@@ -165,15 +178,18 @@ int main() {
 
 		// be sure to activate shader when setting uniforms/drawing objects
 		lightingShader.use();
-		//lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-		lightingShader.setVec3("objectColor", 0.0f, 0.0f, 0.0f);  // Cube Colors
+		lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+		//lightingShader.setVec3("objectColor", 0.0f, 0.0f, 0.0f);
 		lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		lightingShader.setVec3("lightPos", lightPos);
+		lightingShader.setVec3("viewPos", camera.Position);
 
 		// view/projection transformations
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		lightingShader.setMat4("projection", projection);
 		lightingShader.setMat4("view", view);
+		
 
 		// world transformation
 		glm::mat4 model_main_cube = glm::mat4(1.0f);
@@ -210,6 +226,7 @@ int main() {
 		#pragma endregion
 
 		#pragma region Draw Main Cube
+		
 		if (tranlsations_rotations)
 		{
 			float speed = glfwGetTime();
@@ -222,7 +239,7 @@ int main() {
 			unsigned int transformLocation = glGetUniformLocation(lightingShader.ID, "transform");
 			glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 		}
-		for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < 1; i++)
 		{
 			// calculate the model matrix for each object and pass it to shader before drawing
 			// world transformation
@@ -231,6 +248,7 @@ int main() {
 
 			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
 			model_main_cube = glm::rotate(model_main_cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			model_main_cube = glm::scale(model_main_cube, glm::vec3(0.5f, 0.5f, 0.5f));
 			// render the cube
 			glBindVertexArray(cubeVAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -238,13 +256,22 @@ int main() {
 		#pragma endregion
 
 		#pragma region Draw Light Cube
+		
+		
+		
+		model_light_cube = glm::translate(model_light_cube, lightPos);
+		model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // a smaller cube
+
+		std::pair<float, float> tmpPoint;
+		tmpPoint = circle_points(2.0f, lightRotationSpeed * currentFrame, glm::vec3(0.0f, 0.0f, 0.0f));
+		lightPos.x = tmpPoint.first;
+		lightPos.z = tmpPoint.second;
+		model_light_cube = glm::rotate(model_light_cube, glm::radians(lightRotationSpeed/2 * -currentFrame), glm::vec3(0.0f, 1.0f, 0.0f)); // a smaller cube
+		
 		// also draw the lamp object
 		lightCubeShader.use();
 		lightCubeShader.setMat4("projection", projection);
 		lightCubeShader.setMat4("view", view);
-		
-		model_light_cube = glm::translate(model_light_cube, lightPos);
-		model_light_cube = glm::scale(model_light_cube, glm::vec3(0.2f)); // a smaller cube
 		lightCubeShader.setMat4("model", model_light_cube);
 
 		glBindVertexArray(lightCubeVAO);
@@ -323,4 +350,10 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+std::pair<float, float> circle_points(float radius, float angle, glm::vec3 origin)
+{
+	float angle_in_radians = glm::radians(angle);
+ 	return std::make_pair((origin.x + radius) * glm::cos(angle_in_radians), (origin.y + radius) * glm::sin(angle_in_radians));
 }
