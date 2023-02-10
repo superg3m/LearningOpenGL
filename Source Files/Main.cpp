@@ -14,7 +14,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Light Cube
-const float lightRotationSpeed = 2.0f;
+const float lightRotationSpeed = 10.0f;
 glm::vec3 lightPos(1.2f, 0.5f, 2.0f);
 
 int main() {
@@ -65,30 +65,14 @@ int main() {
 
 	// first, configure the cube's VAO (and VBO)
 	unsigned int VBO, cubeVAO;
-	glGenVertexArrays(1, &cubeVAO);
 	glGenBuffers(1, &VBO);
-
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+	bindBuffers(cubeVAO);
+	
+	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_without_color), vertices_without_color, GL_STATIC_DRAW);
-
-	glBindVertexArray(cubeVAO);
-
-	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(0 * sizeof(float)));
-	glEnableVertexAttribArray(0);
-
-	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	// Texture Attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	// Normal Attribute
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
-	glEnableVertexAttribArray(3);
+	configureBufferAttributes(3, 3, 2, 3);
 
 
 
@@ -97,31 +81,10 @@ int main() {
 	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 
 	unsigned int lightCubeVAO;
-	glGenVertexArrays(1, &lightCubeVAO);
-	glBindVertexArray(lightCubeVAO);
-
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(light_cube_vertices), light_cube_vertices, GL_STATIC_DRAW);
-
-	// we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
+	bindBuffers(lightCubeVAO);
+	
 	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(0 * sizeof(float)));
-	glEnableVertexAttribArray(0);
-
-	/*
-	//Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	// Texture Attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	// Normal Attribute
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
-	glEnableVertexAttribArray(3);
-	*/
+	configureBufferAttributes(3, 3, 2, 3);
 	#pragma endregion
 
 	#pragma region Textures
@@ -179,7 +142,7 @@ int main() {
 		// be sure to activate shader when setting uniforms/drawing objects
 		lightingShader.use();
 		lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-		//lightingShader.setVec3("objectColor", 0.0f, 0.0f, 0.0f);
+		//lightingShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.setVec3("lightPos", lightPos);
 		lightingShader.setVec3("viewPos", camera.Position);
@@ -207,15 +170,15 @@ int main() {
 
 			float fac1 = TAU * time;
 			float changingColorValue = (sinf(fac1 / period) / 2.0f) + 0.5f;
-			changingColorValue *= brightnessFactor;
+			changingColorValue *= brightnessFactor/4;
 
 			float fac2 = TAU * (time + (1.0f * period / 3.0f));
 			float changingColorValue2 = (sinf(fac2 / period) / 2.0f) + 0.5f;
-			changingColorValue2 *= brightnessFactor;
+			changingColorValue2 *= brightnessFactor/4;
 
 			float fac3 = TAU * (time + (2.0f * period / 3.0f));
 			float changingColorValue3 = (sin(fac3 / period) / 2.0f) + 0.5f;
-			changingColorValue3 *= brightnessFactor;
+			changingColorValue3 *= brightnessFactor/4;
 
 			//DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
 
@@ -227,6 +190,20 @@ int main() {
 
 		#pragma region Draw Main Cube
 		
+		
+		for (unsigned int i = 0; i < 1; i++)
+		{
+			// calculate the model matrix for each object and pass it to shader before drawing
+			// world transformation
+			float angle = 20.0f * i;
+			lightingShader.setMat4("model", model_main_cube);
+
+			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
+			model_main_cube = glm::rotate(model_main_cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			// render the cube
+			glBindVertexArray(cubeVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		if (tranlsations_rotations)
 		{
 			float speed = glfwGetTime();
@@ -239,20 +216,6 @@ int main() {
 			unsigned int transformLocation = glGetUniformLocation(lightingShader.ID, "transform");
 			glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 		}
-		for (unsigned int i = 0; i < 1; i++)
-		{
-			// calculate the model matrix for each object and pass it to shader before drawing
-			// world transformation
-			float angle = 20.0f * i;
-			lightingShader.setMat4("model", model_main_cube);
-
-			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
-			model_main_cube = glm::rotate(model_main_cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-			model_main_cube = glm::scale(model_main_cube, glm::vec3(0.5f, 0.5f, 0.5f));
-			// render the cube
-			glBindVertexArray(cubeVAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
 		#pragma endregion
 
 		#pragma region Draw Light Cube
@@ -263,10 +226,10 @@ int main() {
 		model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // a smaller cube
 
 		std::pair<float, float> tmpPoint;
-		tmpPoint = circle_points(2.0f, lightRotationSpeed * currentFrame, glm::vec3(0.0f, 0.0f, 0.0f));
+		tmpPoint = circle_points(2.0f, lightRotationSpeed * currentFrame, glm::vec2(0.0f, 0.0f));
 		lightPos.x = tmpPoint.first;
 		lightPos.z = tmpPoint.second;
-		model_light_cube = glm::rotate(model_light_cube, glm::radians(lightRotationSpeed/2 * -currentFrame), glm::vec3(0.0f, 1.0f, 0.0f)); // a smaller cube
+		model_light_cube = glm::rotate(model_light_cube, glm::radians(lightRotationSpeed/2 * currentFrame), glm::vec3(0.0f, 1.0f, 0.0f)); // a smaller cube
 		
 		// also draw the lamp object
 		lightCubeShader.use();
@@ -352,8 +315,51 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
 
-std::pair<float, float> circle_points(float radius, float angle, glm::vec3 origin)
+std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin)
 {
 	float angle_in_radians = glm::radians(angle);
- 	return std::make_pair((origin.x + radius) * glm::cos(angle_in_radians), (origin.y + radius) * glm::sin(angle_in_radians));
+ 	return std::make_pair((origin.x + radius) * glm::sin(angle_in_radians), (origin.y + radius) * glm::cos(angle_in_radians));
+}
+
+void bindBuffers(unsigned int &generic_VAO)
+{
+	glGenVertexArrays(1, &generic_VAO);
+	glBindVertexArray(generic_VAO);
+}
+
+void configureBufferAttributes(const int position, const int color, const int texture, const int normal)
+{
+	int positionOffsetValue = 3;
+
+	int number_of_elements_per_line = position + color + texture + normal;
+	int offset = 0;
+
+	if (position != NULL)
+	{
+		// Position attribute
+		glVertexAttribPointer(0, position, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(0);
+		offset += position;
+	}
+	if (color != NULL)
+	{
+		// Color attributoffset
+		glVertexAttribPointer(1, color, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		offset += color;
+	}
+	if (texture != NULL)
+	{
+		// Texture Attribute
+		glVertexAttribPointer(2, texture, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		offset += texture;
+	}
+	if (normal != NULL)
+	{
+		// Normal Attribute
+		glVertexAttribPointer(3, normal, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(3);
+		offset += normal;
+	}
 }
