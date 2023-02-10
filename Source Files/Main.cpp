@@ -14,8 +14,8 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Light Cube
-const float lightRotationSpeed = 10.0f;
-glm::vec3 lightPos(1.2f, 0.5f, 2.0f);
+
+glm::vec3 lightPos(1.0f, 0.25f, 2.0f);
 
 int main() {
 	#pragma region inits
@@ -100,9 +100,9 @@ int main() {
 	{
 		// per-frame time logic
 		// --------------------
-		float currentFrame = static_cast<float>(glfwGetTime());
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		float currentTime = (float)glfwGetTime();
+		deltaTime = currentTime - lastFrame;
+		lastFrame = currentTime;
 
 		// input
 		// -----
@@ -135,7 +135,7 @@ int main() {
 
 		// render the cube
 		#pragma region Color
-		if (rainbowColors)
+		if (RAINBOW_COLORS)
 		{
 			// Update the uniform color
 			float time = glfwGetTime();
@@ -177,7 +177,7 @@ int main() {
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		if (tranlsations_rotations)
+		if (TRANSLATION_ROTATION)
 		{
 			float speed = glfwGetTime();
 			float functionTranslation = sin(PI * speed / 2.0f) / 2.0f;
@@ -192,14 +192,26 @@ int main() {
 		#pragma endregion
 
 		#pragma region Draw Light Cube
-		model_light_cube = glm::translate(model_light_cube, lightPos);
-		model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // a smaller cube
-
-		std::pair<float, float> tmpPoint;
-		tmpPoint = circle_points(2.0f, lightRotationSpeed * currentFrame, glm::vec2(0.0f, 0.0f));
+		std::pair<float, float> tmpPoint = circle_points(2.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
 		lightPos.x = tmpPoint.first;
 		lightPos.z = tmpPoint.second;
-		model_light_cube = glm::rotate(model_light_cube, glm::radians(lightRotationSpeed/2 * currentFrame), glm::vec3(0.0f, 1.0f, 0.0f)); // a smaller cube
+
+		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+
+		model_light_cube = glm::translate(model_light_cube, lightPos);
+		transform = glm::rotate(transform, currentTime * LIGHT_ROTATION_SPEED, glm::vec3(0.0f, 1.0f, 0.0f));
+		unsigned int transformLocation = glGetUniformLocation(lightCubeShader.ID, "transform");
+		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+		
+		//model_light_cube = glm::translate(model_light_cube, glm::vec3(0, 0, 0));
+		
+		//model_light_cube *= glm::rotate(model_light_cube, glm::radians(currentTime * LIGHT_ROTATION_SPEED), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model_light_cube = glm::lookAt(glm::vec3(lightPos.x, 0.0, lightPos.z), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+
+		model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // a smaller cube
+
+		
 		
 		// also draw the lamp object
 		lightCubeShader.use();
@@ -288,8 +300,9 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin)
 {
-	float angle_in_radians = glm::radians(angle);
- 	return std::make_pair((origin.x + radius) * glm::sin(angle_in_radians), (origin.y + radius) * glm::cos(angle_in_radians));
+	float xPos = radius * sin(angle);
+	float yPos = radius * cos(angle);
+ 	return std::make_pair(xPos, yPos);
 }
 
 void bindBuffers(unsigned int &generic_VBO, unsigned int &generic_VAO)

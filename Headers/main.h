@@ -26,11 +26,13 @@ void configureBufferAttributes(const int position, const int color, const int te
 void configureTextures(unsigned int& texture, Shader& shader);
 
 // Constants
-const bool tranlsations_rotations = false;
-const bool rainbowColors = false;
+const bool TRANSLATION_ROTATION = false;
+const bool RAINBOW_COLORS = false;
 
 const float PI = 3.1415926;
 const float TAU = 6.2831853;
+const float LIGHT_ROTATION_SPEED = 100.0f;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
+
