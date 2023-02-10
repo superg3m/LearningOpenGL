@@ -17,13 +17,13 @@
 
 // Methods
 
-
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 void bindBuffers(unsigned int &generic_VBO, unsigned int& generic_VAO);
 std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin);
-void configureBufferAttributes(const int position, const int color, const int texture, const int normal);
+void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int& number_of_elements_per_line);
+void configureTextures(unsigned int& texture, Shader& shader);
 
 // Constants
 const bool tranlsations_rotations = false;

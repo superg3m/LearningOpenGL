@@ -18,6 +18,7 @@ const float lightRotationSpeed = 10.0f;
 glm::vec3 lightPos(1.2f, 0.5f, 2.0f);
 
 int main() {
+	#pragma region inits
 	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -28,7 +29,6 @@ int main() {
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	#endif
 
-	#pragma region inits
 	// Make a Pointer to a GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
 
@@ -62,66 +62,40 @@ int main() {
 	#pragma endregion
 
 	#pragma region Shaders
-
 	// first, configure the cube's VAO (and VBO)
 	unsigned int main_cube_VBO, main_cube_VAO;
-	
+
+	int arrLength = sizeof(vertices_without_color) / sizeof(GLfloat);
+	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
 	bindBuffers(main_cube_VBO, main_cube_VAO);
 	
-	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_without_color), vertices_without_color, GL_STATIC_DRAW);
-	configureBufferAttributes(3, 3, 2, 3);
 
-
+	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
 
 	// Light Shaders
 	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
 	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 
 	unsigned int light_cube_VBO, light_cube_VAO;
+
+	arrLength = sizeof(light_cube_vertices) / sizeof(GLfloat);
+	number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
+
 	bindBuffers(light_cube_VBO, light_cube_VAO);
-	
-	// Position attribute
+
 	glBufferData(GL_ARRAY_BUFFER, sizeof(light_cube_vertices), light_cube_vertices, GL_STATIC_DRAW);
-	configureBufferAttributes(3, NULL, NULL, NULL);
+	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
 	#pragma endregion
 
 	#pragma region Textures
 	// Textures
 	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	// set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// load and generate the texture
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("Textures/wall.jpg", &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-	lightingShader.use();
-	lightingShader.setInt("texture", 0);
+	configureTextures(texture, lightingShader);
 	#pragma endregion
 
 	#pragma region Render Loop
-	// render loop
-	// -----------
 	while (!glfwWindowShouldClose(window))
 	{
 		// per-frame time logic
@@ -188,9 +162,8 @@ int main() {
 		}
 		#pragma endregion
 
+		// Reminder to put this draw stuff into a seperate method
 		#pragma region Draw Main Cube
-		
-		
 		for (unsigned int i = 0; i < 1; i++)
 		{
 			// calculate the model matrix for each object and pass it to shader before drawing
@@ -219,9 +192,6 @@ int main() {
 		#pragma endregion
 
 		#pragma region Draw Light Cube
-		
-		
-		
 		model_light_cube = glm::translate(model_light_cube, lightPos);
 		model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // a smaller cube
 
@@ -260,7 +230,7 @@ int main() {
 
 void processInput(GLFWwindow* window)
 {
-	const float camera_y_velocity = 0.05f;
+	const float camera_y_velocity = 0.025f;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -330,13 +300,9 @@ void bindBuffers(unsigned int &generic_VBO, unsigned int &generic_VAO)
 	glBindVertexArray(generic_VAO);
 }
 
-void configureBufferAttributes(const int position, const int color, const int texture, const int normal)
+void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int &number_of_elements_per_line)
 {
-	int positionOffsetValue = 3;
-
-	int number_of_elements_per_line = position + color + texture + normal;
 	int offset = 0;
-
 	if (position != NULL)
 	{
 		// Position attribute
@@ -365,4 +331,35 @@ void configureBufferAttributes(const int position, const int color, const int te
 		glEnableVertexAttribArray(3);
 		offset += normal;
 	}
+}
+
+void configureTextures(unsigned int &texture, Shader &shader)
+{
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// set the texture wrapping/filtering options (on the currently bound texture object)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// load and generate the texture
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("Textures/wall.jpg", &width, &height, &nrChannels, 0);
+
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	shader.use();
+	shader.setInt("texture", 0);
 }
