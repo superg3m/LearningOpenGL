@@ -21,7 +21,7 @@
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
-void bindBuffers(unsigned int& generic_VAO);
+void bindBuffers(unsigned int &generic_VBO, unsigned int& generic_VAO);
 std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin);
 void configureBufferAttributes(const int position, const int color, const int texture, const int normal);
 

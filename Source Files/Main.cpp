@@ -64,11 +64,10 @@ int main() {
 	#pragma region Shaders
 
 	// first, configure the cube's VAO (and VBO)
-	unsigned int VBO, cubeVAO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	unsigned int main_cube_VBO, main_cube_VAO;
+	
 
-	bindBuffers(cubeVAO);
+	bindBuffers(main_cube_VBO, main_cube_VAO);
 	
 	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_without_color), vertices_without_color, GL_STATIC_DRAW);
@@ -80,11 +79,12 @@ int main() {
 	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
 	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 
-	unsigned int lightCubeVAO;
-	bindBuffers(lightCubeVAO);
+	unsigned int light_cube_VBO, light_cube_VAO;
+	bindBuffers(light_cube_VBO, light_cube_VAO);
 	
 	// Position attribute
-	configureBufferAttributes(3, 3, 2, 3);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(light_cube_vertices), light_cube_vertices, GL_STATIC_DRAW);
+	configureBufferAttributes(3, NULL, NULL, NULL);
 	#pragma endregion
 
 	#pragma region Textures
@@ -201,7 +201,7 @@ int main() {
 			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
 			model_main_cube = glm::rotate(model_main_cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 			// render the cube
-			glBindVertexArray(cubeVAO);
+			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 		if (tranlsations_rotations)
@@ -237,7 +237,7 @@ int main() {
 		lightCubeShader.setMat4("view", view);
 		lightCubeShader.setMat4("model", model_light_cube);
 
-		glBindVertexArray(lightCubeVAO);
+		glBindVertexArray(light_cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		#pragma endregion
 
@@ -248,9 +248,10 @@ int main() {
 	#pragma endregion
 
 	#pragma region Delete Objects
-	glDeleteVertexArrays(1, &cubeVAO);
-	glDeleteVertexArrays(1, &lightCubeVAO);
-	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &main_cube_VAO);
+	glDeleteVertexArrays(1, &light_cube_VAO);
+	glDeleteBuffers(1, &main_cube_VBO);
+	glDeleteBuffers(1, &light_cube_VBO);
 	#pragma endregion
 
 	glfwTerminate();
@@ -321,8 +322,10 @@ std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origi
  	return std::make_pair((origin.x + radius) * glm::sin(angle_in_radians), (origin.y + radius) * glm::cos(angle_in_radians));
 }
 
-void bindBuffers(unsigned int &generic_VAO)
+void bindBuffers(unsigned int &generic_VBO, unsigned int &generic_VAO)
 {
+	glGenBuffers(1, &generic_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, generic_VBO);
 	glGenVertexArrays(1, &generic_VAO);
 	glBindVertexArray(generic_VAO);
 }

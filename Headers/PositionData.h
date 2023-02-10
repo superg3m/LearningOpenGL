@@ -117,53 +117,53 @@ GLfloat vertices_without_color[] =
 };
 
 GLfloat light_cube_vertices[] = {
-	 0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  -0.5f,
-	 0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  -0.5f,
-	 0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
 
-	-0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  -0.5f,
-	-0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  -0.5f,
-	-0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  -0.5f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
 
-	-0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  +0.5f,
-	 0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  +0.5f,
-	 0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  +0.5f,
+	-0.5f, -0.5f,  0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
 
-	 0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  +0.5f,
-	-0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  +0.5f,
-	-0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  +0.5f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
 
-	-0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
+	-0.5f, -0.5f, -0.5f,
 
-	-0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
+	-0.5f, -0.5f, -0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
 
-	 0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	 0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	 0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
+	 0.5f,  0.5f,  0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
 
-	 0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	 0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	 0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
+	 0.5f,  0.5f,  0.5f,
 
-	-0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.0f,  -0.5f,  +0.0f,
-	 0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.0f,  -0.5f,  +0.0f,
-	 0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.0f,  -0.5f,  +0.0f,
+	-0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f, -0.5f,
+	 0.5f, -0.5f,  0.5f,
 
-	 0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.0f,  -0.5f,  +0.0f,
-	-0.5f, -0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 0.0f / divisor, +0.0f,  -0.5f,  +0.0f,
-	-0.5f, -0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.0f,  -0.5f,  +0.0f,
+	 0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f,  0.5f,
+	-0.5f, -0.5f, -0.5f,
 
-	-0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.0f,  +0.5f,  +0.0f,
-	 0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.0f,  +0.5f,  +0.0f,
-	 0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.0f,  +0.5f,  +0.0f,
+	-0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f, -0.5f,
+	 0.5f,  0.5f,  0.5f,
 
-	 0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor, +0.0f,  +0.5f,  +0.0f,
-	-0.5f,  0.5f,  0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor, +0.0f,  +0.5f,  +0.0f,
-	-0.5f,  0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor, +0.0f,  +0.5f,  +0.0f,
+	 0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f,  0.5f,
+	-0.5f,  0.5f, -0.5f,
 };
 
 // world space positions of our cubes
