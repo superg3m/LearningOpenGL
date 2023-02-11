@@ -213,6 +213,9 @@ int main() {
 		deltaTime = currentTime - lastFrame;
 		lastFrame = currentTime;
 
+		int FPS = 1 / deltaTime;\
+		std::string fpsText = std::to_string(FPS);
+
 		// input
 		processInput(window);
 
@@ -223,7 +226,7 @@ int main() {
 
 		// Text Rendering
 		RenderText(textShader, "OpenGL Project - Jovanni Djonaj", 25.0f, 25.0f, 1.0f, glm::vec3(0.2, 0.2f, 0.2f));
-		RenderText(textShader, "(C) LearnOpenGL.com", SCREEN_WIDTH - 500.0f, SCREEN_HEIGHT - 50.0f, 1.00f, glm::vec3(0.3, 0.7f, 0.9f));
+		RenderText(textShader, "FPS " + fpsText, SCREEN_WIDTH - 200.0f, SCREEN_HEIGHT - 50.0f, 1.00f, glm::vec3(0.3, 0.7f, 0.9f));
 		
 
 		// *************** Render the main cube ***************
