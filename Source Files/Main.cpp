@@ -14,8 +14,17 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Light Cube
-
 glm::vec3 lightPos(1.0f, 0.5f, 2.0f);
+
+// FreeType
+struct Character {
+	unsigned int TextureID;  // ID handle of the glyph texture
+	glm::ivec2   Size;       // Size of glyph
+	glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
+	unsigned int Advance;    // Offset to advance to next glyph
+};
+std::map<char, Character> Characters;
+unsigned int text_VBO, text_VAO;
 
 int main() {
 	#pragma region inits
@@ -58,26 +67,32 @@ int main() {
 	// Area of the window we want OpenGL to render
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	#pragma endregion
 
+
+
+
 	#pragma region Shaders
+
+	#pragma region Main Cube
 	// first, configure the cube's VAO (and VBO)
+	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
 	unsigned int main_cube_VBO, main_cube_VAO;
 
 	int arrLength = sizeof(vertices_without_color) / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
 	bindBuffers(main_cube_VBO, main_cube_VAO);
-	
+
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_without_color), vertices_without_color, GL_STATIC_DRAW);
-
 	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
+	#pragma endregion
 
-	// Light Shaders
-	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
+	#pragma region Light Cube
 	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
-
 	unsigned int light_cube_VBO, light_cube_VAO;
 
 	arrLength = sizeof(light_cube_vertices) / sizeof(GLfloat);
@@ -89,10 +104,99 @@ int main() {
 	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
 	#pragma endregion
 
+	#pragma region FreeType
+	Shader textShader("Shaders/Vertex/text.vert", "Shaders/Fragment/text.frag");
+	glm::mat4 textProjection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
+
+	textShader.use();
+	glUniformMatrix4fv(glGetUniformLocation(textShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(textProjection));
+	// FreeType
+	// --------
+	FT_Library ft;
+	// All functions return a value different than 0 whenever an error occurred
+	if (FT_Init_FreeType(&ft))
+	{
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+		return -1;
+	}
+
+	// load font as face
+	FT_Face face;
+	if (FT_New_Face(ft, "Fonts/arial.ttf", 0, &face)) {
+		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		return -1;
+	}
+	else {
+		// set size to load glyphs as
+		FT_Set_Pixel_Sizes(face, 0, 48);
+
+		// disable byte-alignment restriction
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		// load first 128 characters of ASCII set
+		for (unsigned char c = 0; c < 128; c++)
+		{
+			// Load character glyph 
+			if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+			{
+				std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+				continue;
+			}
+			// generate texture
+			unsigned int textTexture;
+			glGenTextures(1, &textTexture);
+			glBindTexture(GL_TEXTURE_2D, textTexture);
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				GL_RED,
+				face->glyph->bitmap.width,
+				face->glyph->bitmap.rows,
+				0,
+				GL_RED,
+				GL_UNSIGNED_BYTE,
+				face->glyph->bitmap.buffer
+			);
+			// set texture options
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			// now store character for later use
+			Character character = {
+				textTexture,
+				glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+				glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+				static_cast<unsigned int>(face->glyph->advance.x)
+			};
+			Characters.insert(std::pair<char, Character>(c, character));
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	// destroy FreeType once we're finished
+	FT_Done_Face(face);
+	FT_Done_FreeType(ft);
+
+
+	// configure VAO/VBO for texture quads
+	// -----------------------------------
+	glGenVertexArrays(1, &text_VAO);
+	glGenBuffers(1, &text_VBO);
+	glBindVertexArray(text_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, text_VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	#pragma endregion
+
 	#pragma region Textures
 	// Textures
 	unsigned int texture;
 	configureTextures(texture, lightingShader);
+	#pragma endregion
+
 	#pragma endregion
 
 	#pragma region Render Loop
@@ -110,8 +214,16 @@ int main() {
 
 		// render
 		// ------
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// Text
+		//RenderText(textShader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+		//RenderText(textShader, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));s
+
+		// world transformation
+		glm::mat4 model_main_cube = glm::mat4(1.0f);
+		glm::mat4 model_light_cube = glm::mat4(1.0f);
 
 		// be sure to activate shader when setting uniforms/drawing objects
 		lightingShader.use();
@@ -126,14 +238,9 @@ int main() {
 		glm::mat4 view = camera.GetViewMatrix();
 		lightingShader.setMat4("projection", projection);
 		lightingShader.setMat4("view", view);
-		
 
-		// world transformation
-		glm::mat4 model_main_cube = glm::mat4(1.0f);
+		#pragma region Draw Main Cube
 
-		glm::mat4 model_light_cube = glm::mat4(1.0f);
-
-		// render the cube
 		#pragma region Color
 		if (RAINBOW_COLORS)
 		{
@@ -144,15 +251,15 @@ int main() {
 
 			float fac1 = TAU * time;
 			float changingColorValue = (sinf(fac1 / period) / 2.0f) + 0.5f;
-			changingColorValue *= brightnessFactor/4;
+			changingColorValue *= brightnessFactor / 4;
 
 			float fac2 = TAU * (time + (1.0f * period / 3.0f));
 			float changingColorValue2 = (sinf(fac2 / period) / 2.0f) + 0.5f;
-			changingColorValue2 *= brightnessFactor/4;
+			changingColorValue2 *= brightnessFactor / 4;
 
 			float fac3 = TAU * (time + (2.0f * period / 3.0f));
 			float changingColorValue3 = (sin(fac3 / period) / 2.0f) + 0.5f;
-			changingColorValue3 *= brightnessFactor/4;
+			changingColorValue3 *= brightnessFactor / 4;
 
 			//DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
 
@@ -162,8 +269,6 @@ int main() {
 		}
 		#pragma endregion
 
-		// Reminder to put this draw stuff into a seperate method
-		#pragma region Draw Main Cube
 		for (unsigned int i = 0; i < 1; i++)
 		{
 			// calculate the model matrix for each object and pass it to shader before drawing
@@ -177,19 +282,22 @@ int main() {
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
 		if (TRANSLATION_ROTATION)
 		{
-			float speed = glfwGetTime();
-			float functionTranslation = sin(PI * speed / 2.0f) / 2.0f;
-			glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-			transform = glm::translate(transform, glm::vec3(0.0f, 0.0f + functionTranslation, 0.0f));
-			transform = glm::rotate(transform, speed, glm::vec3(0.5f, 0.25f, 0.25f));
-			transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 0.5f));
-
+			float functionTranslation = sin(PI * currentTime / 2.0f) / 2.0f;
+			glm::mat4 transform = transformMatrix(transform, currentTime, glm::vec3(0.0f, functionTranslation, 0.0f), glm::vec3(0.5f, 0.25f, 0.25f), glm::vec3(0.5f, 0.5f, 0.5f));
 			unsigned int transformLocation = glGetUniformLocation(lightingShader.ID, "transform");
 			glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 		}
 		#pragma endregion
+
+		
+		
+		// render the cube
+
+		// Reminder to put this draw stuff into a seperate method
+		
 
 		#pragma region Draw Light Cube
 		// also draw the lamp object
@@ -202,22 +310,10 @@ int main() {
 		lightPos.x = tmpPoint.first;
 		lightPos.z = tmpPoint.second;
 
-		
+		glm::mat4 transformTwo = transformMatrix(transformTwo, currentTime * LIGHT_ROTATION_SPEED, lightPos, glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.25f));
 
-		glm::mat4 transformTwo = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-		
-		transformTwo = glm::translate(model_light_cube, lightPos);
-		transformTwo = glm::rotate(transformTwo, glm::radians(currentTime * LIGHT_ROTATION_SPEED), glm::vec3(0.0f, 0.5f, 0.0f));
-		transformTwo = glm::scale(transformTwo, glm::vec3(0.25f)); // a smaller cube
 		unsigned int transformLocationTwo = glGetUniformLocation(lightCubeShader.ID, "transformTwo");
 		glUniformMatrix4fv(transformLocationTwo, 1, GL_FALSE, glm::value_ptr(transformTwo));
-		//model_light_cube = glm::lookAt(glm::vec3(lightPos.x, 0.0, lightPos.z), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-
-		
-
-		
-		
-		
 
 		glBindVertexArray(light_cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -261,14 +357,11 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
 	
-
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) mousePressed = true;
 	else
 	{
 		mousePressed = false;
-	}
-	
-		
+	}	
 }
 
 // glfw: whenever the mouse moves, this callback is called
@@ -313,9 +406,9 @@ std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origi
 void bindBuffers(unsigned int &generic_VBO, unsigned int &generic_VAO)
 {
 	glGenBuffers(1, &generic_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, generic_VBO);
 	glGenVertexArrays(1, &generic_VAO);
 	glBindVertexArray(generic_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, generic_VBO);
 }
 
 void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int &number_of_elements_per_line)
@@ -380,4 +473,58 @@ void configureTextures(unsigned int &texture, Shader &shader)
 	stbi_image_free(data);
 	shader.use();
 	shader.setInt("texture", 0);
+}
+
+glm::mat4 transformMatrix(glm::mat4 &matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale)
+{
+	matrix = glm::mat4(1.0f); // Identity matrix is important
+	matrix = glm::translate(matrix, vector_translate);
+	matrix = glm::rotate(matrix, glm::radians(angle), vector_rotate);
+	matrix = glm::scale(matrix, vector_scale);
+	return matrix;
+}
+
+void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color)
+{
+	// activate corresponding render state	
+	shader.use();
+	glUniform3f(glGetUniformLocation(shader.ID, "textColor"), color.x, color.y, color.z);
+	glActiveTexture(GL_TEXTURE0);
+	glBindVertexArray(text_VAO);
+
+	// iterate through all characters
+	std::string::const_iterator c;
+	for (c = text.begin(); c != text.end(); c++)
+	{
+		Character ch = Characters[*c];
+
+		float xpos = x + ch.Bearing.x * scale;
+		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+		float w = ch.Size.x * scale;
+		float h = ch.Size.y * scale;
+		// update VBO for each character
+		float textVertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos,     ypos,       0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+			{ xpos + w, ypos + h,   1.0f, 0.0f }
+		};
+		// render glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+		// update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, text_VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(textVertices), textVertices); // be sure to use glBufferSubData and not glBufferData
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+		x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+	}
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

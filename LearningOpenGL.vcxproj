@@ -162,14 +162,15 @@
     <None Include="Include\glm\gtx\vector_angle.inl" />
     <None Include="Include\glm\gtx\vector_query.inl" />
     <None Include="Include\glm\gtx\wrap.inl" />
-    <None Include="Shaders\Fragment\default.frag" />
+    <None Include="Shaders\Fragment\text.frag" />
     <None Include="Shaders\Fragment\light_color.frag" />
     <None Include="Shaders\Fragment\light_cube.frag" />
-    <None Include="Shaders\Vertex\default.vert" />
+    <None Include="Shaders\Vertex\text.vert" />
     <None Include="Shaders\Vertex\light_color.vert" />
     <None Include="Shaders\Vertex\light_cube.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="Library\freetype.lib" />
     <Library Include="Library\glfw3.lib" />
   </ItemGroup>
   <ItemGroup>
@@ -179,6 +180,7 @@
     <ClInclude Include="Headers\PositionData.h" />
     <ClInclude Include="Headers\shaderClass.h" />
     <ClInclude Include="Headers\stb_image.h" />
+    <ClInclude Include="Include\ft2build.h" />
     <ClInclude Include="Include\glad\glad.h" />
     <ClInclude Include="Include\GLFW\glfw3.h" />
     <ClInclude Include="Include\GLFW\glfw3native.h" />

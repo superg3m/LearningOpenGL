@@ -38,8 +38,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Vertex\default.vert" />
-    <None Include="Shaders\Fragment\default.frag" />
+    <None Include="Shaders\Vertex\text.vert" />
+    <None Include="Shaders\Fragment\text.frag" />
     <None Include="Include\glm\detail\func_common.inl">
       <Filter>Header Files</Filter>
     </None>
@@ -455,6 +455,7 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="Library\glfw3.lib" />
+    <Library Include="Library\freetype.lib" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\glad\glad.h">
@@ -1331,6 +1332,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Headers\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ft2build.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
