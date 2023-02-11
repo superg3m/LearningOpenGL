@@ -15,7 +15,7 @@ float lastFrame = 0.0f;
 
 // Light Cube
 
-glm::vec3 lightPos(1.0f, 0.25f, 2.0f);
+glm::vec3 lightPos(1.0f, 0.5f, 2.0f);
 
 int main() {
 	#pragma region inits
@@ -192,32 +192,32 @@ int main() {
 		#pragma endregion
 
 		#pragma region Draw Light Cube
-		std::pair<float, float> tmpPoint = circle_points(2.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
-		lightPos.x = tmpPoint.first;
-		lightPos.z = tmpPoint.second;
-
-		glm::mat4 transform = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-
-		model_light_cube = glm::translate(model_light_cube, lightPos);
-		transform = glm::rotate(transform, currentTime * LIGHT_ROTATION_SPEED, glm::vec3(0.0f, 1.0f, 0.0f));
-		unsigned int transformLocation = glGetUniformLocation(lightCubeShader.ID, "transform");
-		glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
-		
-		//model_light_cube = glm::translate(model_light_cube, glm::vec3(0, 0, 0));
-		
-		//model_light_cube *= glm::rotate(model_light_cube, glm::radians(currentTime * LIGHT_ROTATION_SPEED), glm::vec3(0.0f, 1.0f, 0.0f));
-		//model_light_cube = glm::lookAt(glm::vec3(lightPos.x, 0.0, lightPos.z), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-
-
-		model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // a smaller cube
-
-		
-		
 		// also draw the lamp object
 		lightCubeShader.use();
 		lightCubeShader.setMat4("projection", projection);
 		lightCubeShader.setMat4("view", view);
 		lightCubeShader.setMat4("model", model_light_cube);
+
+		std::pair<float, float> tmpPoint = circle_points(2.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
+		lightPos.x = tmpPoint.first;
+		lightPos.z = tmpPoint.second;
+
+		
+
+		glm::mat4 transformTwo = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+		
+		transformTwo = glm::translate(model_light_cube, lightPos);
+		transformTwo = glm::rotate(transformTwo, glm::radians(currentTime * LIGHT_ROTATION_SPEED), glm::vec3(0.0f, 0.5f, 0.0f));
+		transformTwo = glm::scale(transformTwo, glm::vec3(0.25f)); // a smaller cube
+		unsigned int transformLocationTwo = glGetUniformLocation(lightCubeShader.ID, "transformTwo");
+		glUniformMatrix4fv(transformLocationTwo, 1, GL_FALSE, glm::value_ptr(transformTwo));
+		//model_light_cube = glm::lookAt(glm::vec3(lightPos.x, 0.0, lightPos.z), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+
+		
+
+		
+		
+		
 
 		glBindVertexArray(light_cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -256,6 +256,11 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera.Position.y -= camera_y_velocity;
 
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera.Position.y += camera_y_velocity;
+
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT, deltaTime);
+
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
+	
 
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) mousePressed = true;
 	else
