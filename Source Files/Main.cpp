@@ -27,6 +27,8 @@ std::map<char, Character> Characters;
 unsigned int text_VBO, text_VAO;
 
 int main() {
+
+	// *************** Initialization ***************
 	#pragma region inits
 	// Initialize GLFW
 	glfwInit();
@@ -40,6 +42,7 @@ int main() {
 
 	// Make a Pointer to a GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
+	glfwSetWindowPos(window, SCREEN_WIDTH / 8 , SCREEN_HEIGHT / 8);
 
 	// If Window is NULL then terminate the GLFW and return the program
 	if (window == NULL) {
@@ -73,10 +76,10 @@ int main() {
 	#pragma endregion
 
 
-
-
+	// *************** Shaders ***************
 	#pragma region Shaders
 
+	
 	#pragma region Main Cube
 	// first, configure the cube's VAO (and VBO)
 	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
@@ -91,6 +94,7 @@ int main() {
 	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
 	#pragma endregion
 
+	// *************** Light Cube ***************
 	#pragma region Light Cube
 	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 	unsigned int light_cube_VBO, light_cube_VAO;
@@ -104,6 +108,14 @@ int main() {
 	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
 	#pragma endregion
 
+	// *************** Textures ***************
+	#pragma region Textures
+	// Textures
+	unsigned int texture;
+	configureTextures(texture, lightingShader);
+	#pragma endregion
+
+	// *************** FreeType ***************
 	#pragma region FreeType
 	Shader textShader("Shaders/Vertex/text.vert", "Shaders/Fragment/text.frag");
 	glm::mat4 textProjection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
@@ -180,53 +192,47 @@ int main() {
 
 	// configure VAO/VBO for texture quads
 	// -----------------------------------
-	glGenVertexArrays(1, &text_VAO);
-	glGenBuffers(1, &text_VBO);
-	glBindVertexArray(text_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, text_VBO);
+	bindBuffers(text_VBO, text_VAO);
+
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
+
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	#pragma endregion
 
-	#pragma region Textures
-	// Textures
-	unsigned int texture;
-	configureTextures(texture, lightingShader);
 	#pragma endregion
 
-	#pragma endregion
-
+	// *************** Render Loop ***************
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
 		// per-frame time logic
-		// --------------------
 		float currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastFrame;
 		lastFrame = currentTime;
 
 		// input
-		// -----
 		processInput(window);
 
 		// render
-		// ------
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 
-		// Text
-		//RenderText(textShader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-		//RenderText(textShader, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));s
+		// Text Rendering
+		RenderText(textShader, "OpenGL Project - Jovanni Djonaj", 25.0f, 25.0f, 1.0f, glm::vec3(0.2, 0.2f, 0.2f));
+		RenderText(textShader, "(C) LearnOpenGL.com", SCREEN_WIDTH - 500.0f, SCREEN_HEIGHT - 50.0f, 1.00f, glm::vec3(0.3, 0.7f, 0.9f));
+		
 
-		// world transformation
+		// *************** Render the main cube ***************
+		#pragma region Draw Main Cube
 		glm::mat4 model_main_cube = glm::mat4(1.0f);
-		glm::mat4 model_light_cube = glm::mat4(1.0f);
 
 		// be sure to activate shader when setting uniforms/drawing objects
 		lightingShader.use();
+		glBindTexture(GL_TEXTURE_2D, texture); // Must bind textures before drawing
 		lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
 		//lightingShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
 		lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
@@ -238,8 +244,6 @@ int main() {
 		glm::mat4 view = camera.GetViewMatrix();
 		lightingShader.setMat4("projection", projection);
 		lightingShader.setMat4("view", view);
-
-		#pragma region Draw Main Cube
 
 		#pragma region Color
 		if (RAINBOW_COLORS)
@@ -292,21 +296,17 @@ int main() {
 		}
 		#pragma endregion
 
-		
-		
-		// render the cube
-
-		// Reminder to put this draw stuff into a seperate method
-		
-
+		// *************** Render the light cube ***************
 		#pragma region Draw Light Cube
 		// also draw the lamp object
+		glm::mat4 model_light_cube = glm::mat4(1.0f);
+
 		lightCubeShader.use();
 		lightCubeShader.setMat4("projection", projection);
 		lightCubeShader.setMat4("view", view);
 		lightCubeShader.setMat4("model", model_light_cube);
 
-		std::pair<float, float> tmpPoint = circle_points(2.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
+		std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
 		lightPos.x = tmpPoint.first;
 		lightPos.z = tmpPoint.second;
 
@@ -336,6 +336,7 @@ int main() {
 	return 0;
 }
 
+#pragma region Methods
 void processInput(GLFWwindow* window)
 {
 	const float camera_y_velocity = 0.025f;
@@ -356,16 +357,15 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT, deltaTime);
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
-	
+
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) mousePressed = true;
 	else
 	{
 		mousePressed = false;
-	}	
+	}
 }
 
 // glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
 	float xpos = static_cast<float>(xposIn);
@@ -390,7 +390,6 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
@@ -400,10 +399,10 @@ std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origi
 {
 	float xPos = radius * sin(angle);
 	float yPos = radius * cos(angle);
- 	return std::make_pair(xPos, yPos);
+	return std::make_pair(xPos, yPos);
 }
 
-void bindBuffers(unsigned int &generic_VBO, unsigned int &generic_VAO)
+void bindBuffers(unsigned int& generic_VBO, unsigned int& generic_VAO)
 {
 	glGenBuffers(1, &generic_VBO);
 	glGenVertexArrays(1, &generic_VAO);
@@ -411,7 +410,7 @@ void bindBuffers(unsigned int &generic_VBO, unsigned int &generic_VAO)
 	glBindBuffer(GL_ARRAY_BUFFER, generic_VBO);
 }
 
-void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int &number_of_elements_per_line)
+void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int& number_of_elements_per_line)
 {
 	int offset = 0;
 	if (position != NULL)
@@ -444,7 +443,7 @@ void configureBufferAttributes(const int position, const int color, const int te
 	}
 }
 
-void configureTextures(unsigned int &texture, Shader &shader)
+void configureTextures(unsigned int& texture, Shader& shader)
 {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -475,7 +474,7 @@ void configureTextures(unsigned int &texture, Shader &shader)
 	shader.setInt("texture", 0);
 }
 
-glm::mat4 transformMatrix(glm::mat4 &matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale)
+glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale)
 {
 	matrix = glm::mat4(1.0f); // Identity matrix is important
 	matrix = glm::translate(matrix, vector_translate);
@@ -528,3 +527,4 @@ void RenderText(Shader& shader, std::string text, float x, float y, float scale,
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+#pragma endregion
