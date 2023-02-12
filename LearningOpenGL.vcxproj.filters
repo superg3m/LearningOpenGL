@@ -36,6 +36,9 @@
     <ClCompile Include="Include\glm\detail\glm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source Files\Character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Vertex\text.vert" />
@@ -1322,10 +1325,10 @@
     <ClInclude Include="Headers\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\PositionData.h">
+    <ClInclude Include="Headers\position_data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\shaderClass.h">
+    <ClInclude Include="Headers\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Headers\stb_image.h">
@@ -1335,6 +1338,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\ft2build.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\character.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

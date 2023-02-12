@@ -1,4 +1,4 @@
-#include <Headers/shaderClass.h>
+#include <Headers/shader.h>
 
 #include <glad/glad.h>
 #include <string>

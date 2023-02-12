@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Include\glm\detail\glm.cpp" />
+    <ClCompile Include="Source Files\Character.cpp" />
     <ClCompile Include="Source Files\glad.c" />
     <ClCompile Include="Source Files\Shader.cpp" />
     <ClCompile Include="Source Files\Main.cpp" />
@@ -176,9 +177,10 @@
   <ItemGroup>
     <ClInclude Include="Headers\admin.h" />
     <ClInclude Include="Headers\camera.h" />
+    <ClInclude Include="Headers\character.h" />
     <ClInclude Include="Headers\main.h" />
-    <ClInclude Include="Headers\PositionData.h" />
-    <ClInclude Include="Headers\shaderClass.h" />
+    <ClInclude Include="Headers\position_data.h" />
+    <ClInclude Include="Headers\shader.h" />
     <ClInclude Include="Headers\stb_image.h" />
     <ClInclude Include="Include\ft2build.h" />
     <ClInclude Include="Include\glad\glad.h" />
