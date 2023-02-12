@@ -39,7 +39,7 @@ const bool RAINBOW_COLORS = false;
 
 const float PI = 3.1415926;
 const float TAU = 6.2831853;
-const float LIGHT_ROTATION_SPEED = 100.0f;
+const float LIGHT_ROTATION_SPEED = 50.0f;
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
