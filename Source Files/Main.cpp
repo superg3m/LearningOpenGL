@@ -69,7 +69,15 @@ int main() {
 	// *************** Shaders ***************
 	#pragma region Shaders
 
-	
+	// *************** Main Cube ***************
+	// 
+	// ==========  NORMAL CUBE CLASS ==========
+	// TODO: Make this an object and seperate all the code so you can make multiple objects Cube cubeOne(GLfloat[] vertices, Shader shader, unsigned int cube_VBO, unsigned int cube_VAO);
+	// TODO: cubeOne.ConfigureTextures();
+	// TODO: cubeOne.addTexture(char* texturePath);
+	// TODO: cubeOne.setColor(glm::vec3 colorValue, float brightnessNormalized, int speed);
+	// TODO: cubeOne.orbit(int radius, float angle, glm::vec3 origin, glm::vec3 axis_of_orbit);
+	// TODO: cubeOne.setTransformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 	#pragma region Main Cube
 	// first, configure the cube's VAO (and VBO)
 	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
@@ -85,6 +93,22 @@ int main() {
 	#pragma endregion
 
 	// *************** Light Cube ***************
+	// 
+	// ==========  NORMAL CUBE CLASS ==========
+	// TODO: Make this an object and seperate all the code so you can make multiple objects Cube lightCube(GLfloat[] vertices, Shader shader, unsigned int cube_VBO, unsigned int cube_VAO);
+	// TODO: lightCube.ConfigureTextures();
+	// TODO: lightCube.addTexture(char* texturePath);
+	// TODO: lightCube.setColor(glm::vec3 colorValue, float brightnessNormalized, int speed);
+	// TODO: lightCube.orbit(int radius, float angle, glm::vec3 origin, glm::vec3 axis_of_orbit);
+	// TODO: lightCube.setTransformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
+	//
+	// ==========  LIGHT CUBE CLASS ==========
+	//
+	// TODO: lightCube.setAmbientStrength(float value);
+	// TODO: lightCube.setDiffusedStrength(float value);
+	// TODO: lightCube.setSpecularStrength(float value);
+	// TODO: lightCube.setLightingStyle(enum lightingType | Example: Phong, Pixelated, Normal);
+	// TODO: lightCube.setLightFocus(glm::vec3 origin);
 	#pragma region Light Cube
 	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 	unsigned int light_cube_VBO, light_cube_VAO;
@@ -118,7 +142,6 @@ int main() {
 	// destroy FreeType once we're finished
 	FT_Done_Face(freeTypeObject.face);
 	FT_Done_FreeType(freeTypeObject.ft);
-
 
 	// configure VAO/VBO for texture quads
 	// -----------------------------------
@@ -158,6 +181,7 @@ int main() {
 		#pragma region Draw Main Cube
 		glm::mat4 model_main_cube = glm::mat4(1.0f);
 
+		// TODO put this into the cube object
 		// be sure to activate shader when setting uniforms/drawing objects
 		lightingShader.use();
 		glBindTexture(GL_TEXTURE_2D, texture); // Must bind textures before drawing
@@ -224,6 +248,7 @@ int main() {
 		}
 		#pragma endregion
 
+		// TODO put this into the cube object
 		// *************** Render the light cube ***************
 		#pragma region Draw Light Cube
 		// also draw the lamp object
