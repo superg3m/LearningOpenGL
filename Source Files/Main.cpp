@@ -82,7 +82,7 @@ int main() {
 	// first, configure the cube's VAO (and VBO)
 	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
 	unsigned int main_cube_VBO, main_cube_VAO;
-	int size_in_bits = sizeof(vertices_without_color);
+	int size_in_bits = sizeof(vertices_with_color);
 	int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
@@ -91,7 +91,7 @@ int main() {
 	GLfloat* verts = new GLfloat[arrLength];
 	for (int i = 0; i < arrLength; i++)
 	{
-		verts[i] = vertices_without_color[i];
+		verts[i] = vertices_with_color[i];
 		std::cout << verts[i] << "\n";
 	}
 
@@ -211,18 +211,19 @@ int main() {
 			float time = glfwGetTime();
 			float period = 2.0f; // Bigger period means lower speed
 			float brightnessFactor = sin(TAU * time / period) / 2.0f;
+			float brightnessDivisor = 1;
 
 			float fac1 = TAU * time;
 			float changingColorValue = (sinf(fac1 / period) / 2.0f) + 0.5f;
-			changingColorValue *= brightnessFactor / 4;
+			changingColorValue *= brightnessFactor / brightnessDivisor;
 
 			float fac2 = TAU * (time + (1.0f * period / 3.0f));
 			float changingColorValue2 = (sinf(fac2 / period) / 2.0f) + 0.5f;
-			changingColorValue2 *= brightnessFactor / 4;
+			changingColorValue2 *= brightnessFactor / brightnessDivisor;
 
 			float fac3 = TAU * (time + (2.0f * period / 3.0f));
 			float changingColorValue3 = (sin(fac3 / period) / 2.0f) + 0.5f;
-			changingColorValue3 *= brightnessFactor / 4;
+			changingColorValue3 *= brightnessFactor / brightnessDivisor;
 
 			//DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
 
@@ -439,7 +440,7 @@ glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_trans
 {
 	matrix = glm::mat4(1.0f); // Identity matrix is important
 	matrix = glm::translate(matrix, vector_translate);
-	matrix = glm::rotate(matrix, glm::radians(angle), vector_rotate);
+	matrix = glm::rotate(matrix, glm::radians(angle) * 50, vector_rotate);
 	matrix = glm::scale(matrix, vector_scale);
 	return matrix;
 }
