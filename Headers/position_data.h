@@ -30,13 +30,13 @@ GLfloat vertices_with_color[] =
 	-0.5f,  0.5f, +0.5f,  +1.0f, +0.0f, +0.0f, 0.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  +0.5f,
 	-0.5f, -0.5f, +0.5f,  +0.0f, +1.0f, +1.0f, 0.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  +0.5f,
 
-	-0.5f, +0.5f, +0.5f,  +1.0f, +0.0f, +0.0f, 1.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f, +0.5f, -0.5f,  +0.0f, +1.0f, +0.0f, 1.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f, -0.5f, -0.5f,  +0.0f, +0.0f, +1.0f, 0.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
+	-0.5f, +0.5f, +0.5f,  +1.0f, +0.0f, +0.0f, 1.0f / divisor, 0.0f / divisor, -0.5f,  +0.0f,  +0.0f,
+	-0.5f, +0.5f, -0.5f,  +0.0f, +1.0f, +0.0f, 1.0f / divisor, 1.0f / divisor, -0.5f,  +0.0f,  +0.0f,
+	-0.5f, -0.5f, -0.5f,  +0.0f, +0.0f, +1.0f, 0.0f / divisor, 1.0f / divisor, -0.5f,  +0.0f,  +0.0f,
 
-	-0.5f, -0.5f, -0.5f,  +0.0f, +0.0f, +1.0f, 0.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f, -0.5f, +0.5f,  +1.0f, +0.0f, +0.0f, 0.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
-	-0.5f, +0.5f, +0.5f,  +0.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
+	-0.5f, -0.5f, -0.5f,  +0.0f, +0.0f, +1.0f, 0.0f / divisor, 1.0f / divisor, -0.5f,  +0.0f,  +0.0f,
+	-0.5f, -0.5f, +0.5f,  +1.0f, +0.0f, +0.0f, 0.0f / divisor, 0.0f / divisor, -0.5f,  +0.0f,  +0.0f,
+	-0.5f, +0.5f, +0.5f,  +0.0f, +1.0f, +1.0f, 1.0f / divisor, 0.0f / divisor, -0.5f,  +0.0f,  +0.0f,
 
 	+0.5f, +0.5f, +0.5f,  +1.0f, +0.0f, +0.0f, 1.0f / divisor, 0.0f / divisor, +0.5f,  +0.0f,  +0.0f,
 	+0.5f, +0.5f, -0.5f,  +0.0f, +1.0f, +0.0f, 1.0f / divisor, 1.0f / divisor, +0.5f,  +0.0f,  +0.0f,
@@ -113,7 +113,7 @@ GLfloat vertices_without_color[] =
 
 	+0.5f, +0.5f, +0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 0.0f / divisor,  +0.0f,  +0.5f,  +0.0f,
 	-0.5f, +0.5f, -0.5f,  +0.1f, +0.1f, +0.1f, 0.0f / divisor, 1.0f / divisor,  +0.0f,  +0.5f,  +0.0f,
-	-0.5f, +0.5f, +0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor,  +0.0f,  +0.5f,  +0.0f
+	-0.5f, +0.5f, +0.5f,  +0.1f, +0.1f, +0.1f, 1.0f / divisor, 1.0f / divisor,  +0.0f,  +0.5f,  +0.0f,
 };
 
 GLfloat light_cube_vertices[] = {

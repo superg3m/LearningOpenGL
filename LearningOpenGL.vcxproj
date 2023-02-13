@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="Include\glm\detail\glm.cpp" />
     <ClCompile Include="Source Files\Character.cpp" />
+    <ClCompile Include="Source Files\Cube.cpp" />
     <ClCompile Include="Source Files\glad.c" />
     <ClCompile Include="Source Files\Shader.cpp" />
     <ClCompile Include="Source Files\Main.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="Headers\admin.h" />
     <ClInclude Include="Headers\camera.h" />
     <ClInclude Include="Headers\character.h" />
+    <ClInclude Include="Headers\cube.h" />
     <ClInclude Include="Headers\main.h" />
     <ClInclude Include="Headers\position_data.h" />
     <ClInclude Include="Headers\shader.h" />

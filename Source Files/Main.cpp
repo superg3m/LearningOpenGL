@@ -82,13 +82,20 @@ int main() {
 	// first, configure the cube's VAO (and VBO)
 	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
 	unsigned int main_cube_VBO, main_cube_VAO;
-
-	int arrLength = sizeof(vertices_without_color) / sizeof(GLfloat);
+	int size_in_bits = sizeof(vertices_without_color);
+	int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
 	bindBuffers(main_cube_VBO, main_cube_VAO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_without_color), vertices_without_color, GL_STATIC_DRAW);
+	GLfloat* verts = new GLfloat[arrLength];
+	for (int i = 0; i < arrLength; i++)
+	{
+		verts[i] = vertices_without_color[i];
+		std::cout << verts[i] << "\n";
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, size_in_bits, verts, GL_STATIC_DRAW);
 	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
 	#pragma endregion
 
@@ -283,6 +290,7 @@ int main() {
 	glDeleteVertexArrays(1, &light_cube_VAO);
 	glDeleteBuffers(1, &main_cube_VBO);
 	glDeleteBuffers(1, &light_cube_VBO);
+	delete verts;
 	#pragma endregion
 
 	glfwTerminate();
