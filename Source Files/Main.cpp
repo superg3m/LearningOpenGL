@@ -32,7 +32,7 @@ int main() {
 
 	// Make a Pointer to a GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
-	glfwSetWindowPos(window, SCREEN_WIDTH / 8 , SCREEN_HEIGHT / 8);
+	glfwSetWindowPos(window, SCREEN_WIDTH / 16 , SCREEN_HEIGHT / 16);
 
 	// If Window is NULL then terminate the GLFW and return the program
 	if (window == NULL) {
