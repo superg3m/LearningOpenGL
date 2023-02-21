@@ -66,6 +66,21 @@ int main() {
 	#pragma endregion
 
 
+	#pragma region Spline
+	
+
+	float mat[5][5] = 
+	{
+		{1, 1, 0, 0, 0},
+		{0, 0, 1, 1, 1},
+		{3, 1, 0, 0, -1},
+		{6, 0, 0, -2, 0},
+		{0, 0, 6, 2, 0}
+	};
+	std::cout << mat[0][0] << "\n";
+	#pragma endregion
+
+
 	// *************** Shaders ***************
 	#pragma region Shaders
 
@@ -92,7 +107,7 @@ int main() {
 	for (int i = 0; i < arrLength; i++)
 	{
 		verts[i] = vertices_with_color[i];
-		std::cout << verts[i] << "\n";
+		//std::cout << verts[i] << "\n";
 	}
 
 	glBufferData(GL_ARRAY_BUFFER, size_in_bits, verts, GL_STATIC_DRAW);
@@ -271,7 +286,7 @@ int main() {
 		lightPos.x = tmpPoint.first;
 		lightPos.z = tmpPoint.second;
 
-		glm::mat4 transformTwo = transformMatrix(transformTwo, currentTime * LIGHT_ROTATION_SPEED, lightPos, glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(0.25f));
+		glm::mat4 transformTwo = transformMatrix(transformTwo, currentTime * LIGHT_ROTATION_SPEED, lightPos, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.25f));
 
 		unsigned int transformLocationTwo = glGetUniformLocation(lightCubeShader.ID, "transformTwo");
 		glUniformMatrix4fv(transformLocationTwo, 1, GL_FALSE, glm::value_ptr(transformTwo));
@@ -440,7 +455,7 @@ glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_trans
 {
 	matrix = glm::mat4(1.0f); // Identity matrix is important
 	matrix = glm::translate(matrix, vector_translate);
-	matrix = glm::rotate(matrix, glm::radians(angle) * 50, vector_rotate);
+	matrix = glm::rotate(matrix, glm::radians(angle), vector_rotate);
 	matrix = glm::scale(matrix, vector_scale);
 	return matrix;
 }
