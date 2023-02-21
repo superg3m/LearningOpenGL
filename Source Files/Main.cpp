@@ -16,7 +16,27 @@ float lastFrame = 0.0f;
 // Light Cube
 glm::vec3 lightPos(1.0f, 0.5f, 2.0f);
 
+#pragma region Spline
+struct splinePointCoordinates
+{
+	float x;
+	float y;
+};
+
+struct spline
+{
+	std::vector<splinePointCoordinates> points;
+
+};
+
+
+
+
+
+#pragma endregion
+
 int main() {
+	
 
 	// *************** Initialization ***************
 	#pragma region inits
@@ -65,21 +85,16 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 	#pragma endregion
 
-
-	#pragma region Spline
-	
-
-	float mat[5][5] = 
+	#pragma region spline
+	spline path;
+	path.points =
 	{
-		{1, 1, 0, 0, 0},
-		{0, 0, 1, 1, 1},
-		{3, 1, 0, 0, -1},
-		{6, 0, 0, -2, 0},
-		{0, 0, 6, 2, 0}
+		{10, 40},
+		{20, 40},
+		{30, 40},
+		{40, 40},
 	};
-	std::cout << mat[0][0] << "\n";
 	#pragma endregion
-
 
 	// *************** Shaders ***************
 	#pragma region Shaders
