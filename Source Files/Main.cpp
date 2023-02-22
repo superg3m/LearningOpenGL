@@ -95,6 +95,8 @@ int main() {
 	};
 	#pragma endregion
 
+
+
 	// *************** Shaders ***************
 	#pragma region Shaders
 
@@ -109,9 +111,9 @@ int main() {
 	// TODO: cubeOne.setTransformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 	#pragma region Main Cube
 	// first, configure the cube's VAO (and VBO)
-	Shader lightingShader("Shaders/Vertex/light_color.vert", "Shaders/Fragment/light_color.frag");
+	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
 	unsigned int main_cube_VBO, main_cube_VAO;
-	int size_in_bits = sizeof(vertices_with_color);
+	int size_in_bits = sizeof(vertices_without_color);
 	int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
@@ -120,7 +122,7 @@ int main() {
 	GLfloat* verts = new GLfloat[arrLength];
 	for (int i = 0; i < arrLength; i++)
 	{
-		verts[i] = vertices_with_color[i];
+		verts[i] = vertices_without_color[i];
 		//std::cout << verts[i] << "\n";
 	}
 
@@ -162,8 +164,12 @@ int main() {
 	#pragma region Textures
 	// Textures
 	unsigned int texture;
-	configureTextures(texture, lightingShader);
+	configureTextures(texture, cubeShader);
 	#pragma endregion
+
+	// *************** Materials ***************
+	
+
 
 	// *************** FreeType ***************
 	#pragma region FreeType
@@ -207,10 +213,10 @@ int main() {
 		// input
 		processInput(window);
 
-		// render
+		// background
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
+
 		
 
 		// *************** Render the main cube ***************
@@ -219,19 +225,43 @@ int main() {
 
 		// TODO put this into the cube object
 		// be sure to activate shader when setting uniforms/drawing objects
-		lightingShader.use();
+		cubeShader.use();
+		cubeShader.setVec3("lightPos", lightPos);
+		cubeShader.setVec3("viewPos", camera.Position);
+
+		#pragma region Material properties of the main cube
+		cubeShader.setVec3("material.ambient", glm::vec3(140.5f));
+		cubeShader.setVec3("material.diffuse", glm::vec3(1.5f));
+		cubeShader.setVec3("material.specular", glm::vec3(8.5f));
+		cubeShader.setFloat("material.shininess", 32.0f);
+		#pragma endregion
+
+		// light properties
+		#pragma region Material properties of the light cube
+		glm::vec3 lightColor;
+		lightColor.x = static_cast<float>(sin(glfwGetTime()));
+		lightColor.y = static_cast<float>(cos(glfwGetTime()));
+		glm::vec3 diffuseColor = lightColor * glm::vec3(0.1f); // decrease the influence
+		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f); // low influence
+		cubeShader.setVec3("light.ambient", ambientColor);
+		cubeShader.setVec3("light.diffuse", diffuseColor);
+		cubeShader.setVec3("light.specular", glm::vec3(1.0f));
+
+		cubeShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+		cubeShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		
 		glBindTexture(GL_TEXTURE_2D, texture); // Must bind textures before drawing
-		lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-		//lightingShader.setVec3("objectColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.setVec3("lightPos", lightPos);
-		lightingShader.setVec3("viewPos", camera.Position);
+		#pragma endregion
+		
+		
+
+		
 
 		// view/projection transformations
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
-		lightingShader.setMat4("projection", projection);
-		lightingShader.setMat4("view", view);
+		cubeShader.setMat4("projection", projection);
+		cubeShader.setMat4("view", view);
 
 		#pragma region Color
 		if (RAINBOW_COLORS)
@@ -256,8 +286,8 @@ int main() {
 
 			//DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
 
-			int vertexColorLocation = glGetUniformLocation(lightingShader.ID, "uniColor");
-			glUseProgram(lightingShader.ID);
+			int vertexColorLocation = glGetUniformLocation(cubeShader.ID, "uniColor");
+			glUseProgram(cubeShader.ID);
 			glUniform4f(vertexColorLocation, changingColorValue3, changingColorValue2, changingColorValue, 1.0f);
 		}
 		#pragma endregion
@@ -267,7 +297,7 @@ int main() {
 			// calculate the model matrix for each object and pass it to shader before drawing
 			// world transformation
 			float angle = 20.0f * i;
-			lightingShader.setMat4("model", model_main_cube);
+			cubeShader.setMat4("model", model_main_cube);
 
 			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
 			model_main_cube = glm::rotate(model_main_cube, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
@@ -279,8 +309,8 @@ int main() {
 		if (TRANSLATION_ROTATION)
 		{
 			float functionTranslation = sin(PI * currentTime / 2.0f) / 2.0f;
-			glm::mat4 transform = transformMatrix(transform, currentTime, glm::vec3(0.0f, functionTranslation, 0.0f), glm::vec3(0.5f, 0.25f, 0.25f), glm::vec3(0.5f, 0.5f, 0.5f));
-			unsigned int transformLocation = glGetUniformLocation(lightingShader.ID, "transform");
+			glm::mat4 transform = transformMatrix(transform, currentTime * 20, glm::vec3(0.0f, functionTranslation, 0.0f), glm::vec3(0.5f, 0.25f, 0.25f), glm::vec3(0.5f, 0.5f, 0.5f));
+			unsigned int transformLocation = glGetUniformLocation(cubeShader.ID, "transform");
 			glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 		}
 		#pragma endregion
@@ -289,6 +319,9 @@ int main() {
 		// *************** Render the light cube ***************
 		#pragma region Draw Light Cube
 		// also draw the lamp object
+
+
+
 		glm::mat4 model_light_cube = glm::mat4(1.0f);
 
 		lightCubeShader.use();
@@ -307,8 +340,10 @@ int main() {
 
 		glBindVertexArray(light_cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+		#pragma endregion
 
-
+		// *************** Render Text ***************
+		#pragma region Render Text
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -320,7 +355,6 @@ int main() {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
-
 		#pragma endregion
 
 		// Events and updates

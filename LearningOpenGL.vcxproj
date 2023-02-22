@@ -165,10 +165,10 @@
     <None Include="Include\glm\gtx\vector_query.inl" />
     <None Include="Include\glm\gtx\wrap.inl" />
     <None Include="Shaders\Fragment\text.frag" />
-    <None Include="Shaders\Fragment\light_color.frag" />
+    <None Include="Shaders\Fragment\main_cube.frag" />
     <None Include="Shaders\Fragment\light_cube.frag" />
     <None Include="Shaders\Vertex\text.vert" />
-    <None Include="Shaders\Vertex\light_color.vert" />
+    <None Include="Shaders\Vertex\main_cube.vert" />
     <None Include="Shaders\Vertex\light_cube.vert" />
   </ItemGroup>
   <ItemGroup>
