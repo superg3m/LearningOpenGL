@@ -79,10 +79,9 @@ int main() {
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 600
 	// Area of the window we want OpenGL to render
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
+	
+	
 	#pragma endregion
 
 	#pragma region spline
@@ -174,6 +173,7 @@ int main() {
 
 	textShader.use();
 	glUniformMatrix4fv(glGetUniformLocation(textShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(textProjection));
+
 	freeTypeObject.init();
 
 	// destroy FreeType once we're finished
@@ -193,6 +193,7 @@ int main() {
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
+		
 		// per-frame time logic
 		float currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastFrame;
@@ -208,11 +209,18 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-
-		// Text Rendering
-		freeTypeObject.renderText(textShader, "OpenGL Project - Jovanni Djonaj", 25.0f, 25.0f, 1.0f, glm::vec3(0.2, 0.2f, 0.2f));
-		freeTypeObject.renderText(textShader, "FPS " + fpsText, SCREEN_WIDTH - 200.0f, SCREEN_HEIGHT - 50.0f, 1.00f, glm::vec3(0.3, 0.7f, 0.9f));
+		glEnable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
+		
+		// Text Rendering
+		freeTypeObject.renderText(textShader, "OpenGL Project - Jovanni Djonaj", 25.0f, 25.0f, 1.0f, glm::vec3(0.55, 0.2f, 0.2f));
+		freeTypeObject.renderText(textShader, "FPS " + fpsText, SCREEN_WIDTH - 200.0f, SCREEN_HEIGHT - 50.0f, 1.00f, glm::vec3(0.3, 0.7f, 0.9f));
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube

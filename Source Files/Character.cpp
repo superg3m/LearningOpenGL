@@ -1,5 +1,7 @@
 #include <Headers/character.h>
 
+const int SCREEN_WIDTH = 1200;
+const int SCREEN_HEIGHT = 800;
 
 void Character::init()
 {
@@ -15,7 +17,7 @@ void Character::init()
 
 	// load font as face
 	
-	if (FT_New_Face(ft, "Fonts/arial.ttf", 0, &face)) {
+	if (FT_New_Face(ft, "Fonts/calibri.ttf", 0, &face)) {
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 		abort();
 	}
@@ -78,9 +80,9 @@ void Character::deleteObjects()
 void Character::bind()
 {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	glEnableVertexAttribArray(0);
-
+	
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
@@ -105,7 +107,7 @@ void Character::renderText(Shader& shader, std::string text, float x, float y, f
 		float w = ch.Size.x * scale;
 		float h = ch.Size.y * scale;
 		// update VBO for each character
-		float textVertices[6][4] = {
+		float vertices[6][4] = {
 			{ xpos,     ypos + h,   0.0f, 0.0f },
 			{ xpos,     ypos,       0.0f, 1.0f },
 			{ xpos + w, ypos,       1.0f, 1.0f },
@@ -118,7 +120,7 @@ void Character::renderText(Shader& shader, std::string text, float x, float y, f
 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 		// update content of VBO memory
 		glBindBuffer(GL_ARRAY_BUFFER, text_VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(textVertices), textVertices); // be sure to use glBufferSubData and not glBufferData
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		// render quad
