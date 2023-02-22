@@ -23,7 +23,7 @@ public:
 	FT_Library ft;
 	FT_Face face;
 
-	std::map<char, Character> Characters;
+	std::map<GLchar, Character> Characters;
 	unsigned int text_VBO, text_VAO;
 
 	void init();

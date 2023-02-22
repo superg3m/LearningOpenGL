@@ -177,13 +177,15 @@ int main() {
 	freeTypeObject.init();
 
 	// destroy FreeType once we're finished
-	FT_Done_Face(freeTypeObject.face);
-	FT_Done_FreeType(freeTypeObject.ft);
+	freeTypeObject.deleteObjects();
 
 	// configure VAO/VBO for texture quads
 	// -----------------------------------
-	bindBuffers(freeTypeObject.text_VBO, freeTypeObject.text_VAO);
-
+	//bindBuffers(freeTypeObject.text_VBO, freeTypeObject.text_VAO);
+	glGenVertexArrays(1, &freeTypeObject.text_VAO);
+	glGenBuffers(1, &freeTypeObject.text_VBO);
+	glBindVertexArray(freeTypeObject.text_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, freeTypeObject.text_VBO);
 	freeTypeObject.bind();
 	#pragma endregion
 
@@ -209,18 +211,7 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		glEnable(GL_BLEND);
-		glEnable(GL_CULL_FACE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		
-		
-		// Text Rendering
-		freeTypeObject.renderText(textShader, "OpenGL Project - Jovanni Djonaj", 25.0f, 25.0f, 1.0f, glm::vec3(0.55, 0.2f, 0.2f));
-		freeTypeObject.renderText(textShader, "FPS " + fpsText, SCREEN_WIDTH - 200.0f, SCREEN_HEIGHT - 50.0f, 1.00f, glm::vec3(0.3, 0.7f, 0.9f));
-
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		glDisable(GL_CULL_FACE);
-		glDisable(GL_BLEND);
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -316,6 +307,20 @@ int main() {
 
 		glBindVertexArray(light_cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+		glEnable(GL_BLEND);
+		glEnable(GL_CULL_FACE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// Text Rendering
+		freeTypeObject.renderText(textShader, "OpenGL Project - Jovanni Djonaj", 25.0f, 25.0f, 1.0f, glm::vec3(0.4, 0.4f, 0.4f));
+		freeTypeObject.renderText(textShader, "FPS " + fpsText, SCREEN_WIDTH - 200.0f, SCREEN_HEIGHT - 50.0f, 1.00f, glm::vec3(0.3, 0.7f, 0.9f));
+
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glDisable(GL_CULL_FACE);
+		glDisable(GL_BLEND);
+
 		#pragma endregion
 
 		// Events and updates
