@@ -16,25 +16,6 @@ float lastFrame = 0.0f;
 // Light Cube
 glm::vec3 lightPos(1.0f, 0.5f, 2.0f);
 
-#pragma region Spline
-struct splinePointCoordinates
-{
-	float x;
-	float y;
-};
-
-struct spline
-{
-	std::vector<splinePointCoordinates> points;
-
-};
-
-
-
-
-
-#pragma endregion
-
 int main() {
 	
 
@@ -83,19 +64,6 @@ int main() {
 	
 	
 	#pragma endregion
-
-	#pragma region spline
-	spline path;
-	path.points =
-	{
-		{10, 40},
-		{20, 40},
-		{30, 40},
-		{40, 40},
-	};
-	#pragma endregion
-
-
 
 	// *************** Shaders ***************
 	#pragma region Shaders
