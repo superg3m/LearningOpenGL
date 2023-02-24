@@ -42,7 +42,7 @@ int main() {
 
 	// Introduce the window into the current context
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(0);
+	//glfwSwapInterval(0);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
@@ -112,10 +112,10 @@ int main() {
 
 	// *************** Materials ***************
 	#pragma region Material properties of the main cube
-	cubeShader.setVec3("material.ambient", glm::vec3(140.5f));
-	cubeShader.setVec3("material.diffuse", glm::vec3(1.5f));
-	cubeShader.setVec3("material.specular", glm::vec3(8.5f));
-	cubeShader.setFloat("material.shininess", 32.0f);
+	cubeShader.setVec3("material.ambient", glm::vec3(100.5f));
+	cubeShader.setVec3("material.diffuse", glm::vec3(0.1f));
+	cubeShader.setVec3("material.specular", glm::vec3(15.5f));
+	cubeShader.setFloat("material.shininess", 0.0f);
 	#pragma endregion
 	
 	// *************** FreeType ***************
@@ -155,8 +155,8 @@ int main() {
 		deltaTime = currentTime - lastFrame;
 		lastFrame = currentTime;
 
-		int FPS = 1 / deltaTime; \
-			std::string fpsText = std::to_string(FPS);
+		int FPS = 1 / deltaTime;
+		std::string fpsText = std::to_string(FPS);
 
 		// input
 		processInput(window);
@@ -165,7 +165,6 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		#pragma endregion
-		std::cout << deltaTime << "\n";
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -188,13 +187,12 @@ int main() {
 		lightColor.x = static_cast<float>(xValue);
 		lightColor.y = static_cast<float>(yValue);
 		lightColor.z = static_cast<float>(zValue);
-		glm::vec3 diffuseColor = lightColor * glm::vec3(0.1f); // influence of the light color
-		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f); // very low influence becuase the blacks are too pronounced
+		glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f); // influence of the light color
+		glm::vec3 ambientColor = glm::vec3(1.0f); // very low influence becuase the blacks are too pronounced
 		cubeShader.setVec3("light.ambient", ambientColor);
 		cubeShader.setVec3("light.diffuse", diffuseColor);
 		cubeShader.setVec3("light.specular", glm::vec3(1.0f));
 
-		cubeShader.setVec3("objectColor", glm::vec3(1.0f));
 		cubeShader.setVec3("lightColor", lightColor);
 
 		
@@ -218,8 +216,8 @@ int main() {
 			// Update the uniform color
 			float time = glfwGetTime();
 			float period = 2.0f; // Bigger period means lower speed
-			float brightnessFactor = sin(TAU * time / period) / 2.0f;
-			float brightnessDivisor = 1;
+			float brightnessFactor = sin(TAU * time / period) / 8.0f;
+			float brightnessDivisor = 2;
 
 			float fac1 = TAU * time;
 			float changingColorValue = (sinf(fac1 / period) / 2.0f) + 0.5f;

@@ -42,7 +42,8 @@ void main()
     
 
     // ambient
-    vec3 ambient = light.ambient * material.ambient;
+    float ambientStrength = 0.5f;
+    vec3 ambient = light.ambient * material.ambient * ambientStrength;
   	
     // diffuse 
     vec3 norm = normalize(Normal);
@@ -57,7 +58,7 @@ void main()
     vec3 specular = lightColor * (spec * material.specular); 
     
     
-    vec3 result = (ambient + diffuse + specular) * objectColor;
+    vec3 result = (ambient + diffuse + specular);
     FragColor = texture(ourTexture, TexCoord) * ourColor * vec4(result, 1.0);
     FragColor += uniColor;
 }
