@@ -17,8 +17,6 @@ float lastFrame = 0.0f;
 glm::vec3 lightPos(1.0f, 0.5f, 2.0f);
 
 int main() {
-	
-
 	// *************** Initialization ***************
 	#pragma region inits
 	// Initialize GLFW
@@ -44,6 +42,7 @@ int main() {
 
 	// Introduce the window into the current context
 	glfwMakeContextCurrent(window);
+	glfwSwapInterval(0);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 
@@ -69,14 +68,6 @@ int main() {
 	#pragma region Shaders
 
 	// *************** Main Cube ***************
-	// 
-	// ==========  NORMAL CUBE CLASS ==========
-	// TODO: Make this an object and seperate all the code so you can make multiple objects Cube cubeOne(GLfloat[] vertices, Shader shader, unsigned int cube_VBO, unsigned int cube_VAO);
-	// TODO: cubeOne.ConfigureTextures();
-	// TODO: cubeOne.addTexture(char* texturePath);
-	// TODO: cubeOne.setColor(glm::vec3 colorValue, float brightnessNormalized, int speed);
-	// TODO: cubeOne.orbit(int radius, float angle, glm::vec3 origin, glm::vec3 axis_of_orbit);
-	// TODO: cubeOne.setTransformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 	#pragma region Main Cube
 	// first, configure the cube's VAO (and VBO)
 	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
@@ -99,22 +90,6 @@ int main() {
 	#pragma endregion
 
 	// *************** Light Cube ***************
-	// 
-	// ==========  NORMAL CUBE CLASS ==========
-	// TODO: Make this an object and seperate all the code so you can make multiple objects Cube lightCube(GLfloat[] vertices, Shader shader, unsigned int cube_VBO, unsigned int cube_VAO);
-	// TODO: lightCube.ConfigureTextures();
-	// TODO: lightCube.addTexture(char* texturePath);
-	// TODO: lightCube.setColor(glm::vec3 colorValue, float brightnessNormalized, int speed);
-	// TODO: lightCube.orbit(int radius, float angle, glm::vec3 origin, glm::vec3 axis_of_orbit);
-	// TODO: lightCube.setTransformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
-	//
-	// ==========  LIGHT CUBE CLASS ==========
-	//
-	// TODO: lightCube.setAmbientStrength(float value);
-	// TODO: lightCube.setDiffusedStrength(float value);
-	// TODO: lightCube.setSpecularStrength(float value);
-	// TODO: lightCube.setLightingStyle(enum lightingType | Example: Phong, Pixelated, Normal);
-	// TODO: lightCube.setLightFocus(glm::vec3 origin);
 	#pragma region Light Cube
 	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 	unsigned int light_cube_VBO, light_cube_VAO;
@@ -136,9 +111,13 @@ int main() {
 	#pragma endregion
 
 	// *************** Materials ***************
+	#pragma region Material properties of the main cube
+	cubeShader.setVec3("material.ambient", glm::vec3(140.5f));
+	cubeShader.setVec3("material.diffuse", glm::vec3(1.5f));
+	cubeShader.setVec3("material.specular", glm::vec3(8.5f));
+	cubeShader.setFloat("material.shininess", 32.0f);
+	#pragma endregion
 	
-
-
 	// *************** FreeType ***************
 	#pragma region FreeType
 	Shader textShader("Shaders/Vertex/text.vert", "Shaders/Fragment/text.frag");
@@ -169,14 +148,15 @@ int main() {
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
-		
+
+		#pragma region Initial Logic
 		// per-frame time logic
 		float currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastFrame;
 		lastFrame = currentTime;
 
-		int FPS = 1 / deltaTime;\
-		std::string fpsText = std::to_string(FPS);
+		int FPS = 1 / deltaTime; \
+			std::string fpsText = std::to_string(FPS);
 
 		// input
 		processInput(window);
@@ -184,8 +164,8 @@ int main() {
 		// background
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		
+		#pragma endregion
+		std::cout << deltaTime << "\n";
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -197,26 +177,27 @@ int main() {
 		cubeShader.setVec3("lightPos", lightPos);
 		cubeShader.setVec3("viewPos", camera.Position);
 
-		#pragma region Material properties of the main cube
-		cubeShader.setVec3("material.ambient", glm::vec3(140.5f));
-		cubeShader.setVec3("material.diffuse", glm::vec3(1.5f));
-		cubeShader.setVec3("material.specular", glm::vec3(8.5f));
-		cubeShader.setFloat("material.shininess", 32.0f);
-		#pragma endregion
-
 		// light properties
-		#pragma region Material properties of the light cube
+		#pragma region Material Properties
 		glm::vec3 lightColor;
-		lightColor.x = static_cast<float>(sin(glfwGetTime()));
-		lightColor.y = static_cast<float>(cos(glfwGetTime()));
-		glm::vec3 diffuseColor = lightColor * glm::vec3(0.1f); // decrease the influence
-		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f); // low influence
+		const float frequency = 0.25f;
+
+		float xValue = 0.5 * (sin(TAU * (glfwGetTime() * frequency)) / 2.0) + 0.5;
+		float yValue = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 1.0/3.0)) / 2.0) + 0.5;
+		float zValue = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0/3.0)) / 2.0) + 0.5;
+		lightColor.x = static_cast<float>(xValue);
+		lightColor.y = static_cast<float>(yValue);
+		lightColor.z = static_cast<float>(zValue);
+		glm::vec3 diffuseColor = lightColor * glm::vec3(0.1f); // influence of the light color
+		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.1f); // very low influence becuase the blacks are too pronounced
 		cubeShader.setVec3("light.ambient", ambientColor);
 		cubeShader.setVec3("light.diffuse", diffuseColor);
 		cubeShader.setVec3("light.specular", glm::vec3(1.0f));
 
-		cubeShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-		cubeShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		cubeShader.setVec3("objectColor", glm::vec3(1.0f));
+		cubeShader.setVec3("lightColor", lightColor);
+
+		
 		
 		glBindTexture(GL_TEXTURE_2D, texture); // Must bind textures before drawing
 		#pragma endregion
@@ -296,6 +277,7 @@ int main() {
 		lightCubeShader.setMat4("projection", projection);
 		lightCubeShader.setMat4("view", view);
 		lightCubeShader.setMat4("model", model_light_cube);
+		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
 		lightPos.x = tmpPoint.first;
@@ -336,7 +318,7 @@ int main() {
 	glDeleteVertexArrays(1, &light_cube_VAO);
 	glDeleteBuffers(1, &main_cube_VBO);
 	glDeleteBuffers(1, &light_cube_VBO);
-	delete verts;
+	delete[] (verts);
 	#pragma endregion
 
 	glfwTerminate();
@@ -346,7 +328,7 @@ int main() {
 #pragma region Methods
 void processInput(GLFWwindow* window)
 {
-	const float camera_y_velocity = 0.025f;
+	const float camera_y_velocity = 3.0f;
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.ProcessKeyboard(FORWARD, deltaTime);
@@ -357,9 +339,9 @@ void processInput(GLFWwindow* window)
 
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
 
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera.Position.y -= camera_y_velocity;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera.Position.y -= camera_y_velocity * deltaTime;
 
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera.Position.y += camera_y_velocity;
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera.Position.y += camera_y_velocity * deltaTime;
 
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT, deltaTime);
 
