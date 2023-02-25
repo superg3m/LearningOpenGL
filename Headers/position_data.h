@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 float offSet = 0.0f;
 float divisor = 0.2f;
@@ -13,7 +14,7 @@ float divisor = 0.2f;
 GLfloat vertices_with_color[] =
 {
 	// X	 Y	    Z
-	// positions                 colors         texture coords
+	// positions                 colors         texture coords						 Normals
 	-0.5f, -0.5f, -0.5f,  +0.0f, +1.0f, +0.0f, 0.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  -0.5f,
 	+0.5f, -0.5f, -0.5f,  +1.0f, +0.0f, +0.0f, 1.0f / divisor, 0.0f / divisor, +0.0f,  +0.0f,  -0.5f,
 	+0.5f, +0.5f, -0.5f,  +0.0f, +0.0f, +1.0f, 1.0f / divisor, 1.0f / divisor, +0.0f,  +0.0f,  -0.5f,
@@ -167,7 +168,7 @@ GLfloat light_cube_vertices[] = {
 };
 
 // world space positions of our cubes
-glm::vec3 cubePositions[] = {
+std::vector<glm::vec3> cubePositions{
 	glm::vec3(0.0f,  0.0f,  0.0f),
 	glm::vec3(2.0f,  2.0f, -2.0f),
 	glm::vec3(-0.5f, -2.2f, -2.5f),
