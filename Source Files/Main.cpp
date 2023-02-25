@@ -87,7 +87,7 @@ int main() {
 	GLfloat* verts = new GLfloat[arrLength];
 	for (int i = 0; i < arrLength; i++)
 	{
-		verts[i] = vertices_with_color[i];
+		verts[i] = vertices_without_color[i];
 		//std::cout << verts[i] << "\n";
 	}
 
@@ -114,10 +114,8 @@ int main() {
 	// Textures
 	// load and create a texture 
 	// -------------------------
-	cubeShader.addTexture("Textures/wall.jpg");
-	cubeShader.addTexture("Textures/wall.jpg");
-	cubeShader.addTexture("Textures/cartoon.jpg");
 	cubeShader.addTexture("Textures/container2.png");
+	cubeShader.addTexture("Textures/container2_specular.png");
 
 	for (auto tuple : cubeShader.textures)
 	{
@@ -130,19 +128,16 @@ int main() {
 
 	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
 	// -------------------------------------------------------------------------------------------
-	cubeShader.use(); // don't forget to activate/use the shader before setting uniforms!
-	// either set it manually like so:
-	cubeShader.setInt("ourTexture1", 0);
-	// or set it via the texture class
-	cubeShader.setInt("ourTexture2", 1);
+	cubeShader.use();
+	cubeShader.setInt("material.diffuse", 0);
+	cubeShader.setInt("material.specular", 1);
+
 
 	#pragma endregion
 
 	// *************** Materials ***************
 	#pragma region Material properties of the main cube
-	cubeShader.setVec3("material.ambient", glm::vec3(0.25f));
-	cubeShader.setVec3("material.diffuse", glm::vec3(1.1f));
-	cubeShader.setVec3("material.specular", glm::vec3(1.5f));
+	cubeShader.setVec3("material.ambient", glm::vec3(10.5f));
 	cubeShader.setFloat("material.shininess", 64.0f);
 	DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
 	#pragma endregion
@@ -221,12 +216,9 @@ int main() {
 		lightColor.y = static_cast<float>(yValue);
 		lightColor.z = static_cast<float>(zValue);
 
-		glm::vec3 diffuseColor = lightColor * glm::vec3(0.01f); // influence of the light color
-		glm::vec3 ambientColor = glm::vec3(0.01f);
-		DEBUG_WRAP(ambientColor = glm::vec3(1.0f););
-		cubeShader.setVec3("light.ambient", ambientColor);
-		cubeShader.setVec3("light.diffuse", diffuseColor);
-		cubeShader.setVec3("light.specular", glm::vec3(1.0f));
+		cubeShader.setVec3("light.ambient", glm::vec3(1.0f));
+		cubeShader.setVec3("light.diffuse", glm::vec3(1.0f));
+		cubeShader.setVec3("light.specular", glm::vec3(10.0f));
 		cubeShader.setVec3("light.color", lightColor);
 
 		

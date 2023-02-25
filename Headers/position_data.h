@@ -9,7 +9,7 @@
 #include <vector>
 
 float offSet = 0.0f;
-float divisor = 0.2f;
+float divisor = 1.0f;
 
 GLfloat vertices_with_color[] =
 {
