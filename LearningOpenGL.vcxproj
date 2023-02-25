@@ -473,6 +473,7 @@
     <ClInclude Include="Include\KHR\khrplatform.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Textures\container2.png" />
     <Image Include="Textures\wall.jpg" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -24,7 +24,7 @@ void processInput(GLFWwindow* window);
 
 void bindBuffers(unsigned int &generic_VBO, unsigned int& generic_VAO);
 void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int& number_of_elements_per_line);
-void configureTextures(unsigned int& texture, Shader& shader);
+unsigned int loadTexture(const char* texturePath, int number_of_textures);
 
 std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin);
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);

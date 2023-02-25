@@ -16,46 +16,25 @@ float lastFrame = 0.0f;
 // Light Cube
 glm::vec3 lightPos(1.0f, 0.5f, 2.0f);
 
-
-void init()
+void inits()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
 	#ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	#endif
-
-	// set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f); // Background color
 }
 
-void draw()
-{
-
-}
 
 int main() {
 	// *************** Initialization ***************
 	#pragma region inits
 	// Initialize GLFW
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	inits();
 
-	#ifdef __APPLE__
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	#endif
+	
 
 	// Make a Pointer to a GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
@@ -134,14 +113,23 @@ int main() {
 	#pragma region Textures
 	// Textures
 	unsigned int texture;
-	configureTextures(texture, cubeShader);
+	std::vector<unsigned int> diffuseMap;
+	diffuseMap.push_back(loadTexture("Textures/wall.jpg", diffuseMap.size()));
+	diffuseMap.push_back(loadTexture("Textures/container2.png", diffuseMap.size()));
+
+	cubeShader.use();
+	for (int i = 0; i < diffuseMap.size(); i++)
+	{
+		cubeShader.setInt("material.diffuse", 0);
+	}
+	
 	#pragma endregion
 
 	// *************** Materials ***************
 	#pragma region Material properties of the main cube
 	cubeShader.setVec3("material.ambient", glm::vec3(0.5f));
 	cubeShader.setVec3("material.diffuse", glm::vec3(0.1f));
-	cubeShader.setVec3("material.specular", glm::vec3(7.5f));
+	cubeShader.setVec3("material.specular", glm::vec3(2.5f));
 	cubeShader.setFloat("material.shininess", 32.0f);
 	DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
 	#pragma endregion
@@ -228,8 +216,11 @@ int main() {
 		cubeShader.setVec3("lightColor", lightColor);
 
 		
+		for (int i = 0; i < diffuseMap.size(); i++)
+		{
+			glBindTexture(GL_TEXTURE_2D, diffuseMap[0]); // Must bind textures before drawing
+		}
 		
-		glBindTexture(GL_TEXTURE_2D, texture); // Must bind textures before drawing
 		#pragma endregion
 		
 		// view/projection transformations
@@ -470,10 +461,12 @@ void configureBufferAttributes(const int position, const int color, const int te
 	}
 }
 
-void configureTextures(unsigned int& texture, Shader& shader)
+unsigned int loadTexture(const char* texturePath, int number_of_textures)
 {
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	unsigned int textureID;
+	glActiveTexture(GL_TEXTURE0 + number_of_textures);
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	// set the texture wrapping/filtering options (on the currently bound texture object)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -485,7 +478,7 @@ void configureTextures(unsigned int& texture, Shader& shader)
 
 	// load and generate the texture
 	int width, height, nrChannels;
-	unsigned char* data = stbi_load("Textures/wall.jpg", &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
 
 	if (data)
 	{
@@ -497,8 +490,7 @@ void configureTextures(unsigned int& texture, Shader& shader)
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);
-	shader.use();
-	shader.setInt("texture", 0);
+	return textureID;
 }
 
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale)
