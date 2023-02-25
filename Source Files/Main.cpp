@@ -203,7 +203,7 @@ int main() {
 		// TODO put this into the cube object
 		// be sure to activate shader when setting uniforms/drawing objects
 		cubeShader.use();
-		cubeShader.setVec3("lightPos", lightPos);
+		cubeShader.setVec3("light.position", lightPos);
 		cubeShader.setVec3("viewPos", camera.Position);
 
 		// light properties
@@ -275,7 +275,7 @@ int main() {
 			
 
 			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
-			model_main_cube = glm::rotate(model_main_cube, glm::radians(49.0f), glm::vec3(0.0f, 180.0f, 0.0f));
+			//model_main_cube = glm::rotate(model_main_cube, glm::radians(0.0f), glm::vec3(0.0f,0.0f, 0.0f));
 			
 			if (TRANSLATION_ROTATION)
 			{
