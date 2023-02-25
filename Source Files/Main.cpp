@@ -112,25 +112,38 @@ int main() {
 	// *************** Textures ***************
 	#pragma region Textures
 	// Textures
-	unsigned int texture;
-	std::vector<unsigned int> diffuseMap;
-	diffuseMap.push_back(loadTexture("Textures/wall.jpg", diffuseMap.size()));
-	diffuseMap.push_back(loadTexture("Textures/container2.png", diffuseMap.size()));
+	// load and create a texture 
+	// -------------------------
+	cubeShader.addTexture("Textures/wall.jpg");
+	cubeShader.addTexture("Textures/wall.jpg");
+	cubeShader.addTexture("Textures/cartoon.jpg");
+	cubeShader.addTexture("Textures/container2.png");
 
-	cubeShader.use();
-	for (int i = 0; i < diffuseMap.size(); i++)
+	for (auto tuple : cubeShader.textures)
 	{
-		cubeShader.setInt("material.diffuse", 0);
+		std::string texturePath;
+		unsigned int textureID;
+		std::tie(texturePath, textureID) = tuple;
+		std::cout << texturePath << std::endl;
 	}
-	
+
+
+	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+	// -------------------------------------------------------------------------------------------
+	cubeShader.use(); // don't forget to activate/use the shader before setting uniforms!
+	// either set it manually like so:
+	cubeShader.setInt("ourTexture1", 0);
+	// or set it via the texture class
+	cubeShader.setInt("ourTexture2", 1);
+
 	#pragma endregion
 
 	// *************** Materials ***************
 	#pragma region Material properties of the main cube
-	cubeShader.setVec3("material.ambient", glm::vec3(0.5f));
-	cubeShader.setVec3("material.diffuse", glm::vec3(0.1f));
-	cubeShader.setVec3("material.specular", glm::vec3(2.5f));
-	cubeShader.setFloat("material.shininess", 32.0f);
+	cubeShader.setVec3("material.ambient", glm::vec3(0.25f));
+	cubeShader.setVec3("material.diffuse", glm::vec3(1.1f));
+	cubeShader.setVec3("material.specular", glm::vec3(1.5f));
+	cubeShader.setFloat("material.shininess", 64.0f);
 	DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
 	#pragma endregion
 	
@@ -187,6 +200,8 @@ int main() {
 		#pragma region Draw Main Cube
 		glm::mat4 model_main_cube = glm::mat4(1.0f);
 		
+		 
+		
 
 		// TODO put this into the cube object
 		// be sure to activate shader when setting uniforms/drawing objects
@@ -206,19 +221,21 @@ int main() {
 		lightColor.y = static_cast<float>(yValue);
 		lightColor.z = static_cast<float>(zValue);
 
-		glm::vec3 diffuseColor = lightColor * glm::vec3(1.0f); // influence of the light color
-		glm::vec3 ambientColor = glm::vec3(0.1f);
+		glm::vec3 diffuseColor = lightColor * glm::vec3(0.01f); // influence of the light color
+		glm::vec3 ambientColor = glm::vec3(0.01f);
 		DEBUG_WRAP(ambientColor = glm::vec3(1.0f););
 		cubeShader.setVec3("light.ambient", ambientColor);
 		cubeShader.setVec3("light.diffuse", diffuseColor);
 		cubeShader.setVec3("light.specular", glm::vec3(1.0f));
-
-		cubeShader.setVec3("lightColor", lightColor);
+		cubeShader.setVec3("light.color", lightColor);
 
 		
-		for (int i = 0; i < diffuseMap.size(); i++)
+		
+		// bind textures on corresponding texture units
+		for (size_t i = 0; i < cubeShader.textures.size(); i++)
 		{
-			glBindTexture(GL_TEXTURE_2D, diffuseMap[0]); // Must bind textures before drawing
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, std::get<1>(cubeShader.textures[i]));
 		}
 		
 		#pragma endregion
@@ -459,38 +476,6 @@ void configureBufferAttributes(const int position, const int color, const int te
 		glEnableVertexAttribArray(3);
 		offset += normal;
 	}
-}
-
-unsigned int loadTexture(const char* texturePath, int number_of_textures)
-{
-	unsigned int textureID;
-	glActiveTexture(GL_TEXTURE0 + number_of_textures);
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	// set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// load and generate the texture
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
-
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-	return textureID;
 }
 
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale)

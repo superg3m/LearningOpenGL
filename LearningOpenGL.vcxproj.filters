@@ -1357,5 +1357,8 @@
     <Image Include="Textures\container2.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Textures\cartoon.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

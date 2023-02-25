@@ -10,12 +10,19 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vector>
+#include <tuple>
+
+
+#include <Headers/stb_image.h>
 
 class Shader
 {
 public:
     unsigned int ID;
     // constructor generates the shader on the fly
+    // ------------------------------------------------------------------------
+    std::vector< std::tuple<std::string, unsigned int>> textures;
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath);
     // activate the shader
@@ -46,10 +53,18 @@ public:
     void setMat3(const std::string& name, const glm::mat3& mat) const;
     // ------------------------------------------------------------------------
     void setMat4(const std::string& name, const glm::mat4& mat) const;
+
+
+
+    // ------------------------------------------------------------------------
+    void addTexture(const std::string texturePath);
+
 private:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
     void checkCompileErrors(unsigned int shader, std::string type);
+    unsigned int loadTexture(const std::string texturePath, int number_of_textures);
+    
 };
 
 #endif
