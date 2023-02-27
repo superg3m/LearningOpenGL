@@ -168,7 +168,14 @@ int main() {
 
 	#pragma endregion
 
-
+	// *************** Model Loading Tests ***************
+	Model model;
+	model.loadModel("C:\\Users\\Isaac Perry\\Downloads\\low_poly_tree\\Lowpoly_tree_sample.obj");
+	for (int i = 0; i < model.vertcies.size(); i++)
+	{
+		std::cout << "X: " << model.vertcies[i].x << " | Y: " << model.vertcies[i].y << " | Z: " << model.vertcies[i].z;
+	}
+	
 	
 	// *************** Render Loop ***************
 	#pragma region Render Loop

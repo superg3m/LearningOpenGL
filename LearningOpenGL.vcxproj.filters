@@ -42,6 +42,9 @@
     <ClCompile Include="Source Files\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source Files\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Vertex\text.vert" />
@@ -1347,6 +1350,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Headers\cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

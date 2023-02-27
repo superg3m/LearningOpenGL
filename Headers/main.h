@@ -17,6 +17,7 @@
 #include <Headers/position_data.h>
 #include <Headers/admin.h>
 #include <Headers/character.h>
+#include <Headers/model.h>
 
 // Methods
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
