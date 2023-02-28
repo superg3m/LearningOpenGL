@@ -42,9 +42,10 @@ void Model::loadModel(const std::string modelPath)
 		while (ss >> lineSubString)
 		{
 			std::cout << lineSubString << "\n";
-			if (lineSubString == "v")
+			if (lineSubString == "v" && iteration_until_new_state == -1)
 			{
 				fileState = v;
+				iteration_until_new_state++;
 				continue;
 			}
 				
