@@ -19,10 +19,9 @@ void Model::loadModel(const std::string modelPath)
 	std::vector<std::string> file_data;
 	std::stringstream ss;
 	FILE_STATE fileState = no_state;
-	int iteration_until_new_state = 0;
+	int iteration_until_new_state = 1;
 	std::vector<std::string> dataCache;
 	glm::vec3 verts;
-	bool lock = false;
 	file.open(modelPath);
 	if (!file) 
 	{
@@ -100,7 +99,7 @@ void Model::loadModel(const std::string modelPath)
 			if (fileState == v && iteration_until_new_state == 3)
 			{
 				std::cout << "Original: " << s << "\n";
-				std::cout << "X: " << dataCache[0] << " | Y: " << dataCache[1] << " | Z: " << dataCache[2];
+				std::cout << "X: " << dataCache[0] << " | Y: " << dataCache[1] << " | Z: " << dataCache[2] << "\n";
 				//verts.x = std::stod(dataCache[0]);
 				//verts.y = std::stod(dataCache[1]);
 				//verts.z = std::stod(dataCache[2]);
