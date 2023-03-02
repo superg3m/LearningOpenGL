@@ -121,7 +121,6 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
 unsigned int Shader::loadTexture(const std::string texturePath, int number_of_textures)
 {
     unsigned int textureID;
-    bool canbeLoaded = false;
     unsigned char* data;
     glActiveTexture(GL_TEXTURE0 + number_of_textures);
     glGenTextures(1, &textureID);

@@ -14,7 +14,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Light Cube
-glm::vec3 lightPos(1.0f, 0.5f, 2.0f);
+glm::vec3 lightPos(0.0f, 0.0f, 5.0f);
 
 void inits()
 {
@@ -68,6 +68,8 @@ int main() {
 	// Area of the window we want OpenGL to render
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glEnable(GL_DEPTH_TEST); 	
+
+		
 	#pragma endregion
 
 	// *************** Shaders ***************
@@ -130,7 +132,7 @@ int main() {
 	// -------------------------------------------------------------------------------------------
 	cubeShader.use();
 	cubeShader.setInt("material.diffuse", 0);
-	cubeShader.setInt("material.specular", 1);
+	//cubeShader.setInt("material.specular", 1);
 
 
 	#pragma endregion
@@ -138,7 +140,7 @@ int main() {
 	// *************** Materials ***************
 	#pragma region Material properties of the main cube
 	cubeShader.setVec3("material.ambient", glm::vec3(10.5f));
-	cubeShader.setFloat("material.shininess", 64.0f);
+	cubeShader.setFloat("material.shininess", 32.0f);
 	DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
 	#pragma endregion
 	
@@ -167,14 +169,6 @@ int main() {
 	#pragma endregion
 
 	#pragma endregion
-
-	// *************** Model Loading Tests ***************
-	Model model;
-	model.loadModel("C:\\Users\\Isaac Perry\\Downloads\\low_poly_tree\\Lowpoly_tree_sample.obj");
-	for (int i = 0; i < model.vertcies.size(); i++)
-	{
-		std::cout << "X: " << model.vertcies[i].x << " | Y: " << model.vertcies[i].y << " | Z: " << model.vertcies[i].z;
-	}
 	
 	
 	// *************** Render Loop ***************
@@ -223,9 +217,18 @@ int main() {
 		lightColor.y = static_cast<float>(yValue);
 		lightColor.z = static_cast<float>(zValue);
 
+
+		
+		// light properties
 		cubeShader.setVec3("light.ambient", glm::vec3(1.0f));
 		cubeShader.setVec3("light.diffuse", glm::vec3(1.0f));
-		cubeShader.setVec3("light.specular", glm::vec3(10.0f));
+		cubeShader.setVec3("light.specular", glm::vec3(300.5f));
+
+		cubeShader.setFloat("light.constant", 1.0f);
+		cubeShader.setFloat("light.linear", 0.09f);
+		cubeShader.setFloat("light.quadratic", 0.032f);
+
+
 		cubeShader.setVec3("light.color", lightColor);
 
 		
@@ -274,14 +277,15 @@ int main() {
 		}
 		#pragma endregion
 
-		for (unsigned int i = 0; i < 1; i++)
+		for (unsigned int i = 0; i < 9; i++)
 		{
 			// calculate the model matrix for each object and pass it to shader before drawing
 			// world transformation
 			float angle = 20.0f * i;
 			
-
+			model_main_cube = glm::mat4(1.0f);
 			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
+			model_main_cube = glm::scale(model_main_cube, glm::vec3(0.8f));
 			//model_main_cube = glm::rotate(model_main_cube, glm::radians(0.0f), glm::vec3(0.0f,0.0f, 0.0f));
 			
 			if (TRANSLATION_ROTATION)
@@ -306,7 +310,7 @@ int main() {
 		// also draw the lamp object
 
 
-
+		
 		glm::mat4 model_light_cube = glm::mat4(1.0f);
 
 		lightCubeShader.use();
@@ -316,16 +320,16 @@ int main() {
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
-		lightPos.x = tmpPoint.first;
-		lightPos.z = tmpPoint.second;
+		//lightPos.x = tmpPoint.first;
+		//lightPos.z = tmpPoint.second;
 
-		glm::mat4 transformTwo = transformMatrix(transformTwo, currentTime * LIGHT_ROTATION_SPEED, lightPos, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.25f));
+		glm::mat4 transformTwo = transformMatrix(transformTwo, 0, lightPos, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5f));
 
-		unsigned int transformLocationTwo = glGetUniformLocation(lightCubeShader.ID, "transformTwo");
-		glUniformMatrix4fv(transformLocationTwo, 1, GL_FALSE, glm::value_ptr(transformTwo));
+		lightCubeShader.setMat4("transformTwo", transformTwo);
 
 		glBindVertexArray(light_cube_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+		
 		#pragma endregion
 
 		// *************** Render Text ***************
@@ -361,29 +365,66 @@ int main() {
 	return 0;
 }
 
+
+// Non-Letter Keys
+bool Left_Shift_Key_Pressed, Escape_Key_Pressed, Space_Key_Pressed, Left_Control_Key_Pressed;
+
+// Letter Keys
+bool W_Key_Pressed, S_Key_Pressed, A_Key_Pressed, D_Key_Pressed, L_Key_Pressed;
+
+// Arrow Keys
+bool Up_Arrow_Key_Pressed, Down_Arrow_Key_Pressed, Left_Arrow_Key_Pressed, Right_Arrow_Key_Pressed;
+
+//Mouse Input
+bool Mouse_One_Pressed;
+
 #pragma region Methods
 void processInput(GLFWwindow* window)
 {
-	const float camera_y_velocity = 3.0f;
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(window, true);
+	// Non-letter Keys
+	Left_Shift_Key_Pressed		= glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+	Escape_Key_Pressed			= glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+	Space_Key_Pressed			= glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+	Left_Control_Key_Pressed	= glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.ProcessKeyboard(FORWARD, deltaTime);
+	// Letter
+	W_Key_Pressed				= glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
+	S_Key_Pressed				= glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
+	A_Key_Pressed				= glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
+	D_Key_Pressed				= glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+	L_Key_Pressed				= glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
 
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera.ProcessKeyboard(BACKWARD, deltaTime);
+	// Arrows
+	Up_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS;
+	Down_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS;
+	Left_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
+	Right_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT, deltaTime);
+	// Mouse
+	Mouse_One_Pressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
+	// Implementation
 
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) camera.Position.y -= camera_y_velocity * deltaTime;
+	if (Escape_Key_Pressed)			glfwSetWindowShouldClose(window, true);
 
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera.Position.y += camera_y_velocity * deltaTime;
+	if (Left_Shift_Key_Pressed)		camera.ProcessKeyboard(SPEEDMODIFER, deltaTime);
 
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT, deltaTime);
+	if (Space_Key_Pressed)			camera.ProcessKeyboard(UP, deltaTime);
 
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (Left_Control_Key_Pressed)	camera.ProcessKeyboard(DOWN, deltaTime);
 
-	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+
+	
+
+	if (W_Key_Pressed) camera.ProcessKeyboard(FORWARD, deltaTime);
+
+	if (S_Key_Pressed) camera.ProcessKeyboard(BACKWARD, deltaTime);
+
+	if (A_Key_Pressed) camera.ProcessKeyboard(LEFT, deltaTime);
+
+	if (D_Key_Pressed) camera.ProcessKeyboard(RIGHT, deltaTime);
+
+	if (L_Key_Pressed)
 	{
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
@@ -392,7 +433,19 @@ void processInput(GLFWwindow* window)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) mousePressed = true;
+	if (Up_Arrow_Key_Pressed) lightPos.y += (2 * deltaTime);
+
+	if (Down_Arrow_Key_Pressed) lightPos.y -= (2 * deltaTime);
+
+	if (Up_Arrow_Key_Pressed && Left_Control_Key_Pressed) lightPos.z += (2 * deltaTime);
+
+	if (Down_Arrow_Key_Pressed && Left_Control_Key_Pressed) lightPos.z -= (2 * deltaTime);
+
+	if (Left_Arrow_Key_Pressed) lightPos.x += (2 * deltaTime);
+
+	if (Right_Arrow_Key_Pressed) lightPos.x -= (2 * deltaTime);
+
+	if (Mouse_One_Pressed) mousePressed = true;
 	else
 	{
 		mousePressed = false;
@@ -402,23 +455,11 @@ void processInput(GLFWwindow* window)
 // glfw: whenever the mouse moves, this callback is called
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	float xpos = static_cast<float>(xposIn);
-	float ypos = static_cast<float>(yposIn);
+	glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 	if (mousePressed)
 	{
-		if (firstMouse)
-		{
-			lastX = xpos;
-			lastY = ypos;
-			firstMouse = false;
-		}
-
-		float xoffset = xpos - lastX;
-		float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-		lastX = xpos;
-		lastY = ypos;
-
+		float xoffset = xposIn - SCREEN_WIDTH / 2;
+		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
 		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
 }
@@ -444,7 +485,7 @@ void bindBuffers(unsigned int& generic_VBO, unsigned int& generic_VAO)
 	glBindBuffer(GL_ARRAY_BUFFER, generic_VBO);
 }
 
-void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int& number_of_elements_per_line)
+void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int number_of_elements_per_line)
 {
 	int offset = 0;
 	if (position != NULL)

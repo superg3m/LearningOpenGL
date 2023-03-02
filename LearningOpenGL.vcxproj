@@ -477,6 +477,7 @@
   <ItemGroup>
     <Image Include="Textures\cartoon.jpg" />
     <Image Include="Textures\container2.png" />
+    <Image Include="Textures\container2_specular.png" />
     <Image Include="Textures\wall.jpg" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
