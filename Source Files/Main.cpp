@@ -370,13 +370,14 @@ int main() {
 bool Left_Shift_Key_Pressed, Escape_Key_Pressed, Space_Key_Pressed, Left_Control_Key_Pressed;
 
 // Letter Keys
-bool W_Key_Pressed, S_Key_Pressed, A_Key_Pressed, D_Key_Pressed, L_Key_Pressed;
+bool W_Key_Pressed, S_Key_Pressed, A_Key_Pressed, D_Key_Pressed, L_Key_Pressed, V_Key_Pressed;
 
 // Arrow Keys
 bool Up_Arrow_Key_Pressed, Down_Arrow_Key_Pressed, Left_Arrow_Key_Pressed, Right_Arrow_Key_Pressed;
 
 //Mouse Input
 bool Mouse_One_Pressed;
+static bool hover = false;
 
 #pragma region Methods
 void processInput(GLFWwindow* window)
@@ -393,15 +394,16 @@ void processInput(GLFWwindow* window)
 	A_Key_Pressed				= glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
 	D_Key_Pressed				= glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 	L_Key_Pressed				= glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
+	V_Key_Pressed				= glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS;
 
 	// Arrows
-	Up_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS;
-	Down_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS;
-	Left_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
-	Right_Arrow_Key_Pressed = glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
+	Up_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS;
+	Down_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS;
+	Left_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
+	Right_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
 	// Mouse
-	Mouse_One_Pressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+	Mouse_One_Pressed			= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 
 	// Implementation
 
@@ -411,7 +413,7 @@ void processInput(GLFWwindow* window)
 
 	if (Space_Key_Pressed)			camera.ProcessKeyboard(UP, deltaTime);
 
-	if (Left_Control_Key_Pressed)	camera.ProcessKeyboard(DOWN, deltaTime);
+	if (Left_Control_Key_Pressed && !hover)	camera.ProcessKeyboard(DOWN, deltaTime);
 
 
 	
@@ -433,23 +435,22 @@ void processInput(GLFWwindow* window)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	if (Up_Arrow_Key_Pressed) lightPos.y += (2 * deltaTime);
+	
+	if (Left_Arrow_Key_Pressed)						lightPos.x -= (10 * deltaTime);
+	if (Right_Arrow_Key_Pressed)					lightPos.x += (10 * deltaTime);
 
-	if (Down_Arrow_Key_Pressed) lightPos.y -= (2 * deltaTime);
+	if (Down_Arrow_Key_Pressed && !V_Key_Pressed)	lightPos.y -= (10 * deltaTime);
+	if (Up_Arrow_Key_Pressed && !V_Key_Pressed)		lightPos.y += (10 * deltaTime);
 
-	if (Up_Arrow_Key_Pressed && Left_Control_Key_Pressed) lightPos.z += (2 * deltaTime);
-
-	if (Down_Arrow_Key_Pressed && Left_Control_Key_Pressed) lightPos.z -= (2 * deltaTime);
-
-	if (Left_Arrow_Key_Pressed) lightPos.x += (2 * deltaTime);
-
-	if (Right_Arrow_Key_Pressed) lightPos.x -= (2 * deltaTime);
+	if (Up_Arrow_Key_Pressed && V_Key_Pressed)		lightPos.z -= (10 * deltaTime);
+	if (Down_Arrow_Key_Pressed && V_Key_Pressed)	lightPos.z += (10 * deltaTime);
 
 	if (Mouse_One_Pressed) mousePressed = true;
 	else
 	{
 		mousePressed = false;
 	}
+	
 }
 
 // glfw: whenever the mouse moves, this callback is called
