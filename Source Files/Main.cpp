@@ -16,8 +16,10 @@ float lastFrame = 0.0f;
 // Light Cube
 glm::vec3 lightPos(0.0f, 0.0f, 5.0f);
 
-void inits()
-{
+int main() {
+	// *************** Initialization ***************
+	#pragma region inits
+	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -25,16 +27,6 @@ void inits()
 	#ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	#endif
-}
-
-
-int main() {
-	// *************** Initialization ***************
-	#pragma region inits
-	// Initialize GLFW
-	inits();
-
-	
 
 	// Make a Pointer to a GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
@@ -64,12 +56,9 @@ int main() {
 		return -1;
 	}
 
-	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 600
 	// Area of the window we want OpenGL to render
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glEnable(GL_DEPTH_TEST); 	
-
-		
 	#pragma endregion
 
 	// *************** Shaders ***************
@@ -79,7 +68,9 @@ int main() {
 	#pragma region Main Cube
 	// first, configure the cube's VAO (and VBO)
 	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
+
 	unsigned int main_cube_VBO, main_cube_VAO;
+
 	int size_in_bits = sizeof(vertices_with_color);
 	int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
@@ -113,28 +104,14 @@ int main() {
 
 	// *************** Textures ***************
 	#pragma region Textures
-	// Textures
-	// load and create a texture 
-	// -------------------------
 	cubeShader.addTexture("Textures/container2.png");
 	cubeShader.addTexture("Textures/container2_specular.png");
-
-	for (auto tuple : cubeShader.textures)
-	{
-		std::string texturePath;
-		unsigned int textureID;
-		std::tie(texturePath, textureID) = tuple;
-		std::cout << texturePath << std::endl;
-	}
-
 
 	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
 	// -------------------------------------------------------------------------------------------
 	cubeShader.use();
 	cubeShader.setInt("material.diffuse", 0);
 	//cubeShader.setInt("material.specular", 1);
-
-
 	#pragma endregion
 
 	// *************** Materials ***************
@@ -222,17 +199,14 @@ int main() {
 		// light properties
 		cubeShader.setVec3("light.ambient", glm::vec3(1.0f));
 		cubeShader.setVec3("light.diffuse", glm::vec3(1.0f));
-		cubeShader.setVec3("light.specular", glm::vec3(300.5f));
+		cubeShader.setVec3("light.specular", glm::vec3(100.5f));
 
 		cubeShader.setFloat("light.constant", 1.0f);
 		cubeShader.setFloat("light.linear", 0.09f);
 		cubeShader.setFloat("light.quadratic", 0.032f);
 
-
 		cubeShader.setVec3("light.color", lightColor);
 
-		
-		
 		// bind textures on corresponding texture units
 		for (size_t i = 0; i < cubeShader.textures.size(); i++)
 		{
@@ -436,21 +410,17 @@ void processInput(GLFWwindow* window)
 	}
 
 	
-	if (Left_Arrow_Key_Pressed)						lightPos.x -= (10 * deltaTime);
-	if (Right_Arrow_Key_Pressed)					lightPos.x += (10 * deltaTime);
+	if (Left_Arrow_Key_Pressed)	lightPos.x -= (10 * deltaTime);
+	if (Right_Arrow_Key_Pressed) lightPos.x += (10 * deltaTime);
 
-	if (Down_Arrow_Key_Pressed && !V_Key_Pressed)	lightPos.y -= (10 * deltaTime);
-	if (Up_Arrow_Key_Pressed && !V_Key_Pressed)		lightPos.y += (10 * deltaTime);
+	if (Down_Arrow_Key_Pressed && !V_Key_Pressed) lightPos.y -= (10 * deltaTime);
+	if (Up_Arrow_Key_Pressed && !V_Key_Pressed) lightPos.y += (10 * deltaTime);
 
-	if (Up_Arrow_Key_Pressed && V_Key_Pressed)		lightPos.z -= (10 * deltaTime);
-	if (Down_Arrow_Key_Pressed && V_Key_Pressed)	lightPos.z += (10 * deltaTime);
+	if (Up_Arrow_Key_Pressed && V_Key_Pressed) lightPos.z -= (10 * deltaTime);
+	if (Down_Arrow_Key_Pressed && V_Key_Pressed) lightPos.z += (10 * deltaTime);
 
 	if (Mouse_One_Pressed) mousePressed = true;
-	else
-	{
-		mousePressed = false;
-	}
-	
+	else mousePressed = false;
 }
 
 // glfw: whenever the mouse moves, this callback is called
@@ -527,4 +497,7 @@ glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_trans
 	matrix = glm::scale(matrix, vector_scale);
 	return matrix;
 }
+
+
+
 #pragma endregion
