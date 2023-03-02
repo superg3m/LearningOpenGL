@@ -19,7 +19,7 @@ void Model::loadModel(const std::string modelPath)
 	std::vector<std::string> file_data;
 	std::stringstream ss;
 	FILE_STATE fileState = no_state;
-	int iteration_until_new_state = 1;
+	int iteration_until_new_state = -1;
 	std::vector<std::string> dataCache;
 	glm::vec3 verts;
 	file.open(modelPath);
@@ -40,7 +40,7 @@ void Model::loadModel(const std::string modelPath)
 		
 		while (ss >> lineSubString)
 		{
-			std::cout << lineSubString << "\n";
+			//std::cout << lineSubString << "\n";
 			if (lineSubString == "v" && iteration_until_new_state == -1)
 			{
 				fileState = v;
@@ -51,7 +51,6 @@ void Model::loadModel(const std::string modelPath)
 			else if (lineSubString == "vn") fileState = vn;
 			else if (lineSubString == "vt") fileState = vt;
 			else if (lineSubString == "f") fileState = f;
-
 			/*
 			switch (fileState)
 			{
@@ -74,7 +73,6 @@ void Model::loadModel(const std::string modelPath)
 				break;
 			}
 			*/
-			
 
 			if (fileState == v)
 			{
@@ -98,23 +96,16 @@ void Model::loadModel(const std::string modelPath)
 
 			if (fileState == v && iteration_until_new_state == 3)
 			{
-				std::cout << "Original: " << s << "\n";
-				std::cout << "X: " << dataCache[0] << " | Y: " << dataCache[1] << " | Z: " << dataCache[2] << "\n";
-				//verts.x = std::stod(dataCache[0]);
-				//verts.y = std::stod(dataCache[1]);
-				//verts.z = std::stod(dataCache[2]);
-				//this->vertcies.push_back(verts);
-				verts = glm::vec3(0.0f);
+				//std::cout << "Original: " << s << "\n";
+				//std::cout << "X: " << dataCache[0] << " | Y: " << dataCache[1] << " | Z: " << dataCache[2] << "\n";
+				this->vertices.push_back(std::stof(dataCache[0]));
+				this->vertices.push_back(std::stof(dataCache[1]));
+				this->vertices.push_back(std::stof(dataCache[2]));
 				dataCache.clear();
 				iteration_until_new_state = -1;
 			}
-		contin:;
 		}
 		ss.clear();
-	}
-	for (int i = 0; i < this->vertcies.size(); i++)
-	{
-		//std::cout << "X: " << this->vertcies[i].x << " | Y: " << this->vertcies[i].y << " | Z: " << this->vertcies[i].z;
 	}
 }
 

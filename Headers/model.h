@@ -12,7 +12,7 @@
 class Model
 {
 public:
-	std::vector<glm::vec3> vertcies;
+	std::vector<float> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<glm::vec2> texture_coordinates;
 	std::vector<std::tuple<int, int, int>> faces; //Subtract by one on each index
