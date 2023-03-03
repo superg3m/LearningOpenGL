@@ -1,7 +1,11 @@
 #include<Headers/main.h>
 #include<Headers/camera.h>
 
-bool mousePressed = false;
+enum Descriptive
+{
+	TexturePath,
+	TextureID
+};
 
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -14,7 +18,10 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // Light Cube
-glm::vec3 lightPos(0.0f, 0.0f, 5.0f);
+glm::vec3 lightPos(1.0f, 0.0f, 5.0f);
+
+InputHandler input;
+
 
 int main() {
 	// *************** Initialization ***************
@@ -45,9 +52,9 @@ int main() {
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	
-
 	// Lose the cursor mode
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
@@ -66,7 +73,6 @@ int main() {
 
 	// *************** Main Cube ***************
 	#pragma region Main Cube
-	// first, configure the cube's VAO (and VBO)
 	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
 
 	unsigned int main_cube_VBO, main_cube_VAO;
@@ -111,7 +117,7 @@ int main() {
 	// -------------------------------------------------------------------------------------------
 	cubeShader.use();
 	cubeShader.setInt("material.diffuse", 0);
-	//cubeShader.setInt("material.specular", 1);
+	cubeShader.setInt("material.specular", 1);
 	#pragma endregion
 
 	// *************** Materials ***************
@@ -132,20 +138,14 @@ int main() {
 
 	freeTypeObject.init();
 
-	// destroy FreeType once we're finished
 	freeTypeObject.deleteObjects();
 
-	// configure VAO/VBO for texture quads
-	// -----------------------------------
-	//bindBuffers(freeTypeObject.text_VBO, freeTypeObject.text_VAO);
-	glGenVertexArrays(1, &freeTypeObject.text_VAO);
-	glGenBuffers(1, &freeTypeObject.text_VBO);
-	glBindVertexArray(freeTypeObject.text_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, freeTypeObject.text_VBO);
+	bindBuffers(freeTypeObject.text_VBO, freeTypeObject.text_VAO);
 	freeTypeObject.bind();
 	#pragma endregion
 
 	#pragma endregion
+	
 	
 	
 	// *************** Render Loop ***************
@@ -162,7 +162,7 @@ int main() {
 		std::string fpsText = std::to_string(FPS);
 
 		// input
-		processInput(window);
+		input.processInput(window, camera, deltaTime, lightPos);
 
 		// background
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -173,55 +173,45 @@ int main() {
 		#pragma region Draw Main Cube
 		glm::mat4 model_main_cube = glm::mat4(1.0f);
 		
-		 
-		
-
-		// TODO put this into the cube object
-		// be sure to activate shader when setting uniforms/drawing objects
 		cubeShader.use();
 		cubeShader.setVec3("light.position", lightPos);
+		//cubeShader.setVec3("light.position", camera.Position);
+
+		cubeShader.setVec3("light.direction", camera.Front);
+		cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 		cubeShader.setVec3("viewPos", camera.Position);
-
-		// light properties
-		#pragma region Material Properties
-		glm::vec3 lightColor;
-		const float frequency = 0.25f;
-
-		float xValue = 0.5 * (sin(TAU * (glfwGetTime() * frequency)) / 2.0) + 0.5;
-		float yValue = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 1.0/3.0)) / 2.0) + 0.5;
-		float zValue = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0/3.0)) / 2.0) + 0.5;
-		lightColor.x = static_cast<float>(xValue);
-		lightColor.y = static_cast<float>(yValue);
-		lightColor.z = static_cast<float>(zValue);
-
-
-		
-		// light properties
-		cubeShader.setVec3("light.ambient", glm::vec3(1.0f));
-		cubeShader.setVec3("light.diffuse", glm::vec3(1.0f));
-		cubeShader.setVec3("light.specular", glm::vec3(100.5f));
 
 		cubeShader.setFloat("light.constant", 1.0f);
 		cubeShader.setFloat("light.linear", 0.09f);
 		cubeShader.setFloat("light.quadratic", 0.032f);
 
+		cubeShader.setVec3("light.ambient", glm::vec3(1.0f));
+		cubeShader.setVec3("light.diffuse", glm::vec3(1.0f));
+		cubeShader.setVec3("light.specular", glm::vec3(100.5f));
+
+		
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		cubeShader.setMat4("projection", projection);
+		cubeShader.setMat4("view", view);
+
+		const float frequency = 0.25f;
+		glm::vec3 lightColor;
+		lightColor.x = 0.5 * (sin(TAU * (glfwGetTime() * frequency)) / 2.0) + 0.5;
+		lightColor.y = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 1.0/3.0)) / 2.0) + 0.5;
+		lightColor.z = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0/3.0)) / 2.0) + 0.5;
+
+		
 		cubeShader.setVec3("light.color", lightColor);
 
 		// bind textures on corresponding texture units
 		for (size_t i = 0; i < cubeShader.textures.size(); i++)
 		{
 			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, std::get<1>(cubeShader.textures[i]));
+			glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeShader.textures[i]));
 		}
 		
-		#pragma endregion
-		
-		// view/projection transformations
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		cubeShader.setMat4("projection", projection);
-		cubeShader.setMat4("view", view);
-
 		#pragma region Color
 		if (RAINBOW_COLORS)
 		{
@@ -253,8 +243,6 @@ int main() {
 
 		for (unsigned int i = 0; i < 9; i++)
 		{
-			// calculate the model matrix for each object and pass it to shader before drawing
-			// world transformation
 			float angle = 20.0f * i;
 			
 			model_main_cube = glm::mat4(1.0f);
@@ -274,17 +262,10 @@ int main() {
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
-		
 		#pragma endregion
 
-		// TODO put this into the cube object
 		// *************** Render the light cube ***************
 		#pragma region Draw Light Cube
-		// also draw the lamp object
-
-
-		
 		glm::mat4 model_light_cube = glm::mat4(1.0f);
 
 		lightCubeShader.use();
@@ -340,94 +321,11 @@ int main() {
 }
 
 
-// Non-Letter Keys
-bool Left_Shift_Key_Pressed, Escape_Key_Pressed, Space_Key_Pressed, Left_Control_Key_Pressed;
-
-// Letter Keys
-bool W_Key_Pressed, S_Key_Pressed, A_Key_Pressed, D_Key_Pressed, L_Key_Pressed, V_Key_Pressed;
-
-// Arrow Keys
-bool Up_Arrow_Key_Pressed, Down_Arrow_Key_Pressed, Left_Arrow_Key_Pressed, Right_Arrow_Key_Pressed;
-
-//Mouse Input
-bool Mouse_One_Pressed;
-static bool hover = false;
-
 #pragma region Methods
-void processInput(GLFWwindow* window)
-{
-	// Non-letter Keys
-	Left_Shift_Key_Pressed		= glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-	Escape_Key_Pressed			= glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
-	Space_Key_Pressed			= glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
-	Left_Control_Key_Pressed	= glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS;
-
-	// Letter
-	W_Key_Pressed				= glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
-	S_Key_Pressed				= glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
-	A_Key_Pressed				= glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
-	D_Key_Pressed				= glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
-	L_Key_Pressed				= glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
-	V_Key_Pressed				= glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS;
-
-	// Arrows
-	Up_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS;
-	Down_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS;
-	Left_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS;
-	Right_Arrow_Key_Pressed		= glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
-
-	// Mouse
-	Mouse_One_Pressed			= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-
-	// Implementation
-
-	if (Escape_Key_Pressed)			glfwSetWindowShouldClose(window, true);
-
-	if (Left_Shift_Key_Pressed)		camera.ProcessKeyboard(SPEEDMODIFER, deltaTime);
-
-	if (Space_Key_Pressed)			camera.ProcessKeyboard(UP, deltaTime);
-
-	if (Left_Control_Key_Pressed && !hover)	camera.ProcessKeyboard(DOWN, deltaTime);
-
-
-	
-
-	if (W_Key_Pressed) camera.ProcessKeyboard(FORWARD, deltaTime);
-
-	if (S_Key_Pressed) camera.ProcessKeyboard(BACKWARD, deltaTime);
-
-	if (A_Key_Pressed) camera.ProcessKeyboard(LEFT, deltaTime);
-
-	if (D_Key_Pressed) camera.ProcessKeyboard(RIGHT, deltaTime);
-
-	if (L_Key_Pressed)
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	}
-	else
-	{
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-
-	
-	if (Left_Arrow_Key_Pressed)	lightPos.x -= (10 * deltaTime);
-	if (Right_Arrow_Key_Pressed) lightPos.x += (10 * deltaTime);
-
-	if (Down_Arrow_Key_Pressed && !V_Key_Pressed) lightPos.y -= (10 * deltaTime);
-	if (Up_Arrow_Key_Pressed && !V_Key_Pressed) lightPos.y += (10 * deltaTime);
-
-	if (Up_Arrow_Key_Pressed && V_Key_Pressed) lightPos.z -= (10 * deltaTime);
-	if (Down_Arrow_Key_Pressed && V_Key_Pressed) lightPos.z += (10 * deltaTime);
-
-	if (Mouse_One_Pressed) mousePressed = true;
-	else mousePressed = false;
-}
-
-// glfw: whenever the mouse moves, this callback is called
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
 	glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-	if (mousePressed)
+	if (InputHandler::mousePressed)
 	{
 		float xoffset = xposIn - SCREEN_WIDTH / 2;
 		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
@@ -435,12 +333,10 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	}
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
-
 std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin)
 {
 	float xPos = radius * sin(angle);
@@ -497,7 +393,4 @@ glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_trans
 	matrix = glm::scale(matrix, vector_scale);
 	return matrix;
 }
-
-
-
 #pragma endregion

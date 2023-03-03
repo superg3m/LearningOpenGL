@@ -42,7 +42,7 @@
     <ClCompile Include="Source Files\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source Files\Model.cpp">
+    <ClCompile Include="Source Files\InputHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1352,7 +1352,7 @@
     <ClInclude Include="Headers\cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\model.h">
+    <ClInclude Include="Headers\input_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

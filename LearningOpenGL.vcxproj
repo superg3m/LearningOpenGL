@@ -23,7 +23,7 @@
     <ClCompile Include="Source Files\Character.cpp" />
     <ClCompile Include="Source Files\Cube.cpp" />
     <ClCompile Include="Source Files\glad.c" />
-    <ClCompile Include="Source Files\Model.cpp" />
+    <ClCompile Include="Source Files\InputHandler.cpp" />
     <ClCompile Include="Source Files\Shader.cpp" />
     <ClCompile Include="Source Files\Main.cpp" />
     <ClCompile Include="Source Files\stb_image.cpp" />
@@ -181,8 +181,8 @@
     <ClInclude Include="Headers\camera.h" />
     <ClInclude Include="Headers\character.h" />
     <ClInclude Include="Headers\cube.h" />
+    <ClInclude Include="Headers\input_handler.h" />
     <ClInclude Include="Headers\main.h" />
-    <ClInclude Include="Headers\model.h" />
     <ClInclude Include="Headers\position_data.h" />
     <ClInclude Include="Headers\shader.h" />
     <ClInclude Include="Headers\stb_image.h" />

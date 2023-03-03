@@ -17,12 +17,11 @@
 #include <Headers/position_data.h>
 #include <Headers/admin.h>
 #include <Headers/character.h>
-#include <Headers/model.h>
+#include <Headers/input_handler.h>
 
 // Methods
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow* window);
 
 void bindBuffers(unsigned int &generic_VBO, unsigned int& generic_VAO);
 void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int number_of_elements_per_line);
@@ -31,13 +30,13 @@ std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origi
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 
 // Constants
-const bool TRANSLATION_ROTATION = false;
-const bool RAINBOW_COLORS = false;
+const static bool TRANSLATION_ROTATION = false;
+const static bool RAINBOW_COLORS = false;
 
-const float PI = 3.1415926;
-const float TAU = 6.2831853;
+const static float PI = 3.1415926;
+const static float TAU = 6.2831853;
 const float LIGHT_ROTATION_SPEED = 50.0f;
 
-const int SCREEN_WIDTH = 1200;
-const int SCREEN_HEIGHT = 800;
+const static int SCREEN_WIDTH = 1200;
+const static int SCREEN_HEIGHT = 800;
 
