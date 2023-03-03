@@ -25,9 +25,6 @@ public:
 
 	unsigned int cube_VBO;
 	unsigned int cube_VAO;
-
-
-
 	
 private:
 

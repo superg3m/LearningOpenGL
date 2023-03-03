@@ -21,14 +21,7 @@ void main()
 {
     FragPos = vec3(model * vec4(aPos, 1.0));
     Normal = mat3(transpose(inverse(model))) * aNormal;  
-    if(transform == 0) 
-    {
-        gl_Position = projection * view * model * vec4(FragPos, 1.0);
-    }
-    else 
-    {
-        gl_Position = projection * view * model * transform * vec4(FragPos, 1.0);
-    }
     ourColor = aColor;
-    TexCoords = vec2(aTexCoord.x, aTexCoord.y);
+    TexCoords = aTexCoord;
+    gl_Position = projection * view * vec4(FragPos, 1.0); 
 }

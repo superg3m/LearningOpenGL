@@ -30,10 +30,11 @@ std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origi
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 
 // Constants
-const static bool TRANSLATION_ROTATION = false;
+const bool TRANSLATION_ROTATION = true;
+const bool ORBIT = false;
 
-const static float PI = 3.1415926;
-const static float TAU = 6.2831853;
+const float PI = 3.1415926;
+const float TAU = 6.2831853;
 const float LIGHT_ROTATION_SPEED = 50.0f;
 
 const static int SCREEN_WIDTH = 1200;

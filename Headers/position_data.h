@@ -9,7 +9,7 @@
 #include <vector>
 
 float offSet = 0.0f;
-float divisor = 1.0f;
+float divisor = 0.25f;
 
 GLfloat vertices_with_color[] =
 {
@@ -179,6 +179,14 @@ std::vector<glm::vec3> cubePositions{
 	glm::vec3(1.5f,  2.0f, -10.5f),
 	glm::vec3(1.5f,  0.2f, -1.5f),
 	glm::vec3(-1.3f,  1.0f, -1.5f)
+};
+
+// positions of the point lights
+glm::vec3 lightNodePositions[] = {
+	glm::vec3(0.7f,  0.2f,  2.0f),
+	glm::vec3(2.3f, -3.3f, -4.0f),
+	glm::vec3(-4.0f,  2.0f, -12.0f),
+	glm::vec3(0.0f,  0.0f, -3.0f)
 };
 
 #endif

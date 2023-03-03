@@ -7,6 +7,8 @@ enum Descriptive
 	TextureID
 };
 
+int lightNodeIndex = 0; // Implement a tab change
+
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = SCREEN_WIDTH / 2.0f;
@@ -76,7 +78,7 @@ int main() {
 	GLfloat* verts = new GLfloat[arrLength];
 	for (int i = 0; i < arrLength; i++)
 	{
-		verts[i] = vertices_without_color[i];
+		verts[i] = vertices_with_color[i];
 		//std::cout << verts[i] << "\n";
 	}
 
@@ -103,7 +105,7 @@ int main() {
 	#pragma endregion
 
 	// *************** Textures *********************
-	cubeShader.addTexture("Textures/container2.png");
+	cubeShader.addTexture("Textures/wall.jpg");
 	cubeShader.addTexture("Textures/container2_specular.png");
 
 	cubeShader.use();
@@ -139,39 +141,64 @@ int main() {
 		int FPS = 1 / deltaTime;
 		std::string fpsText = std::to_string(FPS);
 
-		input.processInput(window, camera, deltaTime, lightPos);
+		input.processInput(window, camera, deltaTime, lightNodePositions[0]);
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		
+
 		#pragma endregion
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
 		cubeShader.use();
-		glm::mat4 model_main_cube = glm::mat4(1.0f);
+		cubeShader.setVec3("viewPos", camera.Position);
+		cubeShader.setFloat("material.shininess", 32.0f);
+		DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
+
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		cubeShader.setMat4("projection", projection);
 		cubeShader.setMat4("view", view);
 
-		//cubeShader.setVec3("light.position", camera.Position);
-		cubeShader.setVec3("light.position", lightPos);
-		cubeShader.setVec3("light.direction", camera.Front);
-		cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-		cubeShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
-		cubeShader.setVec3("viewPos", camera.Position);
+		glm::mat4 model_main_cube = glm::mat4(1.0f);
+		cubeShader.setMat4("model", model_main_cube);
 
-		cubeShader.setFloat("light.constant", 1.0f);
-		cubeShader.setFloat("light.linear", 0.09f);
-		cubeShader.setFloat("light.quadratic", 0.032f);
+		// directional light
+		cubeShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+		cubeShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+		cubeShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+		cubeShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+		// point light 1
 
-		cubeShader.setVec3("light.ambient", glm::vec3(1.0f));
-		cubeShader.setVec3("light.diffuse", glm::vec3(1.0f));
-		cubeShader.setVec3("light.specular", glm::vec3(100.5f));
+		
+		for (int i = 0; i < 4; i++)
+		{
+			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally
+			cubeShader.setVec3(lightNode + ".position", lightNodePositions[i]);
+			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.05f));
+			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(0.8f));
+			cubeShader.setVec3(lightNode + ".specular", glm::vec3(20.0f));
 
-		cubeShader.setVec3("material.ambient", glm::vec3(10.5f));
-		cubeShader.setFloat("material.shininess", 32.0f);
-		DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
+			cubeShader.setFloat(lightNode + ".constant", 1.0f);
+			cubeShader.setFloat(lightNode + ".linear", 0.09f);
+			cubeShader.setFloat(lightNode + ".quadratic", 0.032f);
+		}
+		
+		// spotLight
+		cubeShader.setVec3("spotLight.position", camera.Position);
+		cubeShader.setVec3("spotLight.direction", camera.Front);
+		cubeShader.setVec3("spotLight.ambient", glm::vec3(1.5f));
+		cubeShader.setVec3("spotLight.diffuse", glm::vec3(0.5f));
+		cubeShader.setVec3("spotLight.specular", glm::vec3(100.5f));
+
+		cubeShader.setFloat("spotLight.constant", 1.0f);
+		cubeShader.setFloat("spotLight.linear", 0.09f);
+		cubeShader.setFloat("spotLight.quadratic", 0.032f);
+		cubeShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+		cubeShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
 		
 		glm::vec3 lightColor;
 		const float frequency = 0.25f;
@@ -179,7 +206,7 @@ int main() {
 		lightColor.y = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 1.0/3.0)) / 2.0) + 0.5;
 		lightColor.z = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0/3.0)) / 2.0) + 0.5;
 
-		cubeShader.setVec3("light.color", lightColor);
+		cubeShader.setVec3("lightColor", lightColor);
 
 		// bind textures on corresponding texture units
 		for (size_t i = 0; i < cubeShader.textures.size(); i++)
@@ -190,19 +217,18 @@ int main() {
 
 		for (unsigned int i = 0; i < 9; i++)
 		{
-			model_main_cube = glm::mat4(1.0f);
+			glm::mat4 model_main_cube = glm::mat4(1.0f);
 			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
-			model_main_cube = glm::scale(model_main_cube, glm::vec3(0.8f));
-			
+			model_main_cube = glm::scale(model_main_cube, glm::vec3(0.75f));
 			if (TRANSLATION_ROTATION)
 			{
 				float functionTranslation = sin(PI * currentTime / 2.0f) / 2.0f;
-				glm::mat4 transform = glm::mat4(1.0f);
-				transform = transformMatrix(transform, currentTime * 20, glm::vec3(0.0f, functionTranslation, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.5f));
-				cubeShader.setMat4("transform", transform);
+				model_main_cube = glm::translate(model_main_cube, glm::vec3(0.0f, functionTranslation, 0.0f));
+				model_main_cube = glm::rotate(model_main_cube, currentTime / 2.0f, glm::vec3(1.0f, 1.0f, 0.0f));
 			}
 			// render the cube
 			cubeShader.setMat4("model", model_main_cube);
+			
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
@@ -210,24 +236,36 @@ int main() {
 
 		// *************** Render the light cube ***************
 		#pragma region Draw Light Cube
-		glm::mat4 model_light_cube = glm::mat4(1.0f);
-
 		lightCubeShader.use();
 		lightCubeShader.setMat4("projection", projection);
 		lightCubeShader.setMat4("view", view);
+
+		glm::mat4 model_light_cube = glm::mat4(1.0f);
 		lightCubeShader.setMat4("model", model_light_cube);
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
-		std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
-		//lightPos.x = tmpPoint.first;
-		//lightPos.z = tmpPoint.second;
+		
 
-		glm::mat4 transformTwo = transformMatrix(transformTwo, 0, glm::vec3(lightPos), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5f));
+		
 
-		lightCubeShader.setMat4("transformTwo", transformTwo);
-
-		glBindVertexArray(light_cube_VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(light_cube_VAO); 
+		for (unsigned int i = 0; i < 4; i++)
+		{
+			glm::mat4 model_light_cube = glm::mat4(1.0f);
+			model_light_cube = glm::translate(model_light_cube, lightNodePositions[i]);
+			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // Make it a smaller cube
+			
+			if (ORBIT)
+			{
+				std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
+				lightPos.x = tmpPoint.first;
+				lightPos.z = tmpPoint.second;
+				glm::mat4 transformTwo = transformMatrix(transformTwo, 0, glm::vec3(lightPos), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f));
+				lightCubeShader.setMat4("transformTwo", transformTwo);
+			}
+			lightCubeShader.setMat4("model", model_light_cube);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+		}
 		
 		#pragma endregion
 
