@@ -26,7 +26,6 @@ InputHandler input;
 int main() {
 	// *************** Initialization ***************
 	#pragma region inits
-	// Initialize GLFW
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -35,20 +34,17 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	#endif
 
-	// Make a Pointer to a GLFWwindow
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
 	glfwSetWindowPos(window, SCREEN_WIDTH / 16 , SCREEN_HEIGHT / 16);
 
-	// If Window is NULL then terminate the GLFW and return the program
 	if (window == NULL) {
 		std::cerr << "Window is NULL";
 		glfwTerminate();
 		return -1;
 	}
 
-	// Introduce the window into the current context
-	glfwMakeContextCurrent(window);
 	//glfwSwapInterval(0);
+	glfwMakeContextCurrent(window);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
 	
@@ -63,25 +59,19 @@ int main() {
 		return -1;
 	}
 
-	// Area of the window we want OpenGL to render
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glEnable(GL_DEPTH_TEST); 	
 	#pragma endregion
 
-	// *************** Shaders ***************
-	#pragma region Shaders
-
-	// *************** Main Cube ***************
+	// *************** Main Cube ********************
 	#pragma region Main Cube
-	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
-
+	// Make this a buffer Object
 	unsigned int main_cube_VBO, main_cube_VAO;
-
 	int size_in_bits = sizeof(vertices_with_color);
 	int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
-	bindBuffers(main_cube_VBO, main_cube_VAO);
+	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
 
 	GLfloat* verts = new GLfloat[arrLength];
 	for (int i = 0; i < arrLength; i++)
@@ -90,42 +80,35 @@ int main() {
 		//std::cout << verts[i] << "\n";
 	}
 
+	bindBuffers(main_cube_VBO, main_cube_VAO);
+
 	glBufferData(GL_ARRAY_BUFFER, size_in_bits, verts, GL_STATIC_DRAW);
 	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
 	#pragma endregion
 
-	// *************** Light Cube ***************
+	// *************** Light Cube *******************
 	#pragma region Light Cube
-	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
+	// Make this a buffer Object
 	unsigned int light_cube_VBO, light_cube_VAO;
-
 	int lightArrLength = sizeof(light_cube_vertices) / sizeof(GLfloat);
 	number_of_elements_per_line = lightArrLength / 36; // Finding the number of elements per Line
+
+	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 
 	bindBuffers(light_cube_VBO, light_cube_VAO);
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(light_cube_vertices), light_cube_vertices, GL_STATIC_DRAW);
+
 	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
 	#pragma endregion
 
-	// *************** Textures ***************
-	#pragma region Textures
+	// *************** Textures *********************
 	cubeShader.addTexture("Textures/container2.png");
 	cubeShader.addTexture("Textures/container2_specular.png");
 
-	// tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-	// -------------------------------------------------------------------------------------------
 	cubeShader.use();
 	cubeShader.setInt("material.diffuse", 0);
 	cubeShader.setInt("material.specular", 1);
-	#pragma endregion
-
-	// *************** Materials ***************
-	#pragma region Material properties of the main cube
-	cubeShader.setVec3("material.ambient", glm::vec3(10.5f));
-	cubeShader.setFloat("material.shininess", 32.0f);
-	DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
-	#pragma endregion
 	
 	// *************** FreeType ***************
 	#pragma region FreeType
@@ -143,17 +126,12 @@ int main() {
 	bindBuffers(freeTypeObject.text_VBO, freeTypeObject.text_VAO);
 	freeTypeObject.bind();
 	#pragma endregion
-
-	#pragma endregion
-	
-	
 	
 	// *************** Render Loop ***************
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
 		#pragma region Initial Logic
-		// per-frame time logic
 		float currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastFrame;
 		lastFrame = currentTime;
@@ -161,22 +139,23 @@ int main() {
 		int FPS = 1 / deltaTime;
 		std::string fpsText = std::to_string(FPS);
 
-		// input
 		input.processInput(window, camera, deltaTime, lightPos);
 
-		// background
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		#pragma endregion
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
-		glm::mat4 model_main_cube = glm::mat4(1.0f);
-		
 		cubeShader.use();
-		cubeShader.setVec3("light.position", lightPos);
-		//cubeShader.setVec3("light.position", camera.Position);
+		glm::mat4 model_main_cube = glm::mat4(1.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		glm::mat4 view = camera.GetViewMatrix();
+		cubeShader.setMat4("projection", projection);
+		cubeShader.setMat4("view", view);
 
+		//cubeShader.setVec3("light.position", camera.Position);
+		cubeShader.setVec3("light.position", lightPos);
 		cubeShader.setVec3("light.direction", camera.Front);
 		cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
 		cubeShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
@@ -190,19 +169,16 @@ int main() {
 		cubeShader.setVec3("light.diffuse", glm::vec3(1.0f));
 		cubeShader.setVec3("light.specular", glm::vec3(100.5f));
 
+		cubeShader.setVec3("material.ambient", glm::vec3(10.5f));
+		cubeShader.setFloat("material.shininess", 32.0f);
+		DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
 		
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		cubeShader.setMat4("projection", projection);
-		cubeShader.setMat4("view", view);
-
-		const float frequency = 0.25f;
 		glm::vec3 lightColor;
+		const float frequency = 0.25f;
 		lightColor.x = 0.5 * (sin(TAU * (glfwGetTime() * frequency)) / 2.0) + 0.5;
 		lightColor.y = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 1.0/3.0)) / 2.0) + 0.5;
 		lightColor.z = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0/3.0)) / 2.0) + 0.5;
 
-		
 		cubeShader.setVec3("light.color", lightColor);
 
 		// bind textures on corresponding texture units
@@ -211,44 +187,12 @@ int main() {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeShader.textures[i]));
 		}
-		
-		#pragma region Color
-		if (RAINBOW_COLORS)
-		{
-			// Update the uniform color
-			float time = glfwGetTime();
-			float period = 2.0f; // Bigger period means lower speed
-			float brightnessFactor = sin(TAU * time / period) / 8.0f;
-			float brightnessDivisor = 2;
-
-			float fac1 = TAU * time;
-			float changingColorValue = (sinf(fac1 / period) / 2.0f) + 0.5f;
-			changingColorValue *= brightnessFactor / brightnessDivisor;
-
-			float fac2 = TAU * (time + (1.0f * period / 3.0f));
-			float changingColorValue2 = (sinf(fac2 / period) / 2.0f) + 0.5f;
-			changingColorValue2 *= brightnessFactor / brightnessDivisor;
-
-			float fac3 = TAU * (time + (2.0f * period / 3.0f));
-			float changingColorValue3 = (sin(fac3 / period) / 2.0f) + 0.5f;
-			changingColorValue3 *= brightnessFactor / brightnessDivisor;
-
-			//DEBUG_WRAP(std::cout << "1: " << changingColorValue << " | 2: " << changingColorValue2 << " | 3: " << changingColorValue3 << "\n";);
-
-			int vertexColorLocation = glGetUniformLocation(cubeShader.ID, "uniColor");
-			glUseProgram(cubeShader.ID);
-			glUniform4f(vertexColorLocation, changingColorValue3, changingColorValue2, changingColorValue, 1.0f);
-		}
-		#pragma endregion
 
 		for (unsigned int i = 0; i < 9; i++)
 		{
-			float angle = 20.0f * i;
-			
 			model_main_cube = glm::mat4(1.0f);
 			model_main_cube = glm::translate(model_main_cube, cubePositions[i]);
 			model_main_cube = glm::scale(model_main_cube, glm::vec3(0.8f));
-			//model_main_cube = glm::rotate(model_main_cube, glm::radians(0.0f), glm::vec3(0.0f,0.0f, 0.0f));
 			
 			if (TRANSLATION_ROTATION)
 			{
@@ -278,7 +222,7 @@ int main() {
 		//lightPos.x = tmpPoint.first;
 		//lightPos.z = tmpPoint.second;
 
-		glm::mat4 transformTwo = transformMatrix(transformTwo, 0, lightPos, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5f));
+		glm::mat4 transformTwo = transformMatrix(transformTwo, 0, glm::vec3(lightPos), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5f));
 
 		lightCubeShader.setMat4("transformTwo", transformTwo);
 
@@ -320,7 +264,6 @@ int main() {
 	return 0;
 }
 
-
 #pragma region Methods
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
@@ -354,6 +297,7 @@ void bindBuffers(unsigned int& generic_VBO, unsigned int& generic_VAO)
 
 void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int number_of_elements_per_line)
 {
+	// TODO: redo this method better
 	int offset = 0;
 	if (position != NULL)
 	{

@@ -31,7 +31,6 @@ glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_trans
 
 // Constants
 const static bool TRANSLATION_ROTATION = false;
-const static bool RAINBOW_COLORS = false;
 
 const static float PI = 3.1415926;
 const static float TAU = 6.2831853;
