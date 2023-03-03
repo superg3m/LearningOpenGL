@@ -141,7 +141,8 @@ int main() {
 		int FPS = 1 / deltaTime;
 		std::string fpsText = std::to_string(FPS);
 
-		input.processInput(window, camera, deltaTime, lightNodePositions[0]);
+		cubeShader.use();
+		input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0]);
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -152,10 +153,9 @@ int main() {
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
-		cubeShader.use();
+		
 		cubeShader.setVec3("viewPos", camera.Position);
-		cubeShader.setFloat("material.shininess", 32.0f);
-		DEBUG_WRAP(cubeShader.setFloat("material.shininess", 0.0f););
+		cubeShader.setFloat("material.shininess", 64.0f);
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -165,21 +165,18 @@ int main() {
 		glm::mat4 model_main_cube = glm::mat4(1.0f);
 		cubeShader.setMat4("model", model_main_cube);
 
-		// directional light
 		cubeShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
 		cubeShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
 		cubeShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-		cubeShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-		// point light 1
+		cubeShader.setVec3("dirLight.specular", glm::vec3(1.0f));
 
-		
 		for (int i = 0; i < 4; i++)
 		{
-			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally
+			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally stole this one from kyle But I had the for loop prior
 			cubeShader.setVec3(lightNode + ".position", lightNodePositions[i]);
-			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.05f));
+			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.1f));
 			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(0.8f));
-			cubeShader.setVec3(lightNode + ".specular", glm::vec3(20.0f));
+			cubeShader.setVec3(lightNode + ".specular", glm::vec3(50.0f));
 
 			cubeShader.setFloat(lightNode + ".constant", 1.0f);
 			cubeShader.setFloat(lightNode + ".linear", 0.09f);
@@ -190,8 +187,8 @@ int main() {
 		cubeShader.setVec3("spotLight.position", camera.Position);
 		cubeShader.setVec3("spotLight.direction", camera.Front);
 		cubeShader.setVec3("spotLight.ambient", glm::vec3(1.5f));
-		cubeShader.setVec3("spotLight.diffuse", glm::vec3(0.5f));
-		cubeShader.setVec3("spotLight.specular", glm::vec3(100.5f));
+		cubeShader.setVec3("spotLight.diffuse", glm::vec3(0.05f));
+		//cubeShader.setVec3("spotLight.specular", glm::vec3(1.0f));
 
 		cubeShader.setFloat("spotLight.constant", 1.0f);
 		cubeShader.setFloat("spotLight.linear", 0.09f);

@@ -14,6 +14,7 @@ InputHandler::InputHandler()
 	this->D_Key_Pressed = false;
 	this->L_Key_Pressed = false;
 	this->V_Key_Pressed = false;
+	this->F_Key_Pressed = false;
 
 	this->Up_Arrow_Key_Pressed = false;
 	this->Down_Arrow_Key_Pressed = false;
@@ -27,7 +28,7 @@ InputHandler::InputHandler()
 	InputHandler::mousePressed = false;
 }
 
-void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& deltaTime, glm::vec3& lightPos)
+void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& deltaTime, Shader &shader, glm::vec3 &lightPos)
 {		
 	#pragma region Changing Booleans
 	// Non-letter Keys
@@ -43,6 +44,7 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	D_Key_Pressed					= glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
 	L_Key_Pressed					= glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS;
 	V_Key_Pressed					= glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS;
+	F_Key_Pressed					= glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
 
 	// Arrows
 	Up_Arrow_Key_Pressed			= glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS;
@@ -57,30 +59,92 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 
 	#pragma region Implementation
 	// Non-letter Keys
-	if (Escape_Key_Pressed)							glfwSetWindowShouldClose(window, true);
-	if (Left_Shift_Key_Pressed)						camera.ProcessKeyboard(SPEEDMODIFER, deltaTime);
-	if (Space_Key_Pressed)							camera.ProcessKeyboard(UP, deltaTime);
-	if (Left_Control_Key_Pressed && !hover)			camera.ProcessKeyboard(DOWN, deltaTime);
+	if (Escape_Key_Pressed)
+	{
+		glfwSetWindowShouldClose(window, true);
+	}
+	if (Left_Shift_Key_Pressed)						
+	{
+		camera.ProcessKeyboard(SPEEDMODIFER, deltaTime);
+	}
+	if (Space_Key_Pressed)							
+	{
+		camera.ProcessKeyboard(UP, deltaTime);
+	}
+	if (Left_Control_Key_Pressed && !hover)
+	{
+		camera.ProcessKeyboard(DOWN, deltaTime);
+	}
 
 	// Letter
-	if (W_Key_Pressed)								camera.ProcessKeyboard(FORWARD, deltaTime);
-	if (S_Key_Pressed)								camera.ProcessKeyboard(BACKWARD, deltaTime);
-	if (A_Key_Pressed)								camera.ProcessKeyboard(LEFT, deltaTime);
-	if (D_Key_Pressed)								camera.ProcessKeyboard(RIGHT, deltaTime);
-	if (L_Key_Pressed)								glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	else											glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (W_Key_Pressed)
+	{
+		camera.ProcessKeyboard(FORWARD, deltaTime);
+	}
+	if (S_Key_Pressed)
+	{
+		camera.ProcessKeyboard(BACKWARD, deltaTime);
+	}
+	if (A_Key_Pressed)
+	{
+		camera.ProcessKeyboard(LEFT, deltaTime);
+	}
+	if (D_Key_Pressed)
+	{
+		camera.ProcessKeyboard(RIGHT, deltaTime);
+	}
+	if (F_Key_Pressed)								
+	{
+		std::cout << "working!" << std::endl;
+		shader.setVec3("spotLight.specular", glm::vec3(100.0f));;
+	}
+	else
+	{
+		shader.setVec3("spotLight.specular", glm::vec3(1.0f));;
+	}
+	if (L_Key_Pressed)								
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else
+	{
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 
 	// Arrows
-	if (Left_Arrow_Key_Pressed)						lightPos.x -= (10 * deltaTime);
-	if (Right_Arrow_Key_Pressed)					lightPos.x += (10 * deltaTime);
+	if (Left_Arrow_Key_Pressed)						
+	{
+		lightPos.x -= (10 * deltaTime);
+	}
+	if (Right_Arrow_Key_Pressed)					
+	{
+		lightPos.x += (10 * deltaTime);
+	}
+	if (Down_Arrow_Key_Pressed && !V_Key_Pressed)	
+	{
+		lightPos.y -= (10 * deltaTime);
+	}
+	if (Up_Arrow_Key_Pressed && !V_Key_Pressed)		
+	{
+		lightPos.y += (10 * deltaTime);
+	}
 
-	if (Down_Arrow_Key_Pressed && !V_Key_Pressed)	lightPos.y -= (10 * deltaTime);
-	if (Up_Arrow_Key_Pressed && !V_Key_Pressed)		lightPos.y += (10 * deltaTime);
+	if (Up_Arrow_Key_Pressed && V_Key_Pressed)		
+	{
+		lightPos.z -= (10 * deltaTime);
+	}
+	if (Down_Arrow_Key_Pressed && V_Key_Pressed)
+	{
+		lightPos.z += (10 * deltaTime);
+	}
 
-	if (Up_Arrow_Key_Pressed && V_Key_Pressed)		lightPos.z -= (10 * deltaTime);
-	if (Down_Arrow_Key_Pressed && V_Key_Pressed)	lightPos.z += (10 * deltaTime);
-
-	if (Mouse_One_Pressed)							mousePressed = true;
-	else											mousePressed = false;
+	if (Mouse_One_Pressed) 
+	{
+		mousePressed = true;
+	}
+	else 
+	{
+		mousePressed = false;
+	}
 	#pragma endregion
 }

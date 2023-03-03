@@ -30,7 +30,7 @@ std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origi
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 
 // Constants
-const bool TRANSLATION_ROTATION = true;
+const bool TRANSLATION_ROTATION = false;
 const bool ORBIT = false;
 
 const float PI = 3.1415926;
