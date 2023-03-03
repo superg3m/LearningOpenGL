@@ -95,7 +95,6 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	}
 	if (F_Key_Pressed)								
 	{
-		std::cout << "working!" << std::endl;
 		shader.setVec3("spotLight.specular", glm::vec3(100.0f));;
 	}
 	else

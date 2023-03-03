@@ -169,7 +169,7 @@ int main() {
 		cubeShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
 		cubeShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
 		cubeShader.setVec3("dirLight.specular", glm::vec3(1.0f));
-
+		
 		for (int i = 0; i < 4; i++)
 		{
 			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally stole this one from kyle But I had the for loop prior
