@@ -18,6 +18,7 @@
 #include <Headers/admin.h>
 #include <Headers/character.h>
 #include <Headers/input_handler.h>
+#include <Headers/model.h>
 
 // Methods
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);

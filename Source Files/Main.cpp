@@ -63,6 +63,8 @@ int main() {
 
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glEnable(GL_DEPTH_TEST); 	
+
+	stbi_set_flip_vertically_on_load(true);
 	#pragma endregion
 
 	// *************** Main Cube ********************
@@ -105,8 +107,8 @@ int main() {
 	#pragma endregion
 
 	// *************** Textures *********************
-	cubeShader.addTexture("Textures/wall.jpg");
-	cubeShader.addTexture("Textures/container2_specular.png");
+	//cubeShader.addTexture("Textures/wall.jpg");
+	//cubeShader.addTexture("Textures/container2_specular.png");
 
 	cubeShader.use();
 	cubeShader.setInt("material.diffuse", 0);
@@ -128,6 +130,10 @@ int main() {
 	bindBuffers(freeTypeObject.text_VBO, freeTypeObject.text_VAO);
 	freeTypeObject.bind();
 	#pragma endregion
+
+	// *************** FreeType ***************
+	Model model("C:\\Users\\superg3m\\Downloads\\backpack.obj");
+
 	
 	// *************** Render Loop ***************
 	#pragma region Render Loop
@@ -211,7 +217,7 @@ int main() {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeShader.textures[i]));
 		}
-
+		/*
 		for (unsigned int i = 0; i < 9; i++)
 		{
 			glm::mat4 model_main_cube = glm::mat4(1.0f);
@@ -229,6 +235,8 @@ int main() {
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+		*/
+		model.Draw(cubeShader);
 		#pragma endregion
 
 		// *************** Render the light cube ***************

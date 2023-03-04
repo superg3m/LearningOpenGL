@@ -82,7 +82,7 @@ void main()
     // phase 3: spot light
     result += CalcSpotLight(spotLight, norm, FragPos, viewDir);    
      
-    FragColor = vec4(ourColor, 1.0) * vec4(result, 1.0);
+    FragColor = vec4(ourColor, 1.0) * vec4(result, 1.0); // Change this for texture
 }
 
 // calculates the color when using a directional light.
