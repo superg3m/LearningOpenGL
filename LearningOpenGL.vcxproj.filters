@@ -462,6 +462,8 @@
     <None Include="Shaders\Vertex\main_cube.vert" />
     <None Include="Shaders\Vertex\light_cube.vert" />
     <None Include="x64\Release\assimp-vc143-mtd.dll" />
+    <None Include="Shaders\Fragment\backpack.frag" />
+    <None Include="Shaders\Vertex\backpack.vert" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Library\glfw3.lib" />

@@ -165,6 +165,8 @@
     <None Include="Include\glm\gtx\vector_angle.inl" />
     <None Include="Include\glm\gtx\vector_query.inl" />
     <None Include="Include\glm\gtx\wrap.inl" />
+    <None Include="Shaders\Fragment\backpack.frag" />
+    <None Include="Shaders\Vertex\backpack.vert" />
     <None Include="x64\Release\assimp-vc143-mtd.dll" />
     <None Include="Shaders\Fragment\text.frag" />
     <None Include="Shaders\Fragment\main_cube.frag" />

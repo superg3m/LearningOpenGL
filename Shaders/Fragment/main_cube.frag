@@ -46,7 +46,7 @@ struct SpotLight
     vec3 specular;       
 };
 
-#define NR_POINT_LIGHTS 4
+#define NR_POINT_LIGHTS 1
 
 // function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
@@ -64,6 +64,7 @@ uniform DirLight dirLight;
 uniform LightNode lightNode[NR_POINT_LIGHTS];
 uniform SpotLight spotLight;
 uniform Material material;
+uniform sampler2D texture_diffuse1;
 
 void main()
 {
@@ -81,8 +82,7 @@ void main()
     }
     // phase 3: spot light
     result += CalcSpotLight(spotLight, norm, FragPos, viewDir);    
-     
-    FragColor = vec4(ourColor, 1.0) * vec4(result, 1.0); // Change this for texture
+    FragColor = vec4(ourColor, 1.0) * vec4(result, 1.0) * texture(texture_diffuse1, TexCoords); // Change this for texture
 }
 
 // calculates the color when using a directional light.

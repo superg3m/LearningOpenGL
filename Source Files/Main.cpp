@@ -33,11 +33,11 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	#endif
 
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
-	glfwSetWindowPos(window, SCREEN_WIDTH / 16 , SCREEN_HEIGHT / 16);
+	glfwSetWindowPos(window, SCREEN_WIDTH / 16, SCREEN_HEIGHT / 16);
 
 	if (window == NULL) {
 		std::cerr << "Window is NULL";
@@ -49,7 +49,7 @@ int main() {
 	glfwMakeContextCurrent(window);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
-	
+
 	// Lose the cursor mode
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -62,20 +62,22 @@ int main() {
 	}
 
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glEnable(GL_DEPTH_TEST); 	
+	glEnable(GL_DEPTH_TEST);
 
 	stbi_set_flip_vertically_on_load(true);
-	#pragma endregion
+#pragma endregion
 
 	// *************** Main Cube ********************
-	#pragma region Main Cube
-	// Make this a buffer Object
+#pragma region Main Cube
+// Make this a buffer Object
 	unsigned int main_cube_VBO, main_cube_VAO;
 	int size_in_bits = sizeof(vertices_with_color);
 	int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
 	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
+
+	Shader backpackShader("Shaders/Vertex/backpack.vert", "Shaders/Fragment/backpack.frag");
 
 	GLfloat* verts = new GLfloat[arrLength];
 	for (int i = 0; i < arrLength; i++)
@@ -88,11 +90,11 @@ int main() {
 
 	glBufferData(GL_ARRAY_BUFFER, size_in_bits, verts, GL_STATIC_DRAW);
 	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
-	#pragma endregion
+#pragma endregion
 
 	// *************** Light Cube *******************
-	#pragma region Light Cube
-	// Make this a buffer Object
+#pragma region Light Cube
+// Make this a buffer Object
 	unsigned int light_cube_VBO, light_cube_VAO;
 	int lightArrLength = sizeof(light_cube_vertices) / sizeof(GLfloat);
 	number_of_elements_per_line = lightArrLength / 36; // Finding the number of elements per Line
@@ -104,16 +106,16 @@ int main() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(light_cube_vertices), light_cube_vertices, GL_STATIC_DRAW);
 
 	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
-	#pragma endregion
+#pragma endregion
 
 	// *************** Textures *********************
-	//cubeShader.addTexture("Textures/wall.jpg");
-	//cubeShader.addTexture("Textures/container2_specular.png");
+	cubeShader.addTexture("Textures/wall.jpg");
+	cubeShader.addTexture("Textures/container2_specular.png");
 
 	cubeShader.use();
 	cubeShader.setInt("material.diffuse", 0);
 	cubeShader.setInt("material.specular", 1);
-	
+
 	// *************** FreeType ***************
 	#pragma region FreeType
 	Shader textShader("Shaders/Vertex/text.vert", "Shaders/Fragment/text.frag");
@@ -132,14 +134,14 @@ int main() {
 	#pragma endregion
 
 	// *************** FreeType ***************
-	Model model("C:\\Users\\superg3m\\Downloads\\backpack.obj");
+	Model modelObject("../3D/backpack.obj");
 
-	
+
 	// *************** Render Loop ***************
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
-		#pragma region Initial Logic
+	#pragma region Initial Logic
 		float currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastFrame;
 		lastFrame = currentTime;
@@ -153,13 +155,13 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		
+
 
 		#pragma endregion
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
-		
+
 		cubeShader.setVec3("viewPos", camera.Position);
 		cubeShader.setFloat("material.shininess", 64.0f);
 
@@ -175,26 +177,25 @@ int main() {
 		cubeShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
 		cubeShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
 		cubeShader.setVec3("dirLight.specular", glm::vec3(1.0f));
-		
-		for (int i = 0; i < 4; i++)
+
+		for (int i = 0; i < 1; i++)
 		{
 			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally stole this one from kyle But I had the for loop prior
 			cubeShader.setVec3(lightNode + ".position", lightNodePositions[i]);
-			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.1f));
-			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(0.8f));
+			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(1.0f));
+			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(1.f));
 			cubeShader.setVec3(lightNode + ".specular", glm::vec3(50.0f));
 
 			cubeShader.setFloat(lightNode + ".constant", 1.0f);
 			cubeShader.setFloat(lightNode + ".linear", 0.09f);
 			cubeShader.setFloat(lightNode + ".quadratic", 0.032f);
 		}
-		
+
 		// spotLight
 		cubeShader.setVec3("spotLight.position", camera.Position);
 		cubeShader.setVec3("spotLight.direction", camera.Front);
 		cubeShader.setVec3("spotLight.ambient", glm::vec3(1.5f));
 		cubeShader.setVec3("spotLight.diffuse", glm::vec3(0.05f));
-		//cubeShader.setVec3("spotLight.specular", glm::vec3(1.0f));
 
 		cubeShader.setFloat("spotLight.constant", 1.0f);
 		cubeShader.setFloat("spotLight.linear", 0.09f);
@@ -202,12 +203,12 @@ int main() {
 		cubeShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
 		cubeShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
-		
+
 		glm::vec3 lightColor;
 		const float frequency = 0.25f;
 		lightColor.x = 0.5 * (sin(TAU * (glfwGetTime() * frequency)) / 2.0) + 0.5;
-		lightColor.y = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 1.0/3.0)) / 2.0) + 0.5;
-		lightColor.z = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0/3.0)) / 2.0) + 0.5;
+		lightColor.y = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 1.0 / 3.0)) / 2.0) + 0.5;
+		lightColor.z = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0 / 3.0)) / 2.0) + 0.5;
 
 		cubeShader.setVec3("lightColor", lightColor);
 
@@ -217,7 +218,7 @@ int main() {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeShader.textures[i]));
 		}
-		/*
+		
 		for (unsigned int i = 0; i < 9; i++)
 		{
 			glm::mat4 model_main_cube = glm::mat4(1.0f);
@@ -231,12 +232,21 @@ int main() {
 			}
 			// render the cube
 			cubeShader.setMat4("model", model_main_cube);
-			
+
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		*/
-		model.Draw(cubeShader);
+		
+		backpackShader.use();
+		backpackShader.setVec3("viewPos", camera.Position);
+		backpackShader.setMat4("projection", projection);
+		backpackShader.setMat4("view", view);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = transformMatrix(model, currentTime * 50, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.01f, 1.0f, 0.0f), glm::vec3(0.2));
+		backpackShader.setMat4("model", model);
+		modelObject.Draw(backpackShader);
+
 		#pragma endregion
 
 		// *************** Render the light cube ***************
@@ -249,17 +259,17 @@ int main() {
 		lightCubeShader.setMat4("model", model_light_cube);
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
-		
 
-		
 
-		glBindVertexArray(light_cube_VAO); 
-		for (unsigned int i = 0; i < 4; i++)
+
+
+		glBindVertexArray(light_cube_VAO);
+		for (unsigned int i = 0; i < 1; i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
 			model_light_cube = glm::translate(model_light_cube, lightNodePositions[i]);
 			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // Make it a smaller cube
-			
+
 			if (ORBIT)
 			{
 				std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
@@ -271,11 +281,11 @@ int main() {
 			lightCubeShader.setMat4("model", model_light_cube);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		
-		#pragma endregion
+
+#pragma endregion
 
 		// *************** Render Text ***************
-		#pragma region Render Text
+#pragma region Render Text
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -287,21 +297,21 @@ int main() {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
-		#pragma endregion
+#pragma endregion
 
 		// Events and updates
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	#pragma endregion
+#pragma endregion
 
-	#pragma region Delete Objects
+#pragma region Delete Objects
 	glDeleteVertexArrays(1, &main_cube_VAO);
 	glDeleteVertexArrays(1, &light_cube_VAO);
 	glDeleteBuffers(1, &main_cube_VBO);
 	glDeleteBuffers(1, &light_cube_VBO);
-	delete[] (verts);
-	#pragma endregion
+	delete[](verts);
+#pragma endregion
 
 	glfwTerminate();
 	return 0;
