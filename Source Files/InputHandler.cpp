@@ -95,11 +95,13 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	}
 	if (F_Key_Pressed)								
 	{
-		shader.setVec3("spotLight.specular", glm::vec3(100.0f));;
+		shader.setVec3("spotLight.specular", glm::vec3(100.0f));
+		shader.setFloat("spotLight.flashLightMode", 1);
 	}
 	else
 	{
-		shader.setVec3("spotLight.specular", glm::vec3(1.0f));;
+		shader.setVec3("spotLight.specular", glm::vec3(1.0f));
+		shader.setFloat("spotLight.flashLightMode", 0);
 	}
 	if (L_Key_Pressed)								
 	{

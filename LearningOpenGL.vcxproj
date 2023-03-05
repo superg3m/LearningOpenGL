@@ -24,6 +24,8 @@
     <ClCompile Include="Source Files\Cube.cpp" />
     <ClCompile Include="Source Files\glad.c" />
     <ClCompile Include="Source Files\InputHandler.cpp" />
+    <ClCompile Include="Source Files\Mesh.cpp" />
+    <ClCompile Include="Source Files\Model.cpp" />
     <ClCompile Include="Source Files\Shader.cpp" />
     <ClCompile Include="Source Files\Main.cpp" />
     <ClCompile Include="Source Files\stb_image.cpp" />
@@ -165,8 +167,7 @@
     <None Include="Include\glm\gtx\vector_angle.inl" />
     <None Include="Include\glm\gtx\vector_query.inl" />
     <None Include="Include\glm\gtx\wrap.inl" />
-    <None Include="Shaders\Fragment\backpack.frag" />
-    <None Include="Shaders\Vertex\backpack.vert" />
+    <None Include="x64\Debug\assimp-vc143-mtd.dll" />
     <None Include="x64\Release\assimp-vc143-mtd.dll" />
     <None Include="Shaders\Fragment\text.frag" />
     <None Include="Shaders\Fragment\main_cube.frag" />

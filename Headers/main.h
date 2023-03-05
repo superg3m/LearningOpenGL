@@ -25,9 +25,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 void bindBuffers(unsigned int &generic_VBO, unsigned int& generic_VAO);
-void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int number_of_elements_per_line);
+void configureBufferAttributes(const unsigned int &position, const unsigned  int& color, const unsigned int& texture, const unsigned int& normal, const unsigned int& number_of_elements_per_line);
 
-std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin);
+std::pair<float, float> circle_points(const float &radius, const float& angle, const glm::vec2& origin);
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 
 // Constants

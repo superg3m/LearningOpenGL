@@ -143,7 +143,6 @@ unsigned int Shader::loadTexture(const std::string texturePath, int number_of_te
         std::tie(texturePathLocal, textureID) = tuple;
         if (texturePath == texturePathLocal)
         {
-            std::cout << "works holy shit!" << std::endl;
             return textureID;
         }
     }
@@ -172,7 +171,6 @@ void Shader::addTexture(const std::string texturePath)
 {
     this->textures.push_back(std::make_tuple(texturePath, loadTexture(texturePath, this->textures.size())));
 }
-
 
 
 void Shader::checkCompileErrors(unsigned int shader, std::string type)

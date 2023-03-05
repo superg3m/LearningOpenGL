@@ -7,12 +7,11 @@ enum Descriptive
 	TextureID
 };
 
-int lightNodeIndex = 0; // Implement a tab change
+unsigned int lightNodeIndex = 0; // Implement a tab change
 
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-float lastX = SCREEN_WIDTH / 2.0f;
-float lastY = SCREEN_HEIGHT / 2.0f;
+
 bool firstMouse = true;
 
 // Time Variables
@@ -71,13 +70,14 @@ int main() {
 #pragma region Main Cube
 // Make this a buffer Object
 	unsigned int main_cube_VBO, main_cube_VAO;
-	int size_in_bits = sizeof(vertices_with_color);
-	int arrLength = size_in_bits / sizeof(GLfloat);
+	const int size_in_bits = sizeof(vertices_with_color);
+	const int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
-	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
 
-	Shader backpackShader("Shaders/Vertex/backpack.vert", "Shaders/Fragment/backpack.frag");
+	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
+	cubeShader.addTexture("Textures/wall.jpg");
+	cubeShader.addTexture("Textures/container2_specular.png");
 
 	GLfloat* verts = new GLfloat[arrLength];
 	for (int i = 0; i < arrLength; i++)
@@ -90,11 +90,12 @@ int main() {
 
 	glBufferData(GL_ARRAY_BUFFER, size_in_bits, verts, GL_STATIC_DRAW);
 	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
-#pragma endregion
+	delete[](verts); // Change to safe pointer
+	#pragma endregion
 
 	// *************** Light Cube *******************
-#pragma region Light Cube
-// Make this a buffer Object
+	#pragma region Light Cube
+	// Make this a buffer Object
 	unsigned int light_cube_VBO, light_cube_VAO;
 	int lightArrLength = sizeof(light_cube_vertices) / sizeof(GLfloat);
 	number_of_elements_per_line = lightArrLength / 36; // Finding the number of elements per Line
@@ -108,13 +109,7 @@ int main() {
 	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
 #pragma endregion
 
-	// *************** Textures *********************
-	cubeShader.addTexture("Textures/wall.jpg");
-	cubeShader.addTexture("Textures/container2_specular.png");
-
-	cubeShader.use();
-	cubeShader.setInt("material.diffuse", 0);
-	cubeShader.setInt("material.specular", 1);
+	
 
 	// *************** FreeType ***************
 	#pragma region FreeType
@@ -133,7 +128,7 @@ int main() {
 	freeTypeObject.bind();
 	#pragma endregion
 
-	// *************** FreeType ***************
+	// *************** Model ***************
 	Model modelObject("../3D/backpack.obj");
 
 
@@ -161,7 +156,14 @@ int main() {
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
+		// *************** Textures *********************
+		cubeShader.use();
+		
 
+		
+
+		
+	
 		cubeShader.setVec3("viewPos", camera.Position);
 		cubeShader.setFloat("material.shininess", 64.0f);
 
@@ -182,9 +184,9 @@ int main() {
 		{
 			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally stole this one from kyle But I had the for loop prior
 			cubeShader.setVec3(lightNode + ".position", lightNodePositions[i]);
-			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(1.0f));
-			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(1.f));
-			cubeShader.setVec3(lightNode + ".specular", glm::vec3(50.0f));
+			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.25f));
+			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(2.0f));
+			cubeShader.setVec3(lightNode + ".specular", glm::vec3(10.0f));
 
 			cubeShader.setFloat(lightNode + ".constant", 1.0f);
 			cubeShader.setFloat(lightNode + ".linear", 0.09f);
@@ -211,13 +213,11 @@ int main() {
 		lightColor.z = 0.5 * (sin(TAU * (glfwGetTime() * frequency + 2.0 / 3.0)) / 2.0) + 0.5;
 
 		cubeShader.setVec3("lightColor", lightColor);
+		cubeShader.setFloat("material.type", 0);
 
 		// bind textures on corresponding texture units
-		for (size_t i = 0; i < cubeShader.textures.size(); i++)
-		{
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeShader.textures[i]));
-		}
+		
+		
 		
 		for (unsigned int i = 0; i < 9; i++)
 		{
@@ -232,20 +232,40 @@ int main() {
 			}
 			// render the cube
 			cubeShader.setMat4("model", model_main_cube);
+			cubeShader.setInt("material.diffuse_texture1", 0);
+			cubeShader.setInt("material.specular_texture1", 1);
 
+			
+			if (cubeShader.textures.size() == 0)
+			{
+				for (size_t i = 0; i < 2; i++)
+				{
+					glActiveTexture(GL_TEXTURE0 + i);
+					glBindTexture(GL_TEXTURE_2D, NULL);
+				}
+				
+			}
+			else 
+			{
+				for (size_t i = 0; i < cubeShader.textures.size(); i++)
+				{
+					glActiveTexture(GL_TEXTURE0 + i);
+					glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeShader.textures[i]));
+				}
+			}
+			
+			
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		
-		backpackShader.use();
-		backpackShader.setVec3("viewPos", camera.Position);
-		backpackShader.setMat4("projection", projection);
-		backpackShader.setMat4("view", view);
 
-		glm::mat4 model = glm::mat4(1.0f);
-		model = transformMatrix(model, currentTime * 50, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.01f, 1.0f, 0.0f), glm::vec3(0.2));
-		backpackShader.setMat4("model", model);
-		modelObject.Draw(backpackShader);
+		glm::mat4 loading_model = glm::mat4(1.0f);
+		loading_model = transformMatrix(loading_model, 0, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
+		cubeShader.setMat4("model", loading_model);
+		cubeShader.setVec3("lightColor", glm::vec3(0.1));
+		cubeShader.setFloat("material.type", 1);
+		modelObject.Draw(cubeShader);
+		
 
 		#pragma endregion
 
@@ -282,10 +302,10 @@ int main() {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-#pragma endregion
+		#pragma endregion
 
 		// *************** Render Text ***************
-#pragma region Render Text
+		#pragma region Render Text
 		glEnable(GL_BLEND);
 		glEnable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -297,20 +317,20 @@ int main() {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
-#pragma endregion
+		#pragma endregion
 
 		// Events and updates
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-#pragma endregion
+	#pragma endregion
 
-#pragma region Delete Objects
+	#pragma region Delete Objects
 	glDeleteVertexArrays(1, &main_cube_VAO);
 	glDeleteVertexArrays(1, &light_cube_VAO);
 	glDeleteBuffers(1, &main_cube_VBO);
 	glDeleteBuffers(1, &light_cube_VBO);
-	delete[](verts);
+	
 #pragma endregion
 
 	glfwTerminate();
@@ -333,7 +353,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
-std::pair<float, float> circle_points(float radius, float angle, glm::vec2 origin)
+
+std::pair<float, float> circle_points(const float &radius, const float &angle, const glm::vec2 &origin)
 {
 	float xPos = radius * sin(angle);
 	float yPos = radius * cos(angle);
@@ -348,7 +369,7 @@ void bindBuffers(unsigned int& generic_VBO, unsigned int& generic_VAO)
 	glBindBuffer(GL_ARRAY_BUFFER, generic_VBO);
 }
 
-void configureBufferAttributes(const int position, const int color, const int texture, const int normal, int number_of_elements_per_line)
+void configureBufferAttributes(const unsigned int &position, const unsigned  int &color, const unsigned int &texture, const unsigned int &normal, const unsigned int &number_of_elements_per_line)
 {
 	// TODO: redo this method better
 	int offset = 0;
