@@ -22,28 +22,29 @@ void Mesh::Draw(Shader &shader)
         glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
         // retrieve texture number (the N in diffuse_textureN)
         std::string number;
-        std::string name = "material.";
-        name += textures[i].type;
-        if (name == "material.texture_diffuse")
+        std::string name = textures[i].type;
+        if (name == "texture_diffuse")
         {
             number = std::to_string(diffuseNr++);
         }
             
-        else if (name == "material.texture_specular")
+        else if (name == "texture_specular")
         {
             number = std::to_string(specularNr++);
         }
-        else if (name == "material.texture_normal")
+        /*
+        else if (name == "texture_normal")
         {
             number = std::to_string(normalNr++); // transfer unsigned int to string
         }
             
-        else if (name == "material.texture_height")
+        else if (name == "texture_height")
         {
             number = std::to_string(heightNr++); // transfer unsigned int to string
         }
+        */
         // now set the sampler to the correct texture unit
-        shader.setInt((name + number).c_str(), i);
+        shader.setInt(("material." + name + number), i);
         // and finally bind the texture
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }

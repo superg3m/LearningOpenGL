@@ -1,6 +1,7 @@
 #include<Headers/main.h>
 #include<Headers/camera.h>
 
+
 enum Descriptive
 {
 	TexturePath,
@@ -64,50 +65,40 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	stbi_set_flip_vertically_on_load(true);
-#pragma endregion
+	#pragma endregion
 
 	// *************** Main Cube ********************
-#pragma region Main Cube
-// Make this a buffer Object
+	#pragma region Main Cube
+	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
+
+	Texture_Class cubeTexture;
+	cubeTexture.addTexture("Textures/wall.jpg");
+	cubeTexture.addTexture("Textures/container2_specular.png");
+
 	unsigned int main_cube_VBO, main_cube_VAO;
 	const int size_in_bits = sizeof(vertices_with_color);
 	const int arrLength = size_in_bits / sizeof(GLfloat);
 	int number_of_elements_per_line = arrLength / 36; // Finding the number of elements per Line
 
-
-	Shader cubeShader("Shaders/Vertex/main_cube.vert", "Shaders/Fragment/main_cube.frag");
-	cubeShader.addTexture("Textures/wall.jpg");
-	cubeShader.addTexture("Textures/container2_specular.png");
-
-	GLfloat* verts = new GLfloat[arrLength];
-	for (int i = 0; i < arrLength; i++)
-	{
-		verts[i] = vertices_with_color[i];
-		//std::cout << verts[i] << "\n";
-	}
-
 	bindBuffers(main_cube_VBO, main_cube_VAO);
 
-	glBufferData(GL_ARRAY_BUFFER, size_in_bits, verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, size_in_bits, vertices_with_color, GL_STATIC_DRAW);
 	configureBufferAttributes(3, 3, 2, 3, number_of_elements_per_line);
-	delete[](verts); // Change to safe pointer
 	#pragma endregion
 
 	// *************** Light Cube *******************
 	#pragma region Light Cube
-	// Make this a buffer Object
+	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 	unsigned int light_cube_VBO, light_cube_VAO;
 	int lightArrLength = sizeof(light_cube_vertices) / sizeof(GLfloat);
 	number_of_elements_per_line = lightArrLength / 36; // Finding the number of elements per Line
-
-	Shader lightCubeShader("Shaders/Vertex/light_cube.vert", "Shaders/Fragment/light_cube.frag");
 
 	bindBuffers(light_cube_VBO, light_cube_VAO);
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(light_cube_vertices), light_cube_vertices, GL_STATIC_DRAW);
 
 	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
-#pragma endregion
+	#pragma endregion
 
 	
 
@@ -115,10 +106,10 @@ int main() {
 	#pragma region FreeType
 	Shader textShader("Shaders/Vertex/text.vert", "Shaders/Fragment/text.frag");
 	Character freeTypeObject;
-	glm::mat4 textProjection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
 
 	textShader.use();
-	glUniformMatrix4fv(glGetUniformLocation(textShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(textProjection));
+	glm::mat4 textProjection = glm::ortho(0.0f, static_cast<float>(SCREEN_WIDTH), 0.0f, static_cast<float>(SCREEN_HEIGHT));
+	textShader.setMat4("projection", textProjection);
 
 	freeTypeObject.init();
 
@@ -131,17 +122,16 @@ int main() {
 	// *************** Model ***************
 	Model modelObject("../3D/backpack.obj");
 
-
 	// *************** Render Loop ***************
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
-	#pragma region Initial Logic
+		#pragma region Initial Logic
 		float currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastFrame;
 		lastFrame = currentTime;
 
-		int FPS = 1 / deltaTime;
+		unsigned int FPS = 1 / deltaTime;
 		std::string fpsText = std::to_string(FPS);
 
 		cubeShader.use();
@@ -150,20 +140,11 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
 		#pragma endregion
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
 		// *************** Textures *********************
-		cubeShader.use();
-		
-
-		
-
-		
-	
 		cubeShader.setVec3("viewPos", camera.Position);
 		cubeShader.setFloat("material.shininess", 64.0f);
 
@@ -175,17 +156,17 @@ int main() {
 		glm::mat4 model_main_cube = glm::mat4(1.0f);
 		cubeShader.setMat4("model", model_main_cube);
 
-		cubeShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-		cubeShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-		cubeShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-		cubeShader.setVec3("dirLight.specular", glm::vec3(1.0f));
+		cubeShader.setVec3("dirLight.direction", 0, -1.0f, 0); // The power of the sun in the palm of my hands
+		cubeShader.setVec3("dirLight.ambient", glm::vec3(0.05f));
+		cubeShader.setVec3("dirLight.diffuse", glm::vec3(0.25f));
+		cubeShader.setVec3("dirLight.specular", glm::vec3(0.25f));
 
 		for (int i = 0; i < 1; i++)
 		{
 			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally stole this one from kyle But I had the for loop prior
 			cubeShader.setVec3(lightNode + ".position", lightNodePositions[i]);
-			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.25f));
-			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(2.0f));
+			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.5f));
+			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(1.0f));
 			cubeShader.setVec3(lightNode + ".specular", glm::vec3(10.0f));
 
 			cubeShader.setFloat(lightNode + ".constant", 1.0f);
@@ -214,10 +195,6 @@ int main() {
 
 		cubeShader.setVec3("lightColor", lightColor);
 		cubeShader.setFloat("material.type", 0);
-
-		// bind textures on corresponding texture units
-		
-		
 		
 		for (unsigned int i = 0; i < 9; i++)
 		{
@@ -236,7 +213,7 @@ int main() {
 			cubeShader.setInt("material.specular_texture1", 1);
 
 			
-			if (cubeShader.textures.size() == 0)
+			if (cubeTexture.currently_loaded_textures.size() == 0)
 			{
 				for (size_t i = 0; i < 2; i++)
 				{
@@ -247,22 +224,22 @@ int main() {
 			}
 			else 
 			{
-				for (size_t i = 0; i < cubeShader.textures.size(); i++)
+				for (size_t i = 0; i < cubeTexture.currently_loaded_textures.size(); i++)
 				{
 					glActiveTexture(GL_TEXTURE0 + i);
-					glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeShader.textures[i]));
+					glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeTexture.currently_loaded_textures[i]));
 				}
 			}
-			
 			
 			glBindVertexArray(main_cube_VAO);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		glm::mat4 loading_model = glm::mat4(1.0f);
-		loading_model = transformMatrix(loading_model, 0, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
-		cubeShader.setMat4("model", loading_model);
-		cubeShader.setVec3("lightColor", glm::vec3(0.1));
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = transformMatrix(model, 0, glm::vec3(0.0f, 5.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
+		cubeShader.setMat4("model", model);
+		cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 		cubeShader.setFloat("material.type", 1);
 		modelObject.Draw(cubeShader);
 		
@@ -274,29 +251,21 @@ int main() {
 		lightCubeShader.use();
 		lightCubeShader.setMat4("projection", projection);
 		lightCubeShader.setMat4("view", view);
-
-		glm::mat4 model_light_cube = glm::mat4(1.0f);
-		lightCubeShader.setMat4("model", model_light_cube);
 		lightCubeShader.setVec3("uniColor2", lightColor);
-
-
-
-
 
 		glBindVertexArray(light_cube_VAO);
 		for (unsigned int i = 0; i < 1; i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
 			model_light_cube = glm::translate(model_light_cube, lightNodePositions[i]);
-			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.5f)); // Make it a smaller cube
+			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.25f)); // Make it a smaller cube
 
 			if (ORBIT)
 			{
 				std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
-				lightPos.x = tmpPoint.first;
-				lightPos.z = tmpPoint.second;
-				glm::mat4 transformTwo = transformMatrix(transformTwo, 0, glm::vec3(lightPos), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f));
-				lightCubeShader.setMat4("transformTwo", transformTwo);
+				lightNodePositions[i].x = tmpPoint.first;
+				lightNodePositions[i].z = tmpPoint.second;
+				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.25f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
 			glDrawArrays(GL_TRIANGLES, 0, 36);

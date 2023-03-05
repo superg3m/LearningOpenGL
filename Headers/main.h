@@ -2,14 +2,14 @@
 #include <iostream>
 #include <map>
 #include <tuple>
+#include <memory>
+
 
 // OpenGL includes
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 // Our includes
 #include <Headers/shader.h>
@@ -19,8 +19,9 @@
 #include <Headers/character.h>
 #include <Headers/input_handler.h>
 #include <Headers/model.h>
+#include <Headers/texture_class.h>
 
-// Methods
+// Method prototypes
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
