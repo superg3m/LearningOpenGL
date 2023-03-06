@@ -23,7 +23,7 @@ private:
 	bool Up_Arrow_Key_Pressed, Down_Arrow_Key_Pressed, Left_Arrow_Key_Pressed, Right_Arrow_Key_Pressed;
 
 	//Mouse Input
-	bool Mouse_One_Pressed;
+	bool Mouse_Two_Pressed;
 	
 	bool hover;
 };

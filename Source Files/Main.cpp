@@ -51,7 +51,7 @@ int main() {
 	glfwSetScrollCallback(window, scroll_callback);
 
 	// Lose the cursor mode
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -63,6 +63,14 @@ int main() {
 
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	glEnable(GL_DEPTH_TEST);
+
+	// *************** GUI ***************
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	stbi_set_flip_vertically_on_load(true);
 	#pragma endregion
@@ -122,6 +130,9 @@ int main() {
 	// *************** Model ***************
 	Model modelObject("../3D/backpack.obj");
 
+	bool drawCubes = false;
+	float cubeSize = 1.0f;
+
 	// *************** Render Loop ***************
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
@@ -140,6 +151,9 @@ int main() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 		#pragma endregion
 
 		// *************** Render the main cube ***************
@@ -208,10 +222,8 @@ int main() {
 				model_main_cube = glm::rotate(model_main_cube, currentTime / 2.0f, glm::vec3(1.0f, 1.0f, 0.0f));
 			}
 			// render the cube
+			model_main_cube = glm::scale(model_main_cube, glm::vec3(cubeSize));
 			cubeShader.setMat4("model", model_main_cube);
-			cubeShader.setInt("material.diffuse_texture1", 0);
-			cubeShader.setInt("material.specular_texture1", 1);
-
 			
 			if (cubeTexture.currently_loaded_textures.size() == 0)
 			{
@@ -232,12 +244,15 @@ int main() {
 			}
 			
 			glBindVertexArray(main_cube_VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			if (drawCubes)
+			{
+				glDrawArrays(GL_TRIANGLES, 0, 36);
+			}
 		}
 
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = transformMatrix(model, 0, glm::vec3(0.0f, 5.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
+		model = transformMatrix(model, 0, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
 		cubeShader.setMat4("model", model);
 		cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 		cubeShader.setFloat("material.type", 1);
@@ -288,6 +303,15 @@ int main() {
 		glDisable(GL_BLEND);
 		#pragma endregion
 
+		ImGui::Begin("Sprite GUI window");
+		ImGui::Text("HELLO THERE!");
+		ImGui::Checkbox("Draw Cubes", &drawCubes);
+		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		// Events and updates
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -295,6 +319,11 @@ int main() {
 	#pragma endregion
 
 	#pragma region Delete Objects
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	glDeleteVertexArrays(1, &main_cube_VAO);
 	glDeleteVertexArrays(1, &light_cube_VAO);
 	glDeleteBuffers(1, &main_cube_VBO);
@@ -309,13 +338,20 @@ int main() {
 #pragma region Methods
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	
 	if (InputHandler::mousePressed)
 	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		float xoffset = xposIn - SCREEN_WIDTH / 2;
 		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
 		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
+	else
+	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+	
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)

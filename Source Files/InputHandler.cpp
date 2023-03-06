@@ -21,7 +21,7 @@ InputHandler::InputHandler()
 	this->Left_Arrow_Key_Pressed = false;
 	this->Right_Arrow_Key_Pressed = false;
 
-	this->Mouse_One_Pressed = false;
+	this->Mouse_Two_Pressed = false;
 
 	this->hover = false;
 
@@ -53,7 +53,7 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	Right_Arrow_Key_Pressed			= glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
 	// Mouse
-	Mouse_One_Pressed				= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+	Mouse_Two_Pressed				= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 	#pragma endregion
 
 
@@ -139,7 +139,7 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 		lightPos.z += (10 * deltaTime);
 	}
 
-	if (Mouse_One_Pressed) 
+	if (Mouse_Two_Pressed) 
 	{
 		mousePressed = true;
 	}

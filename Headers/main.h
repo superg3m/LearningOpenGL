@@ -20,6 +20,9 @@
 #include <Headers/input_handler.h>
 #include <Headers/model.h>
 #include <Headers/texture_class.h>
+#include <imGUI/imgui.h>
+#include <imGUI/imgui_impl_opengl3.h>
+#include <imGUI/imgui_impl_glfw.h>
 
 // Method prototypes
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);

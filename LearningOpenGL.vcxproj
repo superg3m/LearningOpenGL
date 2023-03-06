@@ -20,6 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Include\glm\detail\glm.cpp" />
+    <ClCompile Include="Include\imGUI\imgui.cpp" />
+    <ClCompile Include="Include\imGUI\imgui_demo.cpp" />
+    <ClCompile Include="Include\imGUI\imgui_draw.cpp" />
+    <ClCompile Include="Include\imGUI\imgui_impl_glfw.cpp" />
+    <ClCompile Include="Include\imGUI\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="Include\imGUI\imgui_tables.cpp" />
+    <ClCompile Include="Include\imGUI\imgui_widgets.cpp" />
     <ClCompile Include="Source Files\Character.cpp" />
     <ClCompile Include="Source Files\glad.c" />
     <ClCompile Include="Source Files\InputHandler.cpp" />
@@ -479,6 +486,15 @@
     <ClInclude Include="Include\glm\vec3.hpp" />
     <ClInclude Include="Include\glm\vec4.hpp" />
     <ClInclude Include="Include\glm\vector_relational.hpp" />
+    <ClInclude Include="Include\imGUI\imconfig.h" />
+    <ClInclude Include="Include\imGUI\imgui.h" />
+    <ClInclude Include="Include\imGUI\imgui_impl_glfw.h" />
+    <ClInclude Include="Include\imGUI\imgui_impl_opengl3.h" />
+    <ClInclude Include="Include\imGUI\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="Include\imGUI\imgui_internal.h" />
+    <ClInclude Include="Include\imGUI\imstb_rectpack.h" />
+    <ClInclude Include="Include\imGUI\imstb_textedit.h" />
+    <ClInclude Include="Include\imGUI\imstb_truetype.h" />
     <ClInclude Include="Include\KHR\khrplatform.h" />
   </ItemGroup>
   <ItemGroup>
