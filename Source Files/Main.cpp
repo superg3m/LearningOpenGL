@@ -179,9 +179,9 @@ int main() {
 		{
 			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally stole this one from kyle But I had the for loop prior
 			cubeShader.setVec3(lightNode + ".position", lightNodePositions[i]);
-			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(0.5f));
-			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(1.0f));
-			cubeShader.setVec3(lightNode + ".specular", glm::vec3(10.0f));
+			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(2.0f));
+			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(0.25f));
+			cubeShader.setVec3(lightNode + ".specular", glm::vec3(3.0f));
 
 			cubeShader.setFloat(lightNode + ".constant", 1.0f);
 			cubeShader.setFloat(lightNode + ".linear", 0.09f);
@@ -254,7 +254,7 @@ int main() {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = transformMatrix(model, 0, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
 		cubeShader.setMat4("model", model);
-		cubeShader.setVec3("lightColor", glm::vec3(1.0f));
+		cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 		cubeShader.setFloat("material.type", 1);
 		modelObject.Draw(cubeShader);
 		
