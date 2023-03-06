@@ -128,7 +128,7 @@ int main() {
 	#pragma endregion
 
 	// *************** Model ***************
-	Model modelObject("../3D/backpack.obj");
+	Model modelObject("../../../3D/backpack.obj");
 
 	bool drawCubes = false;
 	float cubeSize = 1.0f;
@@ -254,7 +254,7 @@ int main() {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = transformMatrix(model, 0, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
 		cubeShader.setMat4("model", model);
-		cubeShader.setVec3("lightColor", glm::vec3(0.25f));
+		cubeShader.setVec3("lightColor", glm::vec3(1.0f));
 		cubeShader.setFloat("material.type", 1);
 		modelObject.Draw(cubeShader);
 		
@@ -273,14 +273,14 @@ int main() {
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
 			model_light_cube = glm::translate(model_light_cube, lightNodePositions[i]);
-			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.25f)); // Make it a smaller cube
+			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.1f)); // Make it a smaller cube
 
 			if (ORBIT)
 			{
 				std::pair<float, float> tmpPoint = circle_points(4.0f, glm::radians(LIGHT_ROTATION_SPEED * currentTime), glm::vec2(0.0f, 0.0f));
 				lightNodePositions[i].x = tmpPoint.first;
 				lightNodePositions[i].z = tmpPoint.second;
-				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.25f));
+				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.1f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
