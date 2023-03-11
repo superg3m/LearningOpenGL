@@ -128,10 +128,75 @@ int main() {
 	#pragma endregion
 
 	// *************** Model ***************
-	Model modelObject("../../../3D/backpack.obj");
+	Model modelObject("../3D/Neon.fbx");
 
 	bool drawCubes = false;
 	float cubeSize = 1.0f;
+
+	glm::vec3 points[4];
+	points[0] = glm::vec3(2, 0, 0);
+	points[1] = glm::vec3(4, 2, 1);
+	points[2] = glm::vec3(6, 1, 0);
+	points[3] = glm::vec3(8, 4, 0);
+
+	CMRSpline splineObject;
+
+	std::vector<glm::vec3> splinePoints;
+	std::vector<glm::vec3> theta;
+	float t = 0.5;
+	const unsigned int amount = 100;
+	for (unsigned int i = 0; i < amount; i++)
+	{
+		splinePoints.push_back(splineObject.CatmullRom(points[0], points[1], points[2], points[3], i / (float)amount));
+		
+		//std::cout << "x: " << splinePoints[i].x << "\t | y:  " << splinePoints[i].y << "\t | z: " << splinePoints[i].z << std::endl;
+	}
+
+	
+
+	for (unsigned int i = 0; i < amount - 1; i++)
+	{
+		float xLength = splinePoints[i + 1].x - splinePoints[i].x;
+		float yLength = splinePoints[i + 1].y - splinePoints[i].y;
+		float zLength = splinePoints[i + 1].z - splinePoints[i].z;
+
+		glm::vec3 resultVector = glm::vec3(xLength, yLength, zLength);
+		float resultMag = sqrt(pow(resultVector.x, 2) + pow(resultVector.y, 2) + pow(resultVector.z, 2));
+		std::cout << resultVector.z << "\n";
+		float x_angle = acos(resultVector.x / resultMag);
+		float y_angle = acos(resultVector.y / resultMag);
+		float z_angle = acos(resultVector.z / resultMag);
+
+		glm::vec3 thetaValue = glm::vec3(x_angle, y_angle, z_angle);
+		theta.push_back(thetaValue);
+		//std::cout << "x: " << thetaValue.x << "\t | y:  " << thetaValue.y << "\t | z: " << thetaValue.z << std::endl;
+		// Create result vector then find the Alpha Beta and Gamma rotations
+		
+
+
+		//float expression = pow(splinePoints[i].x, 2) + pow(splinePoints[i].y, 2) + pow(splinePoints[i].z, 2);
+		//float vectorOneMag = sqrt(expression);
+
+		//expression = pow(splinePoints[i + 1].x, 2) + pow(splinePoints[i + 1].y, 2) + pow(splinePoints[i + 1].z, 2);
+		//float vectorTwoMag = sqrt(expression);
+
+		//glm::vec3 result = (multipledVector) / (vectorOneMag * vectorTwoMag);
+		
+		//float vecOneMag = sqrt(pow(splinePoints[i].x, 2) + pow(splinePoints[i].y, 2) + pow(splinePoints[i].z, 2));
+		//float vecTwoMag = sqrt(pow(splinePoints[i + 1].x, 2) + pow(splinePoints[i + 1].y, 2) + pow(splinePoints[i + 1].z, 2));
+
+		//float angle_x = acos(dot(splinePoints[i], splinePoints[i + 1]) / (vecOneMag * vecTwoMag));
+
+		//glm::vec3 thetaValue = acos(result);
+		//std::cout << "x: " << thetaValue.x << "\t | y:  " << thetaValue.y << "\t | z: " << thetaValue.z << std::endl;
+	}
+	theta.push_back(theta[amount - 2]);
+	for (unsigned int i = 0; i < amount; i++)
+	{
+		std::cout << "x: " << theta[i].x << "\t | y:  " << theta[i].y << "\t | z: " << theta[i].z << std::endl;
+	}
+	
+	
 
 	// *************** Render Loop ***************
 	#pragma region Render Loop
@@ -219,7 +284,7 @@ int main() {
 			{
 				float functionTranslation = sin(PI * currentTime / 2.0f) / 2.0f;
 				model_main_cube = glm::translate(model_main_cube, glm::vec3(0.0f, functionTranslation, 0.0f));
-				model_main_cube = glm::rotate(model_main_cube, currentTime / 2.0f, glm::vec3(1.0f, 1.0f, 0.0f));
+				model_main_cube = glm::rotate(model_main_cube, currentTime / 2.0f, glm::vec3(1, 0, 0));
 			}
 			// render the cube
 			model_main_cube = glm::scale(model_main_cube, glm::vec3(cubeSize));
@@ -251,12 +316,21 @@ int main() {
 		}
 
 
-		glm::mat4 model = glm::mat4(1.0f);
-		model = transformMatrix(model, 0, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
-		cubeShader.setMat4("model", model);
-		cubeShader.setVec3("lightColor", glm::vec3(0.25f));
-		cubeShader.setFloat("material.type", 1);
-		modelObject.Draw(cubeShader);
+		
+		for (int i = 0; i < theta.size(); i++)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, splinePoints[i]);
+			model = glm::rotate(model, theta[i].x, glm::vec3(1, 0, 0));
+			model = glm::rotate(model, theta[i].y, glm::vec3(0, 1, 0));
+			//model = glm::rotate(model, theta[i].z, glm::vec3(0, 0, 1));
+			model = glm::scale(model , glm::vec3(0.5f));
+			cubeShader.setMat4("model", model);
+			cubeShader.setVec3("lightColor", glm::vec3(0.25f));
+			cubeShader.setFloat("material.type", 1);
+			modelObject.Draw(cubeShader);
+		}
+		
 		
 
 		#pragma endregion
@@ -269,10 +343,10 @@ int main() {
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		glBindVertexArray(light_cube_VAO);
-		for (unsigned int i = 0; i < 1; i++)
+		for (unsigned int i = 0; i < 4; i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
-			model_light_cube = glm::translate(model_light_cube, lightNodePositions[i]);
+			model_light_cube = glm::translate(model_light_cube, points[i]);
 			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.1f)); // Make it a smaller cube
 
 			if (ORBIT)

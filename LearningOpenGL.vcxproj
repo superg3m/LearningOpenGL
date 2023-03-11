@@ -191,6 +191,7 @@
   <ItemGroup>
     <ClInclude Include="Headers\admin.h" />
     <ClInclude Include="Headers\camera.h" />
+    <ClInclude Include="Headers\cat_mull_rom.h" />
     <ClInclude Include="Headers\character.h" />
     <ClInclude Include="Headers\input_handler.h" />
     <ClInclude Include="Headers\main.h" />

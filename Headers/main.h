@@ -23,6 +23,7 @@
 #include <imGUI/imgui.h>
 #include <imGUI/imgui_impl_opengl3.h>
 #include <imGUI/imgui_impl_glfw.h>
+#include <Headers/cat_mull_rom.h>
 
 // Method prototypes
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -35,7 +36,7 @@ std::pair<float, float> circle_points(const float &radius, const float& angle, c
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
 
 // Constants
-const bool TRANSLATION_ROTATION = false;
+const bool TRANSLATION_ROTATION = true;
 const bool ORBIT = false;
 
 const float PI = 3.1415926;
