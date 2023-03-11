@@ -68,6 +68,7 @@ uniform DirLight dirLight;
 uniform LightNode lightNode[NR_POINT_LIGHTS];
 uniform SpotLight spotLight;
 uniform Material material;
+uniform vec4 uniColor;
 
 void main()
 {
@@ -91,7 +92,7 @@ void main()
 
     if(material.type == 1)
     {
-        FragColor = vec4(result, 1.0); // Change this for texture
+        FragColor = uniColor * vec4(result, 1.0); // Change this for texture
     }
     else
     {

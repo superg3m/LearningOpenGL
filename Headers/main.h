@@ -10,6 +10,8 @@
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 
 // Our includes
 #include <Headers/shader.h>
@@ -25,6 +27,7 @@
 #include <imGUI/imgui_impl_glfw.h>
 #include <Headers/cat_mull_rom.h>
 
+
 // Method prototypes
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -34,6 +37,9 @@ void configureBufferAttributes(const unsigned int &position, const unsigned  int
 
 std::pair<float, float> circle_points(const float &radius, const float& angle, const glm::vec2& origin);
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
+
+glm::quat QuatLookAt(glm::vec3 direction, glm::vec3 desiredUp);
+glm::quat RotationBetweenVectors(glm::vec3 start, glm::vec3 dest);
 
 // Constants
 const bool TRANSLATION_ROTATION = true;

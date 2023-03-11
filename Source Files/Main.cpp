@@ -134,69 +134,17 @@ int main() {
 	float cubeSize = 1.0f;
 
 	glm::vec3 points[4];
-	points[0] = glm::vec3(2, 0, 0);
-	points[1] = glm::vec3(4, 2, 1);
-	points[2] = glm::vec3(6, 1, 0);
-	points[3] = glm::vec3(8, 4, 0);
 
-	CMRSpline splineObject;
-
-	std::vector<glm::vec3> splinePoints;
-	std::vector<glm::vec3> theta;
-	float t = 0.5;
-	const unsigned int amount = 100;
-	for (unsigned int i = 0; i < amount; i++)
-	{
-		splinePoints.push_back(splineObject.CatmullRom(points[0], points[1], points[2], points[3], i / (float)amount));
-		
-		//std::cout << "x: " << splinePoints[i].x << "\t | y:  " << splinePoints[i].y << "\t | z: " << splinePoints[i].z << std::endl;
-	}
-
+	int spline_point_index = 0;
 	
+	const char *items[] = {"0", "1", "2", "3"};
+	const char* current_item = "0";
 
-	for (unsigned int i = 0; i < amount - 1; i++)
-	{
-		float xLength = splinePoints[i + 1].x - splinePoints[i].x;
-		float yLength = splinePoints[i + 1].y - splinePoints[i].y;
-		float zLength = splinePoints[i + 1].z - splinePoints[i].z;
+	points[0] = glm::vec3(2, 0, 1);
+	points[1] = glm::vec3(3, 3, 1);
+	points[2] = glm::vec3(5, -1, 0);
+	points[3] = glm::vec3(3, 3, 5);
 
-		glm::vec3 resultVector = glm::vec3(xLength, yLength, zLength);
-		float resultMag = sqrt(pow(resultVector.x, 2) + pow(resultVector.y, 2) + pow(resultVector.z, 2));
-		std::cout << resultVector.z << "\n";
-		float x_angle = acos(resultVector.x / resultMag);
-		float y_angle = acos(resultVector.y / resultMag);
-		float z_angle = acos(resultVector.z / resultMag);
-
-		glm::vec3 thetaValue = glm::vec3(x_angle, y_angle, z_angle);
-		theta.push_back(thetaValue);
-		//std::cout << "x: " << thetaValue.x << "\t | y:  " << thetaValue.y << "\t | z: " << thetaValue.z << std::endl;
-		// Create result vector then find the Alpha Beta and Gamma rotations
-		
-
-
-		//float expression = pow(splinePoints[i].x, 2) + pow(splinePoints[i].y, 2) + pow(splinePoints[i].z, 2);
-		//float vectorOneMag = sqrt(expression);
-
-		//expression = pow(splinePoints[i + 1].x, 2) + pow(splinePoints[i + 1].y, 2) + pow(splinePoints[i + 1].z, 2);
-		//float vectorTwoMag = sqrt(expression);
-
-		//glm::vec3 result = (multipledVector) / (vectorOneMag * vectorTwoMag);
-		
-		//float vecOneMag = sqrt(pow(splinePoints[i].x, 2) + pow(splinePoints[i].y, 2) + pow(splinePoints[i].z, 2));
-		//float vecTwoMag = sqrt(pow(splinePoints[i + 1].x, 2) + pow(splinePoints[i + 1].y, 2) + pow(splinePoints[i + 1].z, 2));
-
-		//float angle_x = acos(dot(splinePoints[i], splinePoints[i + 1]) / (vecOneMag * vecTwoMag));
-
-		//glm::vec3 thetaValue = acos(result);
-		//std::cout << "x: " << thetaValue.x << "\t | y:  " << thetaValue.y << "\t | z: " << thetaValue.z << std::endl;
-	}
-	theta.push_back(theta[amount - 2]);
-	for (unsigned int i = 0; i < amount; i++)
-	{
-		std::cout << "x: " << theta[i].x << "\t | y:  " << theta[i].y << "\t | z: " << theta[i].z << std::endl;
-	}
-	
-	
 
 	// *************** Render Loop ***************
 	#pragma region Render Loop
@@ -220,6 +168,37 @@ int main() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		#pragma endregion
+
+		// SPLINE CALCULATION
+		
+
+		const unsigned int amount = 100;
+
+
+		CMRSpline splineObject;
+
+		std::vector<glm::vec3> splinePoints;
+		std::vector<glm::mat4> quaternions;
+
+		glm::vec3 distanceVec[amount];
+
+		float t = 0.5;
+
+		for (unsigned int i = 0; i < amount; i++)
+		{
+			splinePoints.push_back(splineObject.CatmullRom(points[0], points[1], points[2], points[3], i / (float)amount));
+			//std::cout << "x: " << splinePoints[i].x << " | y:  " << splinePoints[i].y << " | z: " << splinePoints[i].z << std::endl;
+		}
+
+
+		for (unsigned int i = 0; i < amount - 1; i++)
+		{
+			distanceVec[i] = glm::normalize(splinePoints[i + 1] - splinePoints[i]);
+		}
+
+		distanceVec[amount - 1] = -1.0f * distanceVec[amount - 2];
+
+
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -315,19 +294,26 @@ int main() {
 			}
 		}
 
+		
 
 		
-		for (int i = 0; i < theta.size(); i++)
+		
+		for (int i = 0; i < amount; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, splinePoints[i]);
-			model = glm::rotate(model, theta[i].x, glm::vec3(1, 0, 0));
-			model = glm::rotate(model, theta[i].y, glm::vec3(0, 1, 0));
-			//model = glm::rotate(model, theta[i].z, glm::vec3(0, 0, 1));
-			model = glm::scale(model , glm::vec3(0.5f));
+			model = glm::scale(model, glm::vec3(0.5));
+			glm::quat quat = QuatLookAt(distanceVec[i], glm::vec3(0, 1, 0));
+
+			glm::mat4 RotationMatrix = glm::toMat4(quat);
+			model = model * RotationMatrix;
+
+			//model = glm::translate(model, splinePoints[i]);
+			//model = glm::scale(model , glm::vec3(0.5f));
 			cubeShader.setMat4("model", model);
 			cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 			cubeShader.setFloat("material.type", 1);
+			cubeShader.setVec4("uniColor", glm::vec4(0.2, 1.0, 0.2f, 1.0));
 			modelObject.Draw(cubeShader);
 		}
 		
@@ -378,9 +364,31 @@ int main() {
 		#pragma endregion
 
 		ImGui::Begin("Sprite GUI window");
+
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
+
+		if (ImGui::BeginCombo("##combo", current_item)) // The second parameter is the label previewed before opening the combo.
+		{
+			for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+			{
+				bool is_selected = (current_item == items[n]); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(items[n], is_selected))
+					current_item = items[n];
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+			}
+			ImGui::EndCombo();
+		}
+
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
+
+		spline_point_index = std::stoi(current_item);
+		
+		ImGui::SliderFloat("point-x-component", &points[spline_point_index].x, -10.0f, 10.0f);
+		ImGui::SliderFloat("point-y-component", &points[spline_point_index].y, -10.0f, 10.0f);
+		ImGui::SliderFloat("point-z-component", &points[spline_point_index].z, -10.0f, 10.0f);
+
 		ImGui::End();
 
 		ImGui::Render();
@@ -490,4 +498,55 @@ glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_trans
 	matrix = glm::scale(matrix, vector_scale);
 	return matrix;
 }
+
+glm::quat RotationBetweenVectors(glm::vec3 start, glm::vec3 dest) {
+	start = glm::normalize(start);
+	dest = glm::normalize(dest);
+
+	float cosTheta = glm::dot(start, dest);
+	glm::vec3 rotationAxis;
+
+	if (cosTheta < -1 + 0.001f) {
+		rotationAxis = glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), start);
+		if (glm::length(rotationAxis) < 0.01)
+			rotationAxis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), start);
+		rotationAxis = glm::normalize(rotationAxis);
+		return glm::angleAxis(180.0f, rotationAxis);
+	}
+
+	rotationAxis = glm::cross(start, dest);
+
+	float s = sqrt((1 + cosTheta) * 2);
+	float invs = 1 / s;
+
+	return glm::quat(
+		s * 0.5f,
+		rotationAxis.x * invs,
+		rotationAxis.y * invs,
+		rotationAxis.z * invs
+	);
+}
+
+glm::quat QuatLookAt(glm::vec3 direction, glm::vec3 desiredUp) {
+
+	if (glm::length2(direction) < 0.0001f)
+		return glm::quat();
+
+	// Recompute desiredUp so that it's perpendicular to the direction
+	// You can skip that part if you really want to force desiredUp
+	glm::vec3 right = glm::cross(direction, desiredUp);
+	desiredUp = cross(right, direction);
+
+	// Find the rotation between the front of the object (that we assume towards +Z,
+	// but this depends on your model) and the desired direction
+	glm::quat rot1 = RotationBetweenVectors(glm::vec3(0.0f, 0.0f, 1.0f), direction);
+	// Because of the 1rst rotation, the up is probably completely screwed up. 
+	// Find the rotation between the "up" of the rotated object, and the desired up
+	glm::vec3 newUp = rot1 * glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::quat rot2 = RotationBetweenVectors(newUp, desiredUp);
+
+	// Apply them
+	return rot2 * rot1; // remember, in reverse order.
+}
+
 #pragma endregion
