@@ -150,9 +150,10 @@ int main() {
 	std::vector<glm::vec3> splinePoints;
 
 	int spline_point_index = 0;
+	std::vector<std::string> items;
 	
-	const char *items[] = {"0", "1", "2", "3", "4", "5", "6", "7" };
-	const char* current_item = "0";
+	
+	std::string current_item = "0";
 
 	const unsigned int amount = 100;
 	const unsigned int halfAmount = amount / 2;
@@ -178,8 +179,17 @@ int main() {
 		std::string fpsText = std::to_string(FPS);
 
 		cubeShader.use();
-		///input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0]);
-		input.processInput(window, camera, deltaTime, cubeShader, points[spline_point_index]);
+
+		
+		if (points.size() > 0)
+		{
+			input.processInput(window, camera, deltaTime, cubeShader, points[spline_point_index]);
+		}
+		else
+		{
+			input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0]);
+		}
+		
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -191,9 +201,16 @@ int main() {
 		// SPLINE CALCULATION
 		splinePoints.clear();
 		distanceVec.clear();
+		items.clear();
+		for (int i = 0; i < points.size(); i++)
+		{
+			items.push_back(std::to_string(i));
+		}
+		
 		// Number of splines
+
 		int number_of_splines = (points.size() - 2);
-		if (number_of_splines > 1)
+		if (points.size() > 2)
 		{
 			
 			for (int i = 0; i < number_of_splines; i++)
@@ -381,35 +398,59 @@ int main() {
 			int random_number_x = rand() % 5 + 1;
 			int random_number_y = rand() % 5 + 1;
 			int random_number_z = rand() % 5 + 1;
-			std::vector<glm::vec3>::iterator it = points.end() - 1;
-			points.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
+			if (points.size() > 0)
+			{
+				std::vector<glm::vec3>::iterator it = points.end() - 1;
+				points.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
+			}
+			else
+			{
+				points.push_back(glm::vec3(random_number_x, random_number_y, random_number_z));
+			}
+			
 		}
-		if (ImGui::Button("Clear Spline Points") && points.size() > 1)
+		if (ImGui::Button("Clear Spline Points"))
 		{
-			std::vector<glm::vec3>::iterator it = points.end() - 2;
-			points.erase(it);
+			points.clear();
 		}
 
-		if (ImGui::BeginCombo("##combo", current_item)) // The second parameter is the label previewed before opening the combo.
+		if (points.size() > 0)
 		{
-			for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+			if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
 			{
-				bool is_selected = (current_item == items[n]); // You can store your selection however you want, outside or inside your objects
-				if (ImGui::Selectable(items[n], is_selected))
-					current_item = items[n];
-				if (is_selected)
-					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+				for (int n = 0; n < items.size(); n++)
+				{
+					bool is_selected = (current_item == items[n]); // You can store your selection however you want, outside or inside your objects
+					if (ImGui::Selectable(items[n].c_str(), is_selected))
+					{
+						current_item = items[n];
+					}
+
+					if (is_selected)
+					{
+						ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+					}
+
+				}
+				ImGui::EndCombo();
 			}
-			ImGui::EndCombo();
+		}
+		else
+		{
+			current_item = "0";
 		}
 
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
-
-		spline_point_index = std::stoi(current_item);
+		std::string s = current_item;
+		//std::cout << "String: " << s << std::endl;
+		if (points.size() > 0)
+		{
+			spline_point_index = std::stoi(current_item);
+			ImGui::SliderFloat("point-x-component", &points[spline_point_index].x, -10.0f, 10.0f);
+			ImGui::SliderFloat("point-y-component", &points[spline_point_index].y, -10.0f, 10.0f);
+			ImGui::SliderFloat("point-z-component", &points[spline_point_index].z, -10.0f, 10.0f);
+		}
 		
-		ImGui::SliderFloat("point-x-component", &points[spline_point_index].x, -10.0f, 10.0f);
-		ImGui::SliderFloat("point-y-component", &points[spline_point_index].y, -10.0f, 10.0f);
-		ImGui::SliderFloat("point-z-component", &points[spline_point_index].z, -10.0f, 10.0f);
 
 		ImGui::End();
 
