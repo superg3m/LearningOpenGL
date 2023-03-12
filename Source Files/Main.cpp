@@ -189,28 +189,28 @@ int main() {
 		#pragma endregion
 
 		// SPLINE CALCULATION
-		
-
 		splinePoints.clear();
 		distanceVec.clear();
-
-		float t = 0.5;
-		int number_of_splines = (points.size() - 2);
 		// Number of splines
-
-		for (int i = 0; i < number_of_splines; i++)
+		int number_of_splines = (points.size() - 2);
+		if (number_of_splines > 1)
 		{
-			for (int j = 0; j < amount; j++)
+			
+			for (int i = 0; i < number_of_splines; i++)
 			{
-				splinePoints.push_back(splineObject.CatmullRom(points[0], points[i + 1], points[i + 2], points[points.size() - 1], j / (float)amount));
+				for (int j = 0; j < amount; j++)
+				{
+					splinePoints.push_back(splineObject.CatmullRom(points[0], points[i + 1], points[i + 2], points[points.size() - 1], j / (float)amount));
+				}
 			}
+
+			for (unsigned int i = 0; i < splinePoints.size() - 1; i++)
+			{
+				distanceVec.push_back(glm::normalize(splinePoints[i + 1] - splinePoints[i]));
+			}
+			distanceVec.push_back(-1.0f * distanceVec[splinePoints.size() - 2]);
 		}
 		
-		for (unsigned int i = 0; i < splinePoints.size() - 1 ; i++)
-		{
-			distanceVec.push_back(glm::normalize(splinePoints[i + 1] - splinePoints[i]));
-		}
-		distanceVec.push_back(-1.0f * distanceVec[splinePoints.size() - 2]);
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -376,7 +376,7 @@ int main() {
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
 
-		if (ImGui::Button("Add Spline Points") )
+		if (ImGui::Button("Add Spline Points"))
 		{
 			int random_number_x = rand() % 5 + 1;
 			int random_number_y = rand() % 5 + 1;
@@ -384,7 +384,7 @@ int main() {
 			std::vector<glm::vec3>::iterator it = points.end() - 1;
 			points.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
 		}
-		if (ImGui::Button("Clear Spline Points") && points.size() > 4)
+		if (ImGui::Button("Clear Spline Points") && points.size() > 1)
 		{
 			std::vector<glm::vec3>::iterator it = points.end() - 2;
 			points.erase(it);
