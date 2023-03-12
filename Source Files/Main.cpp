@@ -181,7 +181,7 @@ int main() {
 		cubeShader.use();
 
 		
-		if (points.size() > 0)
+		if (!points.empty())
 		{
 			input.processInput(window, camera, deltaTime, cubeShader, points[spline_point_index]);
 		}
@@ -398,7 +398,7 @@ int main() {
 			int random_number_x = rand() % 5 + 1;
 			int random_number_y = rand() % 5 + 1;
 			int random_number_z = rand() % 5 + 1;
-			if (points.size() > 0)
+			if (!points.empty())
 			{
 				std::vector<glm::vec3>::iterator it = points.end() - 1;
 				points.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
@@ -409,12 +409,25 @@ int main() {
 			}
 			
 		}
+		if (ImGui::Button("Remove Spline Points"))
+		{
+			if (points.size() > 1)
+			{
+				std::vector<glm::vec3>::iterator it = points.end() - 2;
+				points.erase(it);
+			}
+			else
+			{
+				points.clear();
+			}
+			
+		}
 		if (ImGui::Button("Clear Spline Points"))
 		{
 			points.clear();
 		}
 
-		if (points.size() > 0)
+		if (!points.empty())
 		{
 			if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
 			{
@@ -443,7 +456,7 @@ int main() {
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
 		std::string s = current_item;
 		//std::cout << "String: " << s << std::endl;
-		if (points.size() > 0)
+		if (!points.empty())
 		{
 			spline_point_index = std::stoi(current_item);
 			ImGui::SliderFloat("point-x-component", &points[spline_point_index].x, -10.0f, 10.0f);
