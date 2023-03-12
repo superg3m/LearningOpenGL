@@ -156,7 +156,6 @@ int main() {
 	std::string current_item = "0";
 
 	const unsigned int amount = 100;
-	const unsigned int halfAmount = amount / 2;
 
 	CMRSpline splineObject;
 
@@ -327,9 +326,10 @@ int main() {
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, splinePoints[i]);
-			model = glm::scale(model, glm::vec3(0.5));
-			glm::quat quat = QuatLookAt(distanceVec[i], glm::vec3(0, 1, 0));
 
+			model = glm::scale(model, glm::vec3(0.5f));
+
+			glm::quat quat = QuatLookAt(distanceVec[i], glm::vec3(0, 1, 0));
 			glm::mat4 RotationMatrix = glm::toMat4(quat);
 			model = model * RotationMatrix;
 
