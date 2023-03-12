@@ -1,6 +1,6 @@
 #include<Headers/main.h>
 #include<Headers/camera.h>
-
+#include <time.h>
 
 enum Descriptive
 {
@@ -23,6 +23,7 @@ float lastFrame = 0.0f;
 glm::vec3 lightPos(1.0f, 0.0f, 5.0f);
 
 InputHandler input;
+
 
 
 int main() {
@@ -134,20 +135,35 @@ int main() {
 	Model modelObject("../3D/Neon.fbx");
 
 	bool drawCubes = false;
+	bool addPoint = false;
 	float cubeSize = 1.0f;
 
-	glm::vec3 points[4];
+	std::vector<glm::vec3> points;
+	points.push_back(glm::vec3(2, 0, 1));
+	points.push_back(glm::vec3(3, 3, 1));
+	points.push_back(glm::vec3(5, 1, 0));
+	points.push_back(glm::vec3(6, 2, 1));
+	points.push_back(glm::vec3(6, 2, 2));
+	points.push_back(glm::vec3(7, 3, 1));
+
+
+	std::vector<glm::vec3> splinePoints;
 
 	int spline_point_index = 0;
 	
-	const char *items[] = {"0", "1", "2", "3"};
+	const char *items[] = {"0", "1", "2", "3", "4", "5", "6", "7" };
 	const char* current_item = "0";
 
-	points[0] = glm::vec3(2, 0, 1);
-	points[1] = glm::vec3(3, 3, 1);
-	points[2] = glm::vec3(5, -1, 0);
-	points[3] = glm::vec3(3, 3, 5);
+	const unsigned int amount = 100;
+	const unsigned int halfAmount = amount / 2;
 
+	CMRSpline splineObject;
+
+	// Clear the spline points after
+
+	std::vector<glm::vec3> distanceVec;
+
+	srand(time(NULL));
 
 	// *************** Render Loop ***************
 	#pragma region Render Loop
@@ -163,7 +179,7 @@ int main() {
 
 		cubeShader.use();
 		///input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0]);
-		input.processInput(window, camera, deltaTime, cubeShader, points[0]);
+		input.processInput(window, camera, deltaTime, cubeShader, points[spline_point_index]);
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -175,33 +191,26 @@ int main() {
 		// SPLINE CALCULATION
 		
 
-		const unsigned int amount = 100;
-
-
-		CMRSpline splineObject;
-
-		std::vector<glm::vec3> splinePoints;
-		std::vector<glm::mat4> quaternions;
-
-		glm::vec3 distanceVec[amount];
+		splinePoints.clear();
+		distanceVec.clear();
 
 		float t = 0.5;
+		int number_of_splines = points.size() / 2;
+		// Number of splines
 
-		for (unsigned int i = 0; i < amount; i++)
+		for (int i = 0; i < number_of_splines; i++)
 		{
-			splinePoints.push_back(splineObject.CatmullRom(points[0], points[1], points[2], points[3], i / (float)amount));
-			//std::cout << "x: " << splinePoints[i].x << " | y:  " << splinePoints[i].y << " | z: " << splinePoints[i].z << std::endl;
+			for (int j = 0; j < amount; j++)
+			{
+				splinePoints.push_back(splineObject.CatmullRom(points[0], points[i + 1], points[i + 2], points[points.size() - 1], j / (float)amount));
+			}
 		}
-
-
-		for (unsigned int i = 0; i < amount - 1; i++)
+		
+		for (unsigned int i = 0; i < splinePoints.size() - 1 ; i++)
 		{
-			distanceVec[i] = glm::normalize(splinePoints[i + 1] - splinePoints[i]);
+			distanceVec.push_back(glm::normalize(splinePoints[i + 1] - splinePoints[i]));
 		}
-
-		distanceVec[amount - 1] = -1.0f * distanceVec[amount - 2];
-
-
+		distanceVec.push_back(-1.0f * distanceVec[splinePoints.size() - 2]);
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -218,7 +227,7 @@ int main() {
 		cubeShader.setMat4("model", model_main_cube);
 
 		cubeShader.setVec3("dirLight.direction", 0, -1.0f, 0); // The power of the sun in the palm of my hands
-		cubeShader.setVec3("dirLight.ambient", glm::vec3(0.05f));
+		cubeShader.setVec3("dirLight.ambient", glm::vec3(1.05f));
 		cubeShader.setVec3("dirLight.diffuse", glm::vec3(0.25f));
 		cubeShader.setVec3("dirLight.specular", glm::vec3(0.25f));
 
@@ -301,7 +310,7 @@ int main() {
 
 		
 		
-		for (int i = 0; i < amount; i++)
+		for (int i = 0; i < splinePoints.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, splinePoints[i]);
@@ -332,7 +341,7 @@ int main() {
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		glBindVertexArray(light_cube_VAO);
-		for (unsigned int i = 0; i < 4; i++)
+		for (unsigned int i = 0; i < points.size(); i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
 			model_light_cube = glm::translate(model_light_cube, points[i]);
@@ -370,6 +379,15 @@ int main() {
 
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
+
+		if (ImGui::Button("Add Spline Points"))
+		{
+			int random_number_x = rand() % 5 + 1;
+			int random_number_y = rand() % 5 + 1;
+			int random_number_z = rand() % 5 + 1;
+			points.push_back(glm::vec3(random_number_x, random_number_y, random_number_z));
+		}
+
 
 		if (ImGui::BeginCombo("##combo", current_item)) // The second parameter is the label previewed before opening the combo.
 		{

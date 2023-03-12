@@ -50,7 +50,7 @@ struct SpotLight
     float flashLightMode;
 };
 
-#define NR_POINT_LIGHTS 2
+#define NR_POINT_LIGHTS 10
 
 // function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
