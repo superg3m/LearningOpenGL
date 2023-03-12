@@ -195,7 +195,7 @@ int main() {
 		distanceVec.clear();
 
 		float t = 0.5;
-		int number_of_splines = points.size() / 2;
+		int number_of_splines = (points.size() - 2);
 		// Number of splines
 
 		for (int i = 0; i < number_of_splines; i++)
@@ -305,10 +305,6 @@ int main() {
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}
 		}
-
-		
-
-		
 		
 		for (int i = 0; i < splinePoints.size(); i++)
 		{
@@ -380,14 +376,19 @@ int main() {
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
 
-		if (ImGui::Button("Add Spline Points"))
+		if (ImGui::Button("Add Spline Points") )
 		{
 			int random_number_x = rand() % 5 + 1;
 			int random_number_y = rand() % 5 + 1;
 			int random_number_z = rand() % 5 + 1;
-			points.push_back(glm::vec3(random_number_x, random_number_y, random_number_z));
+			std::vector<glm::vec3>::iterator it = points.end() - 1;
+			points.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
 		}
-
+		if (ImGui::Button("Clear Spline Points") && points.size() > 4)
+		{
+			std::vector<glm::vec3>::iterator it = points.end() - 2;
+			points.erase(it);
+		}
 
 		if (ImGui::BeginCombo("##combo", current_item)) // The second parameter is the label previewed before opening the combo.
 		{
