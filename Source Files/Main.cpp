@@ -82,6 +82,9 @@ int main() {
 	Texture_Class cubeTexture;
 	cubeTexture.addTexture("Textures/wall.jpg");
 	cubeTexture.addTexture("Textures/container2_specular.png");
+	cubeShader.use();
+	cubeShader.setInt("material.texture_diffuse1", 0);
+	cubeShader.setInt("material.texture_specular1", 1);
 
 	unsigned int main_cube_VBO, main_cube_VAO;
 	const int size_in_bits = sizeof(vertices_with_color);
@@ -159,8 +162,8 @@ int main() {
 		std::string fpsText = std::to_string(FPS);
 
 		cubeShader.use();
-		input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0]);
-
+		///input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0]);
+		input.processInput(window, camera, deltaTime, cubeShader, points[0]);
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
