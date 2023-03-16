@@ -216,7 +216,8 @@ int main() {
 		}
 
 		// Number of splines
-		int number_of_splines = (points.size() - 3) > 0 ? (points.size() - 3) : 0;
+		int number_of_splines = points.size();
+
 		if (points.size() > 2 && !pause)
 		{
 			
