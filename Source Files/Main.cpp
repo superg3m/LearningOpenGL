@@ -132,7 +132,7 @@ int main() {
 	#pragma endregion
 
 	// *************** Model ***************
-	Model modelObject("../3D/Neon.fbx");
+	Model modelObject("../../3D/Neon.fbx");
 
 	bool drawCubes = false;
 	bool addPoint = false;
@@ -146,8 +146,13 @@ int main() {
 	points.push_back(glm::vec3(6, 2, 2));
 	points.push_back(glm::vec3(7, 3, 1));
 
-
 	std::vector<glm::vec3> splinePoints;
+
+	bool printing = false;
+	bool pause = false;
+
+	int currentPointsAmount = points.size();
+	int previousPointsAmount = 0;
 
 	int spline_point_index = 0;
 	std::vector<std::string> items;
@@ -155,7 +160,7 @@ int main() {
 	
 	std::string current_item = "0";
 
-	const unsigned int amount = 100;
+	const unsigned int amount = 10;
 
 	CMRSpline splineObject;
 
@@ -198,18 +203,21 @@ int main() {
 		#pragma endregion
 
 		// SPLINE CALCULATION
-		splinePoints.clear();
-		distanceVec.clear();
 		items.clear();
+		if (!pause)
+		{
+			splinePoints.clear();
+			distanceVec.clear();
+		}
+		
 		for (int i = 0; i < points.size(); i++)
 		{
 			items.push_back(std::to_string(i));
 		}
-		
-		// Number of splines
 
-		int number_of_splines = (points.size() - 2);
-		if (points.size() > 2)
+		// Number of splines
+		int number_of_splines = (points.size() - 3) > 0 ? (points.size() - 3) : 0;
+		if (points.size() > 2 && !pause)
 		{
 			
 			for (int i = 0; i < number_of_splines; i++)
@@ -224,9 +232,9 @@ int main() {
 			{
 				distanceVec.push_back(glm::normalize(splinePoints[i + 1] - splinePoints[i]));
 			}
-			distanceVec.push_back(-1.0f * distanceVec[splinePoints.size() - 2]);
+			distanceVec.push_back(-distanceVec[splinePoints.size() - 2]);
+			
 		}
-		
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -321,26 +329,32 @@ int main() {
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}
 		}
-		
 		for (int i = 0; i < splinePoints.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, splinePoints[i]);
-
-			model = glm::scale(model, glm::vec3(0.5f));
-
+			
 			glm::quat quat = QuatLookAt(distanceVec[i], glm::vec3(0, 1, 0));
 			glm::mat4 RotationMatrix = glm::toMat4(quat);
 			model = model * RotationMatrix;
-
-			//model = glm::translate(model, splinePoints[i]);
-			//model = glm::scale(model , glm::vec3(0.5f));
+			model = glm::scale(model, glm::vec3(0.5f));
+			if (printing)
+			{
+				//std::cout << "Number of splines: " << number_of_splines << " -> " << number_of_splines * amount << std::endl;
+				std::cout << "SPLINE SIZE: " << splinePoints.size() << std::endl;
+				//std::cout << "DISTANCE SIZE: " << distanceVec.size() << std::endl;
+				std::cout << glm::to_string(model) << std::endl;
+				printing = false;
+				
+			}
+			
 			cubeShader.setMat4("model", model);
-			cubeShader.setVec3("lightColor", glm::vec3(0.25f));
-			cubeShader.setFloat("material.type", 1);
-			cubeShader.setVec4("uniColor", glm::vec4(0.2, 1.0, 0.2f, 1.0));
+			//cubeShader.setVec3("lightColor", glm::vec3(0.25f));
+			//cubeShader.setFloat("material.type", 1);
+			//cubeShader.setVec4("uniColor", glm::vec4(0.2, 1.0, 0.2f, 1.0));
 			modelObject.Draw(cubeShader);
 		}
+		
 		
 		
 
@@ -407,7 +421,11 @@ int main() {
 			{
 				points.push_back(glm::vec3(random_number_x, random_number_y, random_number_z));
 			}
-			
+			previousPointsAmount = currentPointsAmount;
+			currentPointsAmount = points.size();
+			pause = false;
+			printing = true;
+			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
 		}
 		if (ImGui::Button("Remove Spline Points"))
 		{
@@ -420,11 +438,34 @@ int main() {
 			{
 				points.clear();
 			}
-			
+			previousPointsAmount = currentPointsAmount;
+			currentPointsAmount = points.size();
+			printing = true;
+			pause = false;
+			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
+		}
+		if (ImGui::Button("Remove mesh"))
+		{
+			if (splinePoints.size() > 1)
+			{
+				std::vector<glm::vec3>::iterator it = splinePoints.end();
+				splinePoints.erase(it);
+			}
+			else
+			{
+				splinePoints.clear();
+			}
+			pause = true;
+			printing = true;
+			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
 		}
 		if (ImGui::Button("Clear Spline Points"))
 		{
 			points.clear();
+			previousPointsAmount = currentPointsAmount;
+			currentPointsAmount = points.size();
+			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
+			pause = false;
 		}
 
 		if (!points.empty())
