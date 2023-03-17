@@ -38,10 +38,7 @@ void configureBufferAttributes(const unsigned int &position, const unsigned  int
 
 std::pair<float, float> circle_points(const float &radius, const float& angle, const glm::vec2& origin);
 glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
-
-glm::quat QuatLookAt(glm::vec3 direction, glm::vec3 desiredUp);
-glm::quat RotationBetweenVectors(glm::vec3 start, glm::vec3 dest);
-
+glm::quat safeQuatLookAt(glm::vec3& direction, glm::vec3 const& up);
 // Constants
 const bool TRANSLATION_ROTATION = true;
 const bool ORBIT = false;

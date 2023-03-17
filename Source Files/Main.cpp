@@ -135,7 +135,6 @@ int main() {
 	Model modelObject("../../3D/Neon.fbx");
 
 	bool drawCubes = false;
-	bool addPoint = false;
 	float cubeSize = 1.0f;
 
 	std::vector<glm::vec3> points;
@@ -148,11 +147,7 @@ int main() {
 
 	std::vector<glm::vec3> splinePoints;
 
-	bool printing = false;
 	bool pause = false;
-
-	int currentPointsAmount = points.size();
-	int previousPointsAmount = 0;
 
 	int spline_point_index = 0;
 	std::vector<std::string> items;
@@ -160,7 +155,7 @@ int main() {
 	
 	std::string current_item = "0";
 
-	const unsigned int amount = 10;
+	const unsigned int amount = 100;
 
 	CMRSpline splineObject;
 
@@ -216,9 +211,9 @@ int main() {
 		}
 
 		// Number of splines
-		int number_of_splines = points.size();
+		int number_of_splines = points.size() - 3;
 
-		if (points.size() > 2 && !pause)
+		if (number_of_splines > 0 && !pause)
 		{
 			
 			for (int i = 0; i < number_of_splines; i++)
@@ -228,12 +223,11 @@ int main() {
 					splinePoints.push_back(splineObject.CatmullRom(points[0], points[i + 1], points[i + 2], points[points.size() - 1], j / (float)amount));
 				}
 			}
-
 			for (unsigned int i = 0; i < splinePoints.size() - 1; i++)
 			{
-				distanceVec.push_back(glm::normalize(splinePoints[i + 1] - splinePoints[i]));
+				distanceVec.push_back(splinePoints[i + 1] - splinePoints[i]);
 			}
-			distanceVec.push_back(-distanceVec[splinePoints.size() - 2]);
+			distanceVec.push_back(-distanceVec[distanceVec.size() - 1]);
 			
 		}
 
@@ -335,20 +329,10 @@ int main() {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, splinePoints[i]);
 			
-			glm::quat quat = QuatLookAt(distanceVec[i], glm::vec3(0, 1, 0));
+			glm::quat quat = safeQuatLookAt(distanceVec[i], glm::vec3(0, 1, 0));
 			glm::mat4 RotationMatrix = glm::toMat4(quat);
 			model = model * RotationMatrix;
 			model = glm::scale(model, glm::vec3(0.5f));
-			if (printing)
-			{
-				//std::cout << "Number of splines: " << number_of_splines << " -> " << number_of_splines * amount << std::endl;
-				std::cout << "SPLINE SIZE: " << splinePoints.size() << std::endl;
-				//std::cout << "DISTANCE SIZE: " << distanceVec.size() << std::endl;
-				std::cout << glm::to_string(model) << std::endl;
-				printing = false;
-				
-			}
-			
 			cubeShader.setMat4("model", model);
 			//cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 			//cubeShader.setFloat("material.type", 1);
@@ -422,11 +406,7 @@ int main() {
 			{
 				points.push_back(glm::vec3(random_number_x, random_number_y, random_number_z));
 			}
-			previousPointsAmount = currentPointsAmount;
-			currentPointsAmount = points.size();
 			pause = false;
-			printing = true;
-			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
 		}
 		if (ImGui::Button("Remove Spline Points"))
 		{
@@ -439,17 +419,13 @@ int main() {
 			{
 				points.clear();
 			}
-			previousPointsAmount = currentPointsAmount;
-			currentPointsAmount = points.size();
-			printing = true;
 			pause = false;
-			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
 		}
 		if (ImGui::Button("Remove mesh"))
 		{
 			if (splinePoints.size() > 1)
 			{
-				std::vector<glm::vec3>::iterator it = splinePoints.end();
+				std::vector<glm::vec3>::iterator it = splinePoints.end() - 1;
 				splinePoints.erase(it);
 			}
 			else
@@ -457,15 +433,10 @@ int main() {
 				splinePoints.clear();
 			}
 			pause = true;
-			printing = true;
-			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
 		}
 		if (ImGui::Button("Clear Spline Points"))
 		{
 			points.clear();
-			previousPointsAmount = currentPointsAmount;
-			currentPointsAmount = points.size();
-			std::cout << "Current: " << currentPointsAmount << " | Previous: " << previousPointsAmount << std::endl;
 			pause = false;
 		}
 
@@ -617,54 +588,18 @@ glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_trans
 	return matrix;
 }
 
-glm::quat RotationBetweenVectors(glm::vec3 start, glm::vec3 dest) {
-	start = glm::normalize(start);
-	dest = glm::normalize(dest);
+glm::quat safeQuatLookAt(glm::vec3 &direction,glm::vec3 const& up)
+{
+	float directionLength = glm::length(direction);
 
-	float cosTheta = glm::dot(start, dest);
-	glm::vec3 rotationAxis;
+	// Check if the direction is valid; Also deals with NaN
+	if (!(directionLength > 0.0001))
+		return glm::quat(1, 0, 0, 0); // Just return identity
 
-	if (cosTheta < -1 + 0.001f) {
-		rotationAxis = glm::cross(glm::vec3(0.0f, 0.0f, 1.0f), start);
-		if (glm::length(rotationAxis) < 0.01)
-			rotationAxis = glm::cross(glm::vec3(1.0f, 0.0f, 0.0f), start);
-		rotationAxis = glm::normalize(rotationAxis);
-		return glm::angleAxis(180.0f, rotationAxis);
-	}
+	// Normalize direction
+	direction = glm::normalize(direction);
 
-	rotationAxis = glm::cross(start, dest);
-
-	float s = sqrt((1 + cosTheta) * 2);
-	float invs = 1 / s;
-
-	return glm::quat(
-		s * 0.5f,
-		rotationAxis.x * invs,
-		rotationAxis.y * invs,
-		rotationAxis.z * invs
-	);
-}
-
-glm::quat QuatLookAt(glm::vec3 direction, glm::vec3 desiredUp) {
-
-	if (glm::length2(direction) < 0.0001f)
-		return glm::quat();
-
-	// Recompute desiredUp so that it's perpendicular to the direction
-	// You can skip that part if you really want to force desiredUp
-	glm::vec3 right = glm::cross(direction, desiredUp);
-	desiredUp = cross(right, direction);
-
-	// Find the rotation between the front of the object (that we assume towards +Z,
-	// but this depends on your model) and the desired direction
-	glm::quat rot1 = RotationBetweenVectors(glm::vec3(0.0f, 0.0f, 1.0f), direction);
-	// Because of the 1rst rotation, the up is probably completely screwed up. 
-	// Find the rotation between the "up" of the rotated object, and the desired up
-	glm::vec3 newUp = rot1 * glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::quat rot2 = RotationBetweenVectors(newUp, desiredUp);
-
-	// Apply them
-	return rot2 * rot1; // remember, in reverse order.
+	return glm::quatLookAt(direction, up);
 }
 
 #pragma endregion

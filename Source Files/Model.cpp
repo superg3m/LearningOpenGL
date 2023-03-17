@@ -26,6 +26,7 @@ void Model::loadModel(string const& path)
 
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
+    
 }
 
 void Model::processNode(aiNode* node, const aiScene* scene)
@@ -123,6 +124,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     //textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
+    calculateModelHeight(vertices);
     return Mesh(vertices, indices, textures);
 }
 
@@ -191,3 +193,36 @@ unsigned int Model::TextureFromFile(const char* path, const string& directory, b
     return textureID;
 }
 
+void Model::calculateModelHeight(std::vector<Vertex> vert)
+{
+    std::vector<float> positionsX;
+    std::vector<float> positionsY;
+    std::vector<float> positionsZ;
+    for (int i = 0; i < vert.size(); i++)
+    {
+        positionsX.push_back(vert[i].Position.x);
+        positionsY.push_back(vert[i].Position.y);
+        positionsZ.push_back(vert[i].Position.z);
+    }
+    std::sort(positionsX.begin(), positionsX.end());
+    std::sort(positionsY.begin(), positionsY.end());
+    std::sort(positionsZ.begin(), positionsZ.end());
+
+    float x = positionsX[positionsX.size() - 1] - positionsX[0];
+    float y = positionsY[positionsY.size() - 1] - positionsY[0];
+    float z = positionsZ[positionsZ.size() - 1] - positionsZ[0];
+    std::cout << "X: " << x << "| Y: " << y << " | Z: " << z  << std::endl;
+}
+void Model::calculateModelLength()
+{
+
+}
+
+float Model::getModelHeight()
+{
+    return 0.0f;
+}
+float Model::getModelLength()
+{
+    return 0.0f;
+}
