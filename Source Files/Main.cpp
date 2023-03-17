@@ -146,7 +146,7 @@ int main() {
 	points.push_back(glm::vec3(7, 3, 1));
 
 	std::vector<glm::vec3> splinePoints;
-
+	std::vector<int> meshAmount;
 	bool pause = false;
 
 	int spline_point_index = 0;
@@ -209,18 +209,24 @@ int main() {
 		{
 			items.push_back(std::to_string(i));
 		}
-
+		
+		
+		
 		// Number of splines
 		int number_of_splines = points.size() - 3;
-
+		meshAmount.clear();
+		for (int i = 0; i < number_of_splines; i++)
+		{
+			meshAmount.push_back(10 * (glm::length(points[i] - points[i + 1])) / modelObject.height);
+		}
 		if (number_of_splines > 0 && !pause)
 		{
 			
 			for (int i = 0; i < number_of_splines; i++)
 			{
-				for (int j = 0; j < amount; j++)
+				for (int j = 0; j < meshAmount[i]; j++)
 				{
-					splinePoints.push_back(splineObject.CatmullRom(points[0], points[i + 1], points[i + 2], points[points.size() - 1], j / (float)amount));
+					splinePoints.push_back(splineObject.CatmullRom(points[0], points[i + 1], points[i + 2], points[points.size() - 1], j / (float)meshAmount[i]));
 				}
 			}
 			for (unsigned int i = 0; i < splinePoints.size() - 1; i++)
@@ -228,7 +234,6 @@ int main() {
 				distanceVec.push_back(splinePoints[i + 1] - splinePoints[i]);
 			}
 			distanceVec.push_back(-distanceVec[distanceVec.size() - 1]);
-			
 		}
 
 		// *************** Render the main cube ***************
@@ -439,7 +444,14 @@ int main() {
 			points.clear();
 			pause = false;
 		}
-
+		if (ImGui::Button("Print mesh amount"))
+		{
+			for (auto n : meshAmount)
+			{
+				std::cout << "AMOUNT of meshes PER SPLINE: " << n << std::endl;
+			}
+		}
+		
 		if (!points.empty())
 		{
 			if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.

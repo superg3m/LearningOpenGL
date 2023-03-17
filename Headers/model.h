@@ -38,17 +38,15 @@ public:
 
     // draws the model, and thus all its meshes
     void Draw(Shader& shader);
-    float getModelHeight();
-    float getModelLength();
+    float height, length;
 
 private:
     // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
     void loadModel(string const& path);
 
-    void calculateModelHeight(std::vector<Vertex> vert);
-    void calculateModelLength();
+    void calculateModelDims(std::vector<Vertex> vert);
 
-    float height, length;
+    
 
     // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
     void processNode(aiNode* node, const aiScene* scene);

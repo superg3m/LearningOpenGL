@@ -124,7 +124,7 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
     //textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
-    calculateModelHeight(vertices);
+    calculateModelDims(vertices);
     return Mesh(vertices, indices, textures);
 }
 
@@ -193,7 +193,7 @@ unsigned int Model::TextureFromFile(const char* path, const string& directory, b
     return textureID;
 }
 
-void Model::calculateModelHeight(std::vector<Vertex> vert)
+void Model::calculateModelDims(std::vector<Vertex> vert)
 {
     std::vector<float> positionsX;
     std::vector<float> positionsY;
@@ -211,18 +211,6 @@ void Model::calculateModelHeight(std::vector<Vertex> vert)
     float x = positionsX[positionsX.size() - 1] - positionsX[0];
     float y = positionsY[positionsY.size() - 1] - positionsY[0];
     float z = positionsZ[positionsZ.size() - 1] - positionsZ[0];
+    this->height = z;
     std::cout << "X: " << x << "| Y: " << y << " | Z: " << z  << std::endl;
-}
-void Model::calculateModelLength()
-{
-
-}
-
-float Model::getModelHeight()
-{
-    return 0.0f;
-}
-float Model::getModelLength()
-{
-    return 0.0f;
 }
