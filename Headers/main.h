@@ -33,15 +33,79 @@
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-void bindBuffers(unsigned int &generic_VBO, unsigned int& generic_VAO);
-void configureBufferAttributes(const unsigned int &position, const unsigned  int& color, const unsigned int& texture, const unsigned int& normal, const unsigned int& number_of_elements_per_line);
+// Methods
+std::pair<float, float> circle_points(const float& radius, const float& angle, const glm::vec2& origin)
+{
+	float xPos = radius * sin(angle);
+	float yPos = radius * cos(angle);
+	return std::make_pair(xPos, yPos);
+}
 
-std::pair<float, float> circle_points(const float &radius, const float& angle, const glm::vec2& origin);
-glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale);
-glm::quat safeQuatLookAt(glm::vec3& direction, glm::vec3 const& up);
+void bindBuffers(unsigned int& generic_VBO, unsigned int& generic_VAO)
+{
+	glGenBuffers(1, &generic_VBO);
+	glGenVertexArrays(1, &generic_VAO);
+	glBindVertexArray(generic_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, generic_VBO);
+}
 
-glm::quat RotationBetweenVectors(glm::vec3 start, glm::vec3 dest);
-glm::quat LookAt(glm::vec3 direction, glm::vec3 desiredUp);
+void configureBufferAttributes(const unsigned int& position, const unsigned  int& color, const unsigned int& texture, const unsigned int& normal, const unsigned int& number_of_elements_per_line)
+{
+	// TODO: redo this method better
+	int offset = 0;
+	if (position != NULL)
+	{
+		// Position attribute
+		glVertexAttribPointer(0, position, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(0);
+		offset += position;
+	}
+	if (color != NULL)
+	{
+		// Color attributoffset
+		glVertexAttribPointer(1, color, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		offset += color;
+	}
+	if (texture != NULL)
+	{
+		// Texture Attribute
+		glVertexAttribPointer(2, texture, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		offset += texture;
+	}
+	if (normal != NULL)
+	{
+		// Normal Attribute
+		glVertexAttribPointer(3, normal, GL_FLOAT, GL_FALSE, number_of_elements_per_line * sizeof(float), (void*)(offset * sizeof(float)));
+		glEnableVertexAttribArray(3);
+		offset += normal;
+	}
+}
+
+glm::mat4 transformMatrix(glm::mat4& matrix, float angle, glm::vec3 vector_translate, glm::vec3 vector_rotate, glm::vec3 vector_scale)
+{
+	matrix = glm::mat4(1.0f); // Identity matrix is important
+	matrix = glm::translate(matrix, vector_translate);
+	matrix = glm::rotate(matrix, glm::radians(angle), vector_rotate);
+	matrix = glm::scale(matrix, vector_scale);
+	return matrix;
+}
+
+glm::quat safeQuatLookAt(glm::vec3& direction, glm::vec3 const& up)
+{
+	float directionLength = glm::length(direction);
+
+	// Check if the direction is valid; Also deals with NaN
+	if (!(directionLength > 0.0001))
+	{
+		return glm::quat(1, 0, 0, 0); // Just return identity
+	}
+	// Normalize direction
+	glm::vec3 normDirection = glm::normalize(direction);
+	return glm::quatLookAt(normDirection, up);
+}
+
 
 // Constants
 const bool TRANSLATION_ROTATION = true;
