@@ -1,5 +1,6 @@
 #include <Headers/input_handler.h>
-bool InputHandler::mousePressed;
+bool InputHandler::Mouse_One_Pressed;
+bool InputHandler::Mouse_Two_Pressed;
 
 InputHandler::InputHandler()
 {
@@ -21,14 +22,15 @@ InputHandler::InputHandler()
 	this->Left_Arrow_Key_Pressed = false;
 	this->Right_Arrow_Key_Pressed = false;
 
-	this->Mouse_Two_Pressed = false;
-
 	this->hover = false;
 
-	InputHandler::mousePressed = false;
+	InputHandler::Mouse_One_Pressed = false;
+	InputHandler::Mouse_Two_Pressed = false;
+
+	
 }
 
-void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& deltaTime, Shader &shader, glm::vec3 &lightPos)
+void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& deltaTime, Shader &shader, glm::vec3 &lightPos, std::vector<glm::vec3> &points)
 {		
 	#pragma region Changing Booleans
 	// Non-letter Keys
@@ -53,7 +55,8 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	Right_Arrow_Key_Pressed			= glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
 	// Mouse
-	Mouse_Two_Pressed				= glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+	InputHandler::Mouse_One_Pressed	= glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS;
+	InputHandler::Mouse_Two_Pressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 	#pragma endregion
 
 
@@ -138,14 +141,15 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	{
 		lightPos.z += (10 * deltaTime);
 	}
-
-	if (Mouse_Two_Pressed) 
+	if (InputHandler::Mouse_One_Pressed)
 	{
-		mousePressed = true;
-	}
-	else 
-	{
-		mousePressed = false;
+		float length = abs(glm::length(glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z - 2)) - glm::length(points[points.size() - 1]));
+		std::cout << "length: " << length << std::endl;
+		if (length > 0.2)
+		{
+			points.push_back(glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z - 2));
+		}
+		
 	}
 	#pragma endregion
 }

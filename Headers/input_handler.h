@@ -10,8 +10,8 @@ class InputHandler
 {
 public:
 	InputHandler();
-	void processInput(GLFWwindow* window, Camera& camera, float& deltaTime, Shader& shader, glm::vec3& lightPos);
-	static bool mousePressed;
+	void processInput(GLFWwindow* window, Camera& camera, float& deltaTime, Shader& shader, glm::vec3& lightPos, std::vector<glm::vec3>& points);
+	static bool Mouse_One_Pressed, Mouse_Two_Pressed;
 private:
 	// Non-Letter Keys
 	bool Left_Shift_Key_Pressed, Escape_Key_Pressed, Space_Key_Pressed, Left_Control_Key_Pressed;
@@ -23,7 +23,7 @@ private:
 	bool Up_Arrow_Key_Pressed, Down_Arrow_Key_Pressed, Left_Arrow_Key_Pressed, Right_Arrow_Key_Pressed;
 
 	//Mouse Input
-	bool Mouse_Two_Pressed;
+	
 	
 	bool hover;
 };

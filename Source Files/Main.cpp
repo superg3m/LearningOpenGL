@@ -23,7 +23,7 @@ float lastFrame = 0.0f;
 glm::vec3 lightPos(1.0f, 0.0f, 5.0f);
 
 InputHandler input;
-
+std::vector<glm::vec3> points;
 
 
 int main() {
@@ -137,7 +137,7 @@ int main() {
 	bool drawCubes = false;
 	float cubeSize = 1.0f;
 
-	std::vector<glm::vec3> points;
+	
 	points.push_back(glm::vec3(2, 0, 1));
 	points.push_back(glm::vec3(3, 3, 1));
 	points.push_back(glm::vec3(5, 1, 0));
@@ -155,7 +155,7 @@ int main() {
 	
 	std::string current_item = "0";
 
-	const unsigned int amount = 100;
+	const unsigned int amount = 25;
 
 	CMRSpline splineObject;
 
@@ -182,11 +182,11 @@ int main() {
 		
 		if (!points.empty())
 		{
-			input.processInput(window, camera, deltaTime, cubeShader, points[spline_point_index]);
+			input.processInput(window, camera, deltaTime, cubeShader, points[spline_point_index], points);
 		}
 		else
 		{
-			input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0]);
+			input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0], points);
 		}
 		
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -213,10 +213,10 @@ int main() {
 		
 		// Number of splines
 		int number_of_splines = points.size() - 1;
-		meshAmount.clear();
+		//meshAmount.clear();
 		for (int i = 0; i < number_of_splines; i++)
 		{
-			meshAmount.push_back(50 + (2 * glm::length(points[i] - points[i + 1]) / (modelObject.height)));
+			//meshAmount.push_back(50 + (2 * glm::length(points[i] - points[i + 1]) / (modelObject.height)));
 		}
 		if (number_of_splines > 0 && !pause)
 		{
@@ -224,10 +224,10 @@ int main() {
 			glm::vec3 ghostEnd = 2.0f * points.back() - points[points.size() - 2];
 			for (int i = 0; i < number_of_splines; i++)
 			{
-				for (int j = 0; j < meshAmount[i]; j++)
+				for (int j = 0; j < amount; j++)
 				{
-					//splinePoints.push_back(splineObject.CatmullRom(ghostStart, points[i], points[i + 1], ghostEnd, j / (float)meshAmount[i]));
-					splinePoints.push_back(splineObject.CatmullRom(points[0], points[i], points[i + 1], points[points.size() - 1], j / (float)meshAmount[i]));
+					splinePoints.push_back(splineObject.CatmullRom(ghostStart, points[i], points[i + 1], ghostEnd, j / (float)amount));
+					//splinePoints.push_back(splineObject.CatmullRom(points[0], points[i], points[i + 1], points[points.size() - 1], j / (float)amount));
 				}
 			}
 			for (unsigned int i = 0; i < splinePoints.size() - 1; i++)
@@ -373,7 +373,7 @@ int main() {
 				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.1f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			//glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
 		#pragma endregion
@@ -522,15 +522,27 @@ int main() {
 #pragma region Methods
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	
-	if (InputHandler::mousePressed)
+	if (InputHandler::Mouse_One_Pressed)
+	{
+		float xoffset = xposIn - SCREEN_WIDTH / 2;
+		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
+		
+		xoffset /= (SCREEN_WIDTH / 2);
+		yoffset /= (SCREEN_HEIGHT / 2);
+		std::cout << "X :" << xoffset << " | Y: " << yoffset << std::endl;
+		points.push_back(glm::vec3(camera.Position.x, camera.Position.y, 0));
+	}
+
+	if (InputHandler::Mouse_Two_Pressed)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 		float xoffset = xposIn - SCREEN_WIDTH / 2;
 		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
+		//std::cout << "X :" << xoffset << " | Y: " << yoffset << std::endl;
 		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
+
 	else
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
