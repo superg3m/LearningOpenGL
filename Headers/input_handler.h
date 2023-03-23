@@ -2,7 +2,6 @@
 #define INPUT_HANDLER_H    
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
-#include <glm/glm.hpp>
 #include <Headers/camera.h>
 #include <Headers/shader.h>
 #include <Headers/cat_mull_rom.h>

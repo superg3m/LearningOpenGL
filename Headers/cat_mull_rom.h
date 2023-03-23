@@ -2,9 +2,8 @@
 
 #include <iostream>
 #include <cmath>
-#include <cassert>
-
 #include <glm/glm.hpp>
+#include <Headers/model.h>
 
 class CMRSpline {
 public:
@@ -18,7 +17,7 @@ public:
         controlPoints.push_back(point);
         
     }
-    void drawSpline()
+    void drawSpline(Camera camera)
     {
         if (controlPoints.empty())
         {
