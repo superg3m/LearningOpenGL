@@ -23,8 +23,6 @@ float lastFrame = 0.0f;
 glm::vec3 lightPos(1.0f, 0.0f, 5.0f);
 
 InputHandler input;
-std::vector<glm::vec3> points;
-
 
 int main() {
 	// *************** Initialization ***************
@@ -137,16 +135,6 @@ int main() {
 	bool drawCubes = false;
 	float cubeSize = 1.0f;
 
-	
-	points.push_back(glm::vec3(2, 0, 1));
-	points.push_back(glm::vec3(3, 3, 1));
-	points.push_back(glm::vec3(5, 1, 0));
-	points.push_back(glm::vec3(6, 2, 1));
-	points.push_back(glm::vec3(6, 2, 2));
-	points.push_back(glm::vec3(7, 3, 1));
-
-	std::vector<glm::vec3> splinePoints;
-	std::vector<int> meshAmount;
 	bool pause = false;
 
 	int spline_point_index = 0;
@@ -158,10 +146,13 @@ int main() {
 	const unsigned int amount = 25;
 
 	CMRSpline splineObject;
-
+	splineObject.addControlPoints(glm::vec3(2, 0, 1));
+	splineObject.addControlPoints(glm::vec3(3, 3, 1));
+	splineObject.addControlPoints(glm::vec3(5, 1, 0));
+	splineObject.addControlPoints(glm::vec3(6, 2, 1));
+	splineObject.addControlPoints(glm::vec3(6, 2, 2));
+	splineObject.addControlPoints(glm::vec3(7, 3, 1));
 	// Clear the spline points after
-
-	std::vector<glm::vec3> distanceVec;
 
 	srand(time(NULL));
 
@@ -180,13 +171,13 @@ int main() {
 		cubeShader.use();
 
 		
-		if (!points.empty())
+		if (!splineObject.controlPoints.empty())
 		{
-			input.processInput(window, camera, deltaTime, cubeShader, points[spline_point_index], points);
+			input.processInput(window, camera, deltaTime, cubeShader, splineObject.controlPoints[spline_point_index], splineObject);
 		}
 		else
 		{
-			input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0], points);
+			input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0], splineObject);
 		}
 		
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -199,43 +190,14 @@ int main() {
 
 		// SPLINE CALCULATION
 		items.clear();
-		if (!pause)
-		{
-			splinePoints.clear();
-			distanceVec.clear();
-		}
 		
-		for (int i = 0; i < points.size(); i++)
+		for (int i = 0; i < splineObject.controlPoints.size(); i++)
 		{
 			items.push_back(std::to_string(i));
 		}
 		
-		
-		// Number of splines
-		int number_of_splines = points.size() - 1;
-		//meshAmount.clear();
-		for (int i = 0; i < number_of_splines; i++)
-		{
-			//meshAmount.push_back(50 + (2 * glm::length(points[i] - points[i + 1]) / (modelObject.height)));
-		}
-		if (number_of_splines > 0 && !pause)
-		{
-			glm::vec3 ghostStart = 2.0f * points[0] - points[1];
-			glm::vec3 ghostEnd = 2.0f * points.back() - points[points.size() - 2];
-			for (int i = 0; i < number_of_splines; i++)
-			{
-				for (int j = 0; j < amount; j++)
-				{
-					splinePoints.push_back(splineObject.CatmullRom(ghostStart, points[i], points[i + 1], ghostEnd, j / (float)amount));
-					//splinePoints.push_back(splineObject.CatmullRom(points[0], points[i], points[i + 1], points[points.size() - 1], j / (float)amount));
-				}
-			}
-			for (unsigned int i = 0; i < splinePoints.size() - 1; i++)
-			{
-				distanceVec.push_back(splinePoints[i + 1] - splinePoints[i]);
-			}
-			distanceVec.push_back(-distanceVec[distanceVec.size() - 1]);
-		}
+		splineObject.calculate_number_of_meshes_per_spline(modelObject);
+		splineObject.calculateSplinePoints(pause);
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -330,12 +292,12 @@ int main() {
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}
 		}
-		for (int i = 0; i < splinePoints.size(); i++)
+		for (int i = 0; i < splineObject.splinePoints.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, splinePoints[i]);
+			model = glm::translate(model, splineObject.splinePoints[i]);
 			
-			glm::quat quat = safeQuatLookAt(distanceVec[i], glm::vec3(0, 1, 0));
+			glm::quat quat = safeQuatLookAt(splineObject.distanceVec[i], glm::vec3(0, 1, 0));
 			glm::mat4 RotationMatrix = glm::toMat4(quat);
 			model = model * RotationMatrix;
 			model = glm::scale(model, glm::vec3(0.5f));
@@ -359,10 +321,10 @@ int main() {
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		glBindVertexArray(light_cube_VAO);
-		for (unsigned int i = 0; i < points.size(); i++)
+		for (unsigned int i = 0; i < splineObject.controlPoints.size(); i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
-			model_light_cube = glm::translate(model_light_cube, points[i]);
+			model_light_cube = glm::translate(model_light_cube, splineObject.controlPoints[i]);
 			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.1f)); // Make it a smaller cube
 
 			if (ORBIT)
@@ -373,7 +335,7 @@ int main() {
 				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.1f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
-			//glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
 		#pragma endregion
@@ -397,63 +359,63 @@ int main() {
 
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
-
+		
 		if (ImGui::Button("Add Spline Points"))
 		{
 			int random_number_x = rand() % 5 + 1;
 			int random_number_y = rand() % 5 + 1;
 			int random_number_z = rand() % 5 + 1;
-			if (!points.empty())
+			if (!splineObject.controlPoints.empty())
 			{
-				std::vector<glm::vec3>::iterator it = points.end() - 1;
-				points.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
+				std::vector<glm::vec3>::iterator it = splineObject.controlPoints.end() - 1;
+				splineObject.controlPoints.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
 			}
 			else
 			{
-				points.push_back(glm::vec3(random_number_x, random_number_y, random_number_z));
+				splineObject.controlPoints.push_back(glm::vec3(random_number_x, random_number_y, random_number_z));
 			}
 			pause = false;
 		}
-		if (ImGui::Button("Remove Spline Points"))
+		if (ImGui::Button("Remove control Points"))
 		{
-			if (points.size() > 1)
+			if (splineObject.controlPoints.size() > 1)
 			{
-				std::vector<glm::vec3>::iterator it = points.end() - 2;
-				points.erase(it);
+				std::vector<glm::vec3>::iterator it = splineObject.controlPoints.end() - 2;
+				splineObject.controlPoints.erase(it);
 			}
 			else
 			{
-				points.clear();
+				splineObject.controlPoints.clear();
 			}
 			pause = false;
 		}
 		if (ImGui::Button("Remove mesh"))
 		{
-			if (splinePoints.size() > 1)
+			if (splineObject.splinePoints.size() > 1)
 			{
-				std::vector<glm::vec3>::iterator it = splinePoints.end() - 1;
-				splinePoints.erase(it);
+				std::vector<glm::vec3>::iterator it = splineObject.splinePoints.end() - 1;
+				splineObject.splinePoints.erase(it);
 			}
 			else
 			{
-				splinePoints.clear();
+				splineObject.splinePoints.clear();
 			}
 			pause = true;
 		}
-		if (ImGui::Button("Clear Spline Points"))
+		if (ImGui::Button("Clear control Points"))
 		{
-			points.clear();
+			splineObject.controlPoints.clear();
 			pause = false;
 		}
 		if (ImGui::Button("Print mesh amount"))
 		{
-			for (auto n : meshAmount)
+			for (auto n : splineObject.meshAmount)
 			{
 				std::cout << "AMOUNT of meshes PER SPLINE: " << n << std::endl;
 			}
 		}
 		
-		if (!points.empty())
+		if (!splineObject.controlPoints.empty())
 		{
 			if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
 			{
@@ -482,12 +444,12 @@ int main() {
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
 		std::string s = current_item;
 		//std::cout << "String: " << s << std::endl;
-		if (!points.empty())
+		if (!splineObject.controlPoints.empty())
 		{
 			spline_point_index = std::stoi(current_item);
-			ImGui::SliderFloat("point-x-component", &points[spline_point_index].x, -10.0f, 10.0f);
-			ImGui::SliderFloat("point-y-component", &points[spline_point_index].y, -10.0f, 10.0f);
-			ImGui::SliderFloat("point-z-component", &points[spline_point_index].z, -10.0f, 10.0f);
+			ImGui::SliderFloat("point-x-component", &splineObject.controlPoints[spline_point_index].x, -10.0f, 10.0f);
+			ImGui::SliderFloat("point-y-component", &splineObject.controlPoints[spline_point_index].y, -10.0f, 10.0f);
+			ImGui::SliderFloat("point-z-component", &splineObject.controlPoints[spline_point_index].z, -10.0f, 10.0f);
 		}
 		
 
@@ -522,17 +484,6 @@ int main() {
 #pragma region Methods
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-	if (InputHandler::Mouse_One_Pressed)
-	{
-		float xoffset = xposIn - SCREEN_WIDTH / 2;
-		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
-		
-		xoffset /= (SCREEN_WIDTH / 2);
-		yoffset /= (SCREEN_HEIGHT / 2);
-		std::cout << "X :" << xoffset << " | Y: " << yoffset << std::endl;
-		points.push_back(glm::vec3(camera.Position.x, camera.Position.y, 0));
-	}
-
 	if (InputHandler::Mouse_Two_Pressed)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

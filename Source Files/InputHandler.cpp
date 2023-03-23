@@ -1,4 +1,5 @@
 #include <Headers/input_handler.h>
+
 bool InputHandler::Mouse_One_Pressed;
 bool InputHandler::Mouse_Two_Pressed;
 
@@ -30,7 +31,7 @@ InputHandler::InputHandler()
 	
 }
 
-void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& deltaTime, Shader &shader, glm::vec3 &lightPos, std::vector<glm::vec3> &points)
+void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& deltaTime, Shader &shader, glm::vec3 &lightPos, CMRSpline &splineObject)
 {		
 	#pragma region Changing Booleans
 	// Non-letter Keys
@@ -143,13 +144,7 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	}
 	if (InputHandler::Mouse_One_Pressed)
 	{
-		float length = abs(glm::length(glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z - 2)) - glm::length(points[points.size() - 1]));
-		std::cout << "length: " << length << std::endl;
-		if (length > 0.2)
-		{
-			points.push_back(glm::vec3(camera.Position.x, camera.Position.y, camera.Position.z - 2));
-		}
-		
+		splineObject.drawSpline();
 	}
 	#pragma endregion
 }

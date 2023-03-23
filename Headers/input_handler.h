@@ -5,12 +5,13 @@
 #include <glm/glm.hpp>
 #include <Headers/camera.h>
 #include <Headers/shader.h>
+#include <Headers/cat_mull_rom.h>
 
 class InputHandler
 {
 public:
 	InputHandler();
-	void processInput(GLFWwindow* window, Camera& camera, float& deltaTime, Shader& shader, glm::vec3& lightPos, std::vector<glm::vec3>& points);
+	void processInput(GLFWwindow* window, Camera& camera, float& deltaTime, Shader& shader, glm::vec3& lightPos, CMRSpline &splineObejct);
 	static bool Mouse_One_Pressed, Mouse_Two_Pressed;
 private:
 	// Non-Letter Keys
