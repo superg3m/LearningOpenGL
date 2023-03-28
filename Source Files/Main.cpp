@@ -198,7 +198,7 @@ int main() {
 		}
 		
 		splineObject.calculate_number_of_meshes_per_spline(modelObject);
-		splineObject.calculateSplinePoints(pause, apply);
+		splineObject.calculateSplinePoints(pause, apply, splineObject.drawing);
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube

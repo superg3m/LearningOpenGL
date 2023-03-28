@@ -11,6 +11,7 @@ public:
     std::vector<glm::vec3> distanceVec;
     std::vector<glm::vec3> controlPoints;
     std::vector<int> meshAmount;
+    bool drawing;
     void addControlPoints(glm::vec3 point)
     {
    
@@ -44,7 +45,7 @@ public:
             //this->meshAmount.push_back(5);
         }
     }
-    void calculateSplinePoints(bool pause, bool apply)
+    void calculateSplinePoints(bool pause, bool apply, bool drawing)
     {
         if (!pause)
         {
@@ -60,9 +61,14 @@ public:
             {
                 for (int j = 0; j < this->meshAmount[i]; j++)
                 {
-                    if (apply)
+                    if (drawing)
                     {
-                        this->splinePoints.push_back(CatmullRom(ghostStart, controlPoints[i], controlPoints[i + 1], ghostEnd, j / (float)this->meshAmount[i], 0.20));
+                        // FIX THIS
+                        this->splinePoints.push_back(CatmullRom(ghostStart, controlPoints[i], controlPoints[i + 1], ghostEnd, j / (float)this->meshAmount[i], 0.80f));
+                    }
+                    else if (apply)
+                    {
+                        this->splinePoints.push_back(CatmullRom(ghostStart, controlPoints[i], controlPoints[i + 1], ghostEnd, j / (float)this->meshAmount[i], 0.20f));
                     }
                     else
                     {

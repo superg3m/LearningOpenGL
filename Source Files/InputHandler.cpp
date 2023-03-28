@@ -145,6 +145,11 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	if (InputHandler::Mouse_One_Pressed)
 	{
 		splineObject.drawSpline(camera);
+		splineObject.drawing = true;
+	}
+	else
+	{
+		splineObject.drawing = false;
 	}
 	#pragma endregion
 }
