@@ -37,12 +37,14 @@ public:
     {
         this->meshAmount.clear();
         this->number_of_splines = controlPoints.size() - 1;
+       
         for (int i = 0; i < this->number_of_splines; i++)
         {
-            this->meshAmount.push_back(15 + (2 * (glm::length(controlPoints[i] - controlPoints[i + 1]) / (modelObject.height))));
+            this->meshAmount.push_back(50 + (4 * (glm::length(controlPoints[i] - controlPoints[i + 1]) / (modelObject.height))));
+            //this->meshAmount.push_back(5);
         }
     }
-    void calculateSplinePoints(bool pause)
+    void calculateSplinePoints(bool pause, bool apply)
     {
         if (!pause)
         {
@@ -58,7 +60,14 @@ public:
             {
                 for (int j = 0; j < this->meshAmount[i]; j++)
                 {
-                    this->splinePoints.push_back(CatmullRom(ghostStart, controlPoints[i], controlPoints[i + 1], ghostEnd, j / (float)this->meshAmount[i]));
+                    if (apply)
+                    {
+                        this->splinePoints.push_back(CatmullRom(ghostStart, controlPoints[i], controlPoints[i + 1], ghostEnd, j / (float)this->meshAmount[i], 0.20));
+                    }
+                    else
+                    {
+                        this->splinePoints.push_back(CatmullRom(ghostStart, controlPoints[i], controlPoints[i + 1], ghostEnd, j / (float)this->meshAmount[i]));
+                    }
                     //splinePoints.push_back(splineObject.CatmullRom(points[0], points[i], points[i + 1], points[points.size() - 1], j / (float)amount));
                 }
             }
@@ -69,7 +78,7 @@ public:
             this->distanceVec.push_back(-1.0f * this->distanceVec[this->distanceVec.size() - 1]);
         }
     }
-    static glm::vec3 CatmullRom(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, float t /* between 0 and 1 */, float alpha = .5f /* between 0 and 1 */) {
+    static glm::vec3 CatmullRom(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, float t /* between 0 and 1 */, float alpha = 0.5f /* between 0 and 1 */) {
         float t0 = 0.0f;
         float t1 = GetT(t0, alpha, p0, p1);
         float t2 = GetT(t1, alpha, p1, p2);

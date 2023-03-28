@@ -106,7 +106,6 @@ glm::quat safeQuatLookAt(glm::vec3& direction, glm::vec3 const& up)
 	return glm::quatLookAt(normDirection, up);
 }
 
-
 // Constants
 const bool TRANSLATION_ROTATION = true;
 const bool ORBIT = false;

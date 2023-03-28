@@ -133,6 +133,7 @@ int main() {
 	Model modelObject("../3D/Neon.fbx");
 
 	bool drawCubes = false;
+	bool apply = true;
 	float cubeSize = 1.0f;
 
 	bool pause = false;
@@ -155,7 +156,7 @@ int main() {
 	// Clear the spline points after
 
 	srand(time(NULL));
-
+	int splineIndex = 0;
 	// *************** Render Loop ***************
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
@@ -197,7 +198,7 @@ int main() {
 		}
 		
 		splineObject.calculate_number_of_meshes_per_spline(modelObject);
-		splineObject.calculateSplinePoints(pause);
+		splineObject.calculateSplinePoints(pause, apply);
 
 		// *************** Render the main cube ***************
 		#pragma region Draw Main Cube
@@ -292,16 +293,43 @@ int main() {
 				glDrawArrays(GL_TRIANGLES, 0, 36);
 			}
 		}
+		splineIndex = 0;
+		int sum = -1;
+		if (!splineObject.meshAmount.empty())
+		{
+			sum = splineObject.meshAmount[splineIndex];
+		}
+		
 		for (int i = 0; i < splineObject.splinePoints.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, splineObject.splinePoints[i]);
+			glm::quat quat;
+			if (apply)
+			{
+				//std::cout << "I: " << i << std::endl;
+				if (i != 0)
+				{
+					quat = safeQuatLookAt(splineObject.distanceVec[i - 1], glm::vec3(0, 1, 0));
+				}
+				else
+				{
+					quat = safeQuatLookAt(splineObject.distanceVec[0], glm::vec3(0, 1, 0));
+				}
+				//splineIndex++;
+				//sum += splineObject.meshAmount[splineIndex];
+			}
+			else
+			{
+				quat = safeQuatLookAt(splineObject.distanceVec[i], glm::vec3(0, 1, 0));
+			}
 			
-			glm::quat quat = safeQuatLookAt(splineObject.distanceVec[i], glm::vec3(0, 1, 0));
 			glm::mat4 RotationMatrix = glm::toMat4(quat);
+
 			model = model * RotationMatrix;
-			model = glm::scale(model, glm::vec3(0.5f));
+			model = glm::scale(model, glm::vec3(0.25f));
 			cubeShader.setMat4("model", model);
+			
 			//cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 			//cubeShader.setFloat("material.type", 1);
 			//cubeShader.setVec4("uniColor", glm::vec4(0.2, 1.0, 0.2f, 1.0));
@@ -335,7 +363,7 @@ int main() {
 				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.1f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			//glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
 		#pragma endregion
@@ -359,7 +387,7 @@ int main() {
 
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
-		
+		ImGui::Checkbox("Apply", &apply);
 		if (ImGui::Button("Add Spline Points"))
 		{
 			int random_number_x = rand() % 5 + 1;
