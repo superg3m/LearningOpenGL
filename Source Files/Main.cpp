@@ -395,7 +395,7 @@ int main() {
 			int random_number_z = rand() % 5 + 1;
 			if (!splineObject.controlPoints.empty())
 			{
-				std::vector<glm::vec3>::iterator it = splineObject.controlPoints.end() - 1;
+				std::vector<glm::vec3>::iterator it = splineObject.controlPoints.end();
 				splineObject.controlPoints.insert(it, glm::vec3(random_number_x, random_number_y, random_number_z));
 			}
 			else
@@ -408,7 +408,7 @@ int main() {
 		{
 			if (splineObject.controlPoints.size() > 1)
 			{
-				std::vector<glm::vec3>::iterator it = splineObject.controlPoints.end() - 2;
+				std::vector<glm::vec3>::iterator it = splineObject.controlPoints.end() - 1;
 				splineObject.controlPoints.erase(it);
 			}
 			else
