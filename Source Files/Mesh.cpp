@@ -1,11 +1,23 @@
 #include <Headers/mesh.h>
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, float offSet)
 {
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
-
+    if (offSet != 0.0f) 
+    {
+        for (int i = 0; i < vertices.size(); i++)
+        {
+            if (i >= 0 && i <= 3)
+            {
+                this->vertices[i].Position.x += offSet;
+            }
+            
+        }
+    }
+    
+    
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
     setupMesh();
 }

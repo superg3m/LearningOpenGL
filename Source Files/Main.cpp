@@ -135,6 +135,9 @@ int main() {
 	bool drawCubes = false;
 	bool apply = true;
 	float cubeSize = 1.0f;
+	float splineOffset = 0.0f;
+	float prevSplineOffset = 0.0f;
+
 
 	bool pause = false;
 
@@ -300,7 +303,17 @@ int main() {
 			sum = splineObject.meshAmount[splineIndex];
 		}
 		
-		for (int i = 0; i < splineObject.splinePoints.size(); i++)
+		if (splineOffset != prevSplineOffset)
+		{
+			for (int i = 0; i < modelObject.meshes.size(); i++)
+			{
+				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.textures_loaded, splineOffset);
+			}
+			prevSplineOffset = splineOffset;
+		}
+		
+		
+		for (int i = 0; i < 1; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, splineObject.splinePoints[i]);
@@ -470,6 +483,9 @@ int main() {
 		}
 
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
+
+		ImGui::SliderFloat("SplinePoint-X", &splineOffset, -2.0f, 2.0f);
+
 		std::string s = current_item;
 		//std::cout << "String: " << s << std::endl;
 		if (!splineObject.controlPoints.empty())
