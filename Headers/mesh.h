@@ -36,10 +36,12 @@ public:
     std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture>      textures;
+    std::vector<Vertex> lineSegmentPoints;
+    std::vector<glm::vec2> distanceToLine;
     unsigned int VAO;
     
     // constructor
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, float offSet = 0.0f, float vertexOffset = 0.0,  int n = 0, int vertexIndex = 0);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, glm::vec3 offset = glm::vec3(0.0f), bool isMutable = false);
 
     // render the mesh
     void Draw(Shader& shader);

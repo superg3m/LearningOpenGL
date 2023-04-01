@@ -106,6 +106,82 @@ glm::quat safeQuatLookAt(glm::vec3& direction, glm::vec3 const& up)
 	return glm::quatLookAt(normDirection, up);
 }
 
+void calculateLineSegmentPoints(std::vector<Vertex> &verts, std::vector<Vertex> &lineSegmentPoints)
+{
+    std::vector<Vertex> cacheLower_X;
+    std::vector<Vertex> cacheHigher_X;
+
+    std::vector<Vertex> cacheLower_Y;
+    std::vector<Vertex> cacheHigher_Y;
+
+    std::vector<Vertex> cacheLower_Z;
+    std::vector<Vertex> cacheHigher_Z;
+
+    std::vector<float> positionsX;
+    std::vector<float> positionsY;
+    std::vector<float> positionsZ;
+    for (int i = 0; i < verts.size(); i++)
+    {
+        positionsX.push_back(verts[i].Position.x);
+        positionsY.push_back(verts[i].Position.y);
+        positionsZ.push_back(verts[i].Position.z);
+    }
+
+    std::sort(positionsX.begin(), positionsX.end()); // Lowest to Largest
+    std::sort(positionsY.begin(), positionsY.end());
+    std::sort(positionsZ.begin(), positionsZ.end());
+    for (int i = 0; i < verts.size(); i++)
+    {
+        if (verts[i].Position.y == positionsY.front())
+        {
+            cacheLower_Y.push_back(verts[i]);
+        }
+        if (verts[i].Position.y == positionsY.back())
+        {
+            cacheHigher_Y.push_back(verts[i]);
+        }
+    }
+
+    for (int i = 0; i < cacheLower_Y.size(); i++)
+    {
+        for (int j = i + 1; j < cacheLower_Y.size(); j++)
+        {
+            if (cacheLower_Y[i].Position.z > cacheLower_Y[j].Position.z)
+            {
+                Vertex cache = cacheLower_Y[i];
+                cacheLower_Y[i] = cacheLower_Y[j];
+                cacheLower_Y[j] = cache;
+            }
+            if (cacheHigher_Y[i].Position.z > cacheHigher_Y[j].Position.z)
+            {
+                Vertex cache = cacheHigher_Y[i];
+                cacheHigher_Y[i] = cacheHigher_Y[j];
+                cacheHigher_Y[j] = cache;
+            }
+        }
+    }
+    for (int i = 0; i < cacheLower_Y.size(); i++)
+    {
+        float centerHeight = (cacheHigher_Y[i].Position.y + cacheLower_Y[i].Position.y) / 2.0;
+        Vertex CalculatedVertex = cacheHigher_Y[i];
+        CalculatedVertex.Position.y = centerHeight;
+        lineSegmentPoints.push_back(CalculatedVertex);
+    }
+    for (int i = 0; i < lineSegmentPoints.size(); i++)
+    {
+        for (int j = i; j < lineSegmentPoints.size(); j++)
+        {
+            if (lineSegmentPoints[i].Position.x == lineSegmentPoints[j].Position.x && lineSegmentPoints[i].Position.y == lineSegmentPoints[j].Position.y && lineSegmentPoints[i].Position.z == lineSegmentPoints[j].Position.z)
+            {
+                auto it = lineSegmentPoints.begin() + j;
+                lineSegmentPoints.erase(it);
+            }
+        }
+    }
+    auto it = lineSegmentPoints.end() - 1;
+    lineSegmentPoints.erase(it);
+}
+
 // Constants
 const bool TRANSLATION_ROTATION = true;
 const bool ORBIT = false;

@@ -60,6 +60,7 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	InputHandler::Mouse_Two_Pressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 	#pragma endregion
 
+	const float blockSpeed = 0.25;
 
 	#pragma region Implementation
 	// Non-letter Keys
@@ -119,28 +120,28 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	// Arrows
 	if (Left_Arrow_Key_Pressed)						
 	{
-		lightPos.x -= (10 * deltaTime);
+		lightPos.x -= (blockSpeed * deltaTime);
 	}
-	if (Right_Arrow_Key_Pressed)					
+	if (Right_Arrow_Key_Pressed)
 	{
-		lightPos.x += (10 * deltaTime);
+		lightPos.x += (blockSpeed * deltaTime);
 	}
-	if (Down_Arrow_Key_Pressed && !V_Key_Pressed)	
+	if (Down_Arrow_Key_Pressed && !V_Key_Pressed)
 	{
-		lightPos.y -= (10 * deltaTime);
+		lightPos.y -= (blockSpeed * deltaTime);
 	}
-	if (Up_Arrow_Key_Pressed && !V_Key_Pressed)		
+	if (Up_Arrow_Key_Pressed && !V_Key_Pressed)
 	{
-		lightPos.y += (10 * deltaTime);
+		lightPos.y += (blockSpeed * deltaTime);
 	}
 
-	if (Up_Arrow_Key_Pressed && V_Key_Pressed)		
+	if (Up_Arrow_Key_Pressed && V_Key_Pressed)
 	{
-		lightPos.z -= (10 * deltaTime);
+		lightPos.z -= (blockSpeed * deltaTime);
 	}
 	if (Down_Arrow_Key_Pressed && V_Key_Pressed)
 	{
-		lightPos.z += (10 * deltaTime);
+		lightPos.z += (blockSpeed * deltaTime);
 	}
 	if (InputHandler::Mouse_One_Pressed)
 	{

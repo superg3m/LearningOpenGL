@@ -1,66 +1,30 @@
 #include <Headers/mesh.h>
-
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, float offSet, float vertexOffset, int n, int vertexIndex)
+#include <algorithm>
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, glm::vec3 offSet, bool isMutable)
 {
 
     this->vertices = vertices;
     this->indices = indices;
     this->textures = textures;
-    
-    // I'm finally crazy SMILE
 
-    this->vertices[157].Position.x += 0.05f;
-    this->vertices[156].Position.x += 0.05f;
-    this->vertices[159].Position.x += 0.05f;
-    this->vertices[158].Position.x += 0.05f;
-
-    this->vertices[125].Position.x += 0.05f;
-    this->vertices[124].Position.x += 0.05f;
-    this->vertices[127].Position.x += 0.05f;
-    this->vertices[126].Position.x += 0.05f;
-
-    this->vertices[117].Position.x += 0.05f;
-    this->vertices[116].Position.x += 0.05f;
-    this->vertices[119].Position.x += 0.05f;
-    this->vertices[118].Position.x += 0.05f;
-
-    if (n == 0)
+    if (isMutable)
     {
         for (int i = 0; i < this->vertices.size(); i++)
         {
-            float xValue = this->vertices[i].Position.x;
-            float yValue = this->vertices[i].Position.y;
-            float zValue = this->vertices[i].Position.z;
-            for (int j = i; j < this->vertices.size(); j++)
+            
+            if (this->vertices[i].Position.z == offSet.z)
             {
-                if (this->vertices[j].Position.x == xValue && this->vertices[j].Position.y == yValue && this->vertices[j].Position.z == zValue)
-                {
-                    //std::cout << "Original: " << i << " | Copy: " << j << std::endl;
-                }
-            }
-        }
-        for (int i = 0; i < this->indices.size(); i++)
-        {
-            //std::cout << "Number: " << i + 1 << " | " << this->indices[i] << std::endl;
-        }
-    }
-    for (int i = 0; i < (n * 4); i++)
-    {
-        if (offSet != 0.0)
-        {
-            this->vertices[i].Position.x += offSet;
-            for (int i = n * 6; i < this->indices.size(); i++)
-            {
-                //auto it = this->indices.begin() + i;
-                //this->indices.erase(it);
+                this->vertices[i].Position.x += offSet.x;
+                this->vertices[i].Position.y += offSet.y;
             }
         }
     }
-    this->vertices[vertexIndex].Position.x += vertexOffset * 100;
 
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
     setupMesh();
 }
+
+
 
 void Mesh::Draw(Shader &shader)
 {

@@ -137,8 +137,9 @@ int main() {
 	float splineOffset = 0.0f;
 	float prevSplineOffset = 0.0f;
 
-	float vertexOffset = 0.0f;
-	float previousVertexOffset = 0.0f;
+	glm::vec3 currentLinePoint = glm::vec3(0.0f);
+	glm::vec3 PreviousLinePoint = glm::vec3(0.0f);
+	
 
 	bool pause = false;
 	bool drawCubes = false;
@@ -149,18 +150,21 @@ int main() {
 
 	
 	int spline_point_index = 0;
-	int vertexIndex = 0;
+	int lineIndex = 0;
 	std::vector<std::string> items;
 	
 
-	std::vector<std::string> vertexItems;
-	std::string current_vertex_item = "0";
+	std::vector<std::string> lineItems;
+	std::string current_line_item = "0";
 
+	std::vector<Vertex> lineSegmentPoints;
 
-	for (int i = 0; i < modelObject.meshes[0].vertices.size(); i++)
+	calculateLineSegmentPoints(modelObject.meshes[0].vertices, lineSegmentPoints); // Calculate this outside of this constructor also only do this once and just pass in as an argument
+	for (int i = 0; i < lineSegmentPoints.size(); i++)
 	{
-		vertexItems.push_back(std::to_string(i));
+		lineItems.push_back(std::to_string(i));
 	}
+	
 	
 	std::string current_item = "0";
 
@@ -174,6 +178,11 @@ int main() {
 	splineObject.addControlPoints(glm::vec3(6, 2, 2));
 	splineObject.addControlPoints(glm::vec3(7, 3, 1));
 	// Clear the spline points after
+
+
+	
+	
+
 
 	srand(time(NULL));
 	int splineIndex = 0;
@@ -194,7 +203,7 @@ int main() {
 		
 		if (!splineObject.controlPoints.empty())
 		{
-			input.processInput(window, camera, deltaTime, cubeShader, splineObject.controlPoints[spline_point_index], splineObject);
+			input.processInput(window, camera, deltaTime, cubeShader, lineSegmentPoints[lineIndex].Position, splineObject);
 		}
 		else
 		{
@@ -320,20 +329,32 @@ int main() {
 			sum = splineObject.meshAmount[splineIndex];
 		}
 		
-		
 		for (int i = 0; i < modelObject.meshes.size(); i++)
 		{
-			if (splineOffset != prevSplineOffset)
+			PreviousLinePoint = currentLinePoint;
+			currentLinePoint = lineSegmentPoints[lineIndex].Position;
+			glm::vec3 calcPoint = glm::vec3(currentLinePoint.x - PreviousLinePoint.x, currentLinePoint.y - PreviousLinePoint.y, currentLinePoint.z);
+			if (PreviousLinePoint != currentLinePoint)
 			{
-				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.meshes[i].textures, splineOffset, 0.0, n, vertexIndex);
+				/*
+				for (int i = 0; i < modelObject.meshes[0].vertices.size(); i++)
+				{
+					for (int j = 0; j < lineSegmentPoints.size(); j++)
+					{
+						if (modelObject.meshes[0].vertices[i].Position.z == lineSegmentPoints[j].Position.z)
+						{
+							float x = glm::distance(lineSegmentPoints[j].Position.x, modelObject.meshes[0].vertices[i].Position.x);
+							float y = glm::distance(lineSegmentPoints[j].Position.y, modelObject.meshes[0].vertices[i].Position.y);
+							modelObject.meshes[0].distanceToLine.push_back(glm::vec2(x, y));
+						}
+					}
+				}
+				*/
+				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.meshes[i].textures, calcPoint, true);
 				prevSplineOffset = splineOffset;
 			}
-			if (vertexOffset != previousVertexOffset)
-			{
-				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.meshes[i].textures, splineOffset, vertexOffset, n, vertexIndex);
-				previousVertexOffset = vertexOffset;
-			}
 		}
+		
 		
 		for (int i = 0; i < 1; i++)
 		{
@@ -384,10 +405,11 @@ int main() {
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		glBindVertexArray(light_cube_VAO);
-		for (unsigned int i = 0; i < 1; i++)
+		for (unsigned int i = 0; i < lineSegmentPoints.size(); i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
-			model_light_cube = glm::translate(model_light_cube, modelObject.meshes[i].vertices[vertexIndex].Position);
+			//model_light_cube = glm::translate(model_light_cube, modelObject.meshes[0].vertices[vertexIndex].Position);
+			model_light_cube = glm::translate(model_light_cube, lineSegmentPoints[i].Position);
 			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.001f)); // Make it a smaller cube
 
 			if (ORBIT)
@@ -518,14 +540,14 @@ int main() {
 			current_item = "0";
 		}
 		*/
-		if (ImGui::BeginCombo("##combo", current_vertex_item.c_str())) // The second parameter is the label previewed before opening the combo.
+		if (ImGui::BeginCombo("##combo", current_line_item.c_str())) // The second parameter is the label previewed before opening the combo.
 		{
-			for (int n = 0; n < vertexItems.size(); n++)
+			for (int n = 0; n < lineItems.size(); n++)
 			{
-				bool is_selected = (current_vertex_item == vertexItems[n]); // You can store your selection however you want, outside or inside your objects
-				if (ImGui::Selectable(vertexItems[n].c_str(), is_selected))
+				bool is_selected = (current_line_item == lineItems[n]); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(lineItems[n].c_str(), is_selected))
 				{
-					current_vertex_item = vertexItems[n];
+					current_line_item = lineItems[n];
 				}
 
 				if (is_selected)
@@ -537,13 +559,12 @@ int main() {
 			ImGui::EndCombo();
 		}
 		
-		vertexIndex = std::stoi(current_vertex_item);
+		lineIndex = std::stoi(current_line_item);
 
 
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
 
 		ImGui::SliderFloat("SplinePoint-X", &splineOffset, -0.01f, 0.01f);
-		ImGui::SliderFloat("VertexOffset", &vertexOffset, -0.01f, 0.01f);
 
 		ImGui::SliderInt("n", &n, 0, modelObject.meshes[0].vertices.size() / 4.0);
 
@@ -578,7 +599,7 @@ int main() {
 	glDeleteBuffers(1, &main_cube_VBO);
 	glDeleteBuffers(1, &light_cube_VBO);
 	
-#pragma endregion
+	#pragma endregion
 
 	glfwTerminate();
 	return 0;
