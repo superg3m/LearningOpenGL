@@ -178,8 +178,8 @@ void calculateLineSegmentPoints(std::vector<Vertex> &verts, std::vector<Vertex> 
             }
         }
     }
-    auto it = lineSegmentPoints.end() - 1;
-    lineSegmentPoints.erase(it);
+    //auto it = lineSegmentPoints.end() - 1;
+    //lineSegmentPoints.erase(it);
 }
 
 // Constants
