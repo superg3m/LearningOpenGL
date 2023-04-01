@@ -131,19 +131,36 @@ int main() {
 
 	// *************** Model ***************
 	Model modelObject("../3D/Neon.fbx");
+	std::vector<Mesh> cachedMeshes = modelObject.meshes;
 
-	bool drawCubes = false;
-	bool apply = true;
 	float cubeSize = 1.0f;
 	float splineOffset = 0.0f;
 	float prevSplineOffset = 0.0f;
 
+	float vertexOffset = 0.0f;
+	float previousVertexOffset = 0.0f;
 
 	bool pause = false;
+	bool drawCubes = false;
+	bool apply = true;
+	
+	int n = 0.0;
 
+
+	
 	int spline_point_index = 0;
+	int vertexIndex = 0;
 	std::vector<std::string> items;
 	
+
+	std::vector<std::string> vertexItems;
+	std::string current_vertex_item = "0";
+
+
+	for (int i = 0; i < modelObject.meshes[0].vertices.size(); i++)
+	{
+		vertexItems.push_back(std::to_string(i));
+	}
 	
 	std::string current_item = "0";
 
@@ -218,7 +235,7 @@ int main() {
 		cubeShader.setMat4("model", model_main_cube);
 
 		cubeShader.setVec3("dirLight.direction", 0, -1.0f, 0); // The power of the sun in the palm of my hands
-		cubeShader.setVec3("dirLight.ambient", glm::vec3(1.05f));
+		cubeShader.setVec3("dirLight.ambient", glm::vec3(0.05f));
 		cubeShader.setVec3("dirLight.diffuse", glm::vec3(0.25f));
 		cubeShader.setVec3("dirLight.specular", glm::vec3(0.25f));
 
@@ -303,47 +320,52 @@ int main() {
 			sum = splineObject.meshAmount[splineIndex];
 		}
 		
-		if (splineOffset != prevSplineOffset)
-		{
-			for (int i = 0; i < modelObject.meshes.size(); i++)
-			{
-				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.textures_loaded, splineOffset);
-			}
-			prevSplineOffset = splineOffset;
-		}
 		
+		for (int i = 0; i < modelObject.meshes.size(); i++)
+		{
+			if (splineOffset != prevSplineOffset)
+			{
+				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.meshes[i].textures, splineOffset, 0.0, n, vertexIndex);
+				prevSplineOffset = splineOffset;
+			}
+			if (vertexOffset != previousVertexOffset)
+			{
+				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.meshes[i].textures, splineOffset, vertexOffset, n, vertexIndex);
+				previousVertexOffset = vertexOffset;
+			}
+		}
 		
 		for (int i = 0; i < 1; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, splineObject.splinePoints[i]);
-			glm::quat quat;
+			model = glm::translate(model, glm::vec3(0.0f));
+			//glm::quat quat;
 			if (apply)
 			{
 				//std::cout << "I: " << i << std::endl;
 				if (i != 0)
 				{
-					quat = safeQuatLookAt(splineObject.distanceVec[i - 1], glm::vec3(0, 1, 0));
+					//quat = safeQuatLookAt(splineObject.distanceVec[i - 1], glm::vec3(0, 1, 0));
 				}
 				else
 				{
-					quat = safeQuatLookAt(splineObject.distanceVec[0], glm::vec3(0, 1, 0));
+					//quat = safeQuatLookAt(splineObject.distanceVec[0], glm::vec3(0, 1, 0));
 				}
 				//splineIndex++;
 				//sum += splineObject.meshAmount[splineIndex];
 			}
 			else
 			{
-				quat = safeQuatLookAt(splineObject.distanceVec[i], glm::vec3(0, 1, 0));
+				//quat = safeQuatLookAt(splineObject.distanceVec[i], glm::vec3(0, 1, 0));
 			}
 			
-			glm::mat4 RotationMatrix = glm::toMat4(quat);
+			//glm::mat4 RotationMatrix = glm::toMat4(quat);
 
-			model = model * RotationMatrix;
-			model = glm::scale(model, glm::vec3(0.25f));
+			//model = model * RotationMatrix;
+			model = glm::scale(model, glm::vec3(1.0f));
 			cubeShader.setMat4("model", model);
 			
-			//cubeShader.setVec3("lightColor", glm::vec3(0.25f));
+			cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 			//cubeShader.setFloat("material.type", 1);
 			//cubeShader.setVec4("uniColor", glm::vec4(0.2, 1.0, 0.2f, 1.0));
 			modelObject.Draw(cubeShader);
@@ -362,11 +384,11 @@ int main() {
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		glBindVertexArray(light_cube_VAO);
-		for (unsigned int i = 0; i < splineObject.controlPoints.size(); i++)
+		for (unsigned int i = 0; i < 1; i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
-			model_light_cube = glm::translate(model_light_cube, splineObject.controlPoints[i]);
-			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.1f)); // Make it a smaller cube
+			model_light_cube = glm::translate(model_light_cube, modelObject.meshes[i].vertices[vertexIndex].Position);
+			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.001f)); // Make it a smaller cube
 
 			if (ORBIT)
 			{
@@ -376,7 +398,7 @@ int main() {
 				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.1f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
-			//glDrawArrays(GL_TRIANGLES, 0, 36);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
 		#pragma endregion
@@ -401,6 +423,16 @@ int main() {
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
 		ImGui::Checkbox("Apply", &apply);
+		if (ImGui::Button("Reset"))
+		{
+			for (int i = 0; i < modelObject.meshes.size(); i++)
+			{
+				modelObject.meshes[i] = Mesh(cachedMeshes[i].vertices, cachedMeshes[i].indices, cachedMeshes[i].textures);
+			}
+			splineOffset = 0.0;
+		}
+		/*
+		
 		if (ImGui::Button("Add Spline Points"))
 		{
 			int random_number_x = rand() % 5 + 1;
@@ -417,6 +449,8 @@ int main() {
 			}
 			pause = false;
 		}
+		
+		
 		if (ImGui::Button("Remove control Points"))
 		{
 			if (splineObject.controlPoints.size() > 1)
@@ -455,7 +489,9 @@ int main() {
 				std::cout << "AMOUNT of meshes PER SPLINE: " << n << std::endl;
 			}
 		}
-		
+		*/
+
+		/*
 		if (!splineObject.controlPoints.empty())
 		{
 			if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
@@ -481,19 +517,42 @@ int main() {
 		{
 			current_item = "0";
 		}
+		*/
+		if (ImGui::BeginCombo("##combo", current_vertex_item.c_str())) // The second parameter is the label previewed before opening the combo.
+		{
+			for (int n = 0; n < vertexItems.size(); n++)
+			{
+				bool is_selected = (current_vertex_item == vertexItems[n]); // You can store your selection however you want, outside or inside your objects
+				if (ImGui::Selectable(vertexItems[n].c_str(), is_selected))
+				{
+					current_vertex_item = vertexItems[n];
+				}
+
+				if (is_selected)
+				{
+					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
+				}
+
+			}
+			ImGui::EndCombo();
+		}
+		
+		vertexIndex = std::stoi(current_vertex_item);
+
 
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
 
-		ImGui::SliderFloat("SplinePoint-X", &splineOffset, -2.0f, 2.0f);
+		ImGui::SliderFloat("SplinePoint-X", &splineOffset, -0.01f, 0.01f);
+		ImGui::SliderFloat("VertexOffset", &vertexOffset, -0.01f, 0.01f);
+
+		ImGui::SliderInt("n", &n, 0, modelObject.meshes[0].vertices.size() / 4.0);
+
 
 		std::string s = current_item;
 		//std::cout << "String: " << s << std::endl;
 		if (!splineObject.controlPoints.empty())
 		{
 			spline_point_index = std::stoi(current_item);
-			ImGui::SliderFloat("point-x-component", &splineObject.controlPoints[spline_point_index].x, -10.0f, 10.0f);
-			ImGui::SliderFloat("point-y-component", &splineObject.controlPoints[spline_point_index].y, -10.0f, 10.0f);
-			ImGui::SliderFloat("point-z-component", &splineObject.controlPoints[spline_point_index].z, -10.0f, 10.0f);
 		}
 		
 

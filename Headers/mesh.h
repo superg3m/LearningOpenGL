@@ -39,7 +39,7 @@ public:
     unsigned int VAO;
     
     // constructor
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, float offSet = 0.0f);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, float offSet = 0.0f, float vertexOffset = 0.0,  int n = 0, int vertexIndex = 0);
 
     // render the mesh
     void Draw(Shader& shader);
