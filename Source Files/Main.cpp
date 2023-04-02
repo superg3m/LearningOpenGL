@@ -611,9 +611,9 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	if (InputHandler::Mouse_Two_Pressed)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-		float xoffset = xposIn - SCREEN_WIDTH / 2;
-		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
+		glfwSetCursorPos(window, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f);
+		float xoffset = xposIn - SCREEN_WIDTH / 2.0f;
+		float yoffset = (SCREEN_HEIGHT / 2.0f) - yposIn; // reversed since y-coordinates go from bottom to to
 		//std::cout << "X :" << xoffset << " | Y: " << yoffset << std::endl;
 		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
