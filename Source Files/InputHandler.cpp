@@ -60,7 +60,7 @@ void InputHandler::processInput(GLFWwindow *window, Camera& camera, float& delta
 	InputHandler::Mouse_Two_Pressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 	#pragma endregion
 
-	const float blockSpeed = 0.25;
+	const float blockSpeed = 2.0f;
 
 	#pragma region Implementation
 	// Non-letter Keys

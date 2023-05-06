@@ -32,7 +32,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	#ifdef __APPLE__
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	#endif
 
 	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "OPEN GL", NULL, NULL);
@@ -44,7 +44,7 @@ int main() {
 		return -1;
 	}
 
-	//glfwSwapInterval(0);
+	glfwSwapInterval(0); // disable Gsync
 	glfwMakeContextCurrent(window);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
@@ -110,7 +110,7 @@ int main() {
 	configureBufferAttributes(3, NULL, NULL, NULL, number_of_elements_per_line);
 	#pragma endregion
 
-	
+
 
 	// *************** FreeType ***************
 	#pragma region FreeType
@@ -131,41 +131,17 @@ int main() {
 
 	// *************** Model ***************
 	Model modelObject("../3D/Neon.fbx");
-	std::vector<Mesh> cachedMeshes = modelObject.meshes;
 
+	bool drawCubes = true;
+	bool apply = true;
 	float cubeSize = 1.0f;
-	float splineOffset = 0.0f;
-	float prevSplineOffset = 0.0f;
-
-	glm::vec3 currentLinePoint = glm::vec3(0.0f);
-	glm::vec3 PreviousLinePoint = glm::vec3(0.0f);
-	
 
 	bool pause = false;
-	bool drawCubes = false;
-	bool apply = true;
-	
-	int n = 0.0;
 
-
-	
 	int spline_point_index = 0;
-	int lineIndex = 0;
 	std::vector<std::string> items;
-	
 
-	std::vector<std::string> lineItems;
-	std::string current_line_item = "0";
 
-	std::vector<Vertex> lineSegmentPoints;
-
-	calculateLineSegmentPoints(modelObject.meshes[0].vertices, lineSegmentPoints); // Calculate this outside of this constructor also only do this once and just pass in as an argument
-	for (int i = 0; i < lineSegmentPoints.size(); i++)
-	{
-		lineItems.push_back(std::to_string(i));
-	}
-	
-	
 	std::string current_item = "0";
 
 	const unsigned int amount = 25;
@@ -178,11 +154,6 @@ int main() {
 	splineObject.addControlPoints(glm::vec3(6, 2, 2));
 	splineObject.addControlPoints(glm::vec3(7, 3, 1));
 	// Clear the spline points after
-
-
-	
-	
-
 
 	srand(time(NULL));
 	int splineIndex = 0;
@@ -200,16 +171,16 @@ int main() {
 
 		cubeShader.use();
 
-		
+
 		if (!splineObject.controlPoints.empty())
 		{
-			input.processInput(window, camera, deltaTime, cubeShader, lineSegmentPoints[lineIndex].Position, splineObject);
+			input.processInput(window, camera, deltaTime, cubeShader, splineObject.controlPoints[spline_point_index], splineObject);
 		}
 		else
 		{
 			input.processInput(window, camera, deltaTime, cubeShader, lightNodePositions[0], splineObject);
 		}
-		
+
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -220,12 +191,12 @@ int main() {
 
 		// SPLINE CALCULATION
 		items.clear();
-		
+
 		for (int i = 0; i < splineObject.controlPoints.size(); i++)
 		{
 			items.push_back(std::to_string(i));
 		}
-		
+
 		splineObject.calculate_number_of_meshes_per_spline(modelObject);
 		splineObject.calculateSplinePoints(pause, apply, splineObject.drawing);
 
@@ -244,7 +215,7 @@ int main() {
 		cubeShader.setMat4("model", model_main_cube);
 
 		cubeShader.setVec3("dirLight.direction", 0, -1.0f, 0); // The power of the sun in the palm of my hands
-		cubeShader.setVec3("dirLight.ambient", glm::vec3(0.05f));
+		cubeShader.setVec3("dirLight.ambient", glm::vec3(1.05f));
 		cubeShader.setVec3("dirLight.diffuse", glm::vec3(0.25f));
 		cubeShader.setVec3("dirLight.specular", glm::vec3(0.25f));
 
@@ -282,7 +253,7 @@ int main() {
 
 		cubeShader.setVec3("lightColor", lightColor);
 		cubeShader.setFloat("material.type", 0);
-		
+
 		for (unsigned int i = 0; i < 9; i++)
 		{
 			glm::mat4 model_main_cube = glm::mat4(1.0f);
@@ -297,7 +268,7 @@ int main() {
 			// render the cube
 			model_main_cube = glm::scale(model_main_cube, glm::vec3(cubeSize));
 			cubeShader.setMat4("model", model_main_cube);
-			
+
 			if (cubeTexture.currently_loaded_textures.size() == 0)
 			{
 				for (size_t i = 0; i < 2; i++)
@@ -305,7 +276,7 @@ int main() {
 					glActiveTexture(GL_TEXTURE0 + i);
 					glBindTexture(GL_TEXTURE_2D, NULL);
 				}
-				
+
 			}
 			else 
 			{
@@ -315,7 +286,7 @@ int main() {
 					glBindTexture(GL_TEXTURE_2D, std::get<TextureID>(cubeTexture.currently_loaded_textures[i]));
 				}
 			}
-			
+
 			glBindVertexArray(main_cube_VAO);
 			if (drawCubes)
 			{
@@ -328,72 +299,42 @@ int main() {
 		{
 			sum = splineObject.meshAmount[splineIndex];
 		}
-		
-		for (int i = 0; i < modelObject.meshes.size(); i++)
-		{
-			PreviousLinePoint = currentLinePoint;
-			currentLinePoint = lineSegmentPoints[lineIndex].Position;
-			glm::vec3 calcPoint = glm::vec3(currentLinePoint.x - PreviousLinePoint.x, currentLinePoint.y - PreviousLinePoint.y, currentLinePoint.z);
-			if (PreviousLinePoint != currentLinePoint)
-			{
-				/*
-				for (int i = 0; i < modelObject.meshes[0].vertices.size(); i++)
-				{
-					for (int j = 0; j < lineSegmentPoints.size(); j++)
-					{
-						if (modelObject.meshes[0].vertices[i].Position.z == lineSegmentPoints[j].Position.z)
-						{
-							float x = glm::distance(lineSegmentPoints[j].Position.x, modelObject.meshes[0].vertices[i].Position.x);
-							float y = glm::distance(lineSegmentPoints[j].Position.y, modelObject.meshes[0].vertices[i].Position.y);
-							modelObject.meshes[0].distanceToLine.push_back(glm::vec2(x, y));
-						}
-					}
-				}
-				*/
-				modelObject.meshes[i] = Mesh(modelObject.meshes[i].vertices, modelObject.meshes[i].indices, modelObject.meshes[i].textures, calcPoint, true);
-				prevSplineOffset = splineOffset;
-			}
-		}
-		
-		
-		for (int i = 0; i < 1; i++)
+
+		for (int i = 0; i < splineObject.splinePoints.size(); i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f));
-			//glm::quat quat;
+			model = glm::translate(model, splineObject.splinePoints[i]);
+			glm::quat quat;
 			if (apply)
 			{
-				//std::cout << "I: " << i << std::endl;
 				if (i != 0)
 				{
-					//quat = safeQuatLookAt(splineObject.distanceVec[i - 1], glm::vec3(0, 1, 0));
+					quat = safeQuatLookAt(splineObject.distanceVec[i - 1], glm::vec3(0, 1, 0));
 				}
 				else
 				{
-					//quat = safeQuatLookAt(splineObject.distanceVec[0], glm::vec3(0, 1, 0));
+					quat = safeQuatLookAt(splineObject.distanceVec[0], glm::vec3(0, 1, 0));
 				}
-				//splineIndex++;
-				//sum += splineObject.meshAmount[splineIndex];
 			}
 			else
 			{
-				//quat = safeQuatLookAt(splineObject.distanceVec[i], glm::vec3(0, 1, 0));
+				quat = safeQuatLookAt(splineObject.distanceVec[i], glm::vec3(0, 1, 0));
 			}
-			
-			//glm::mat4 RotationMatrix = glm::toMat4(quat);
 
-			//model = model * RotationMatrix;
-			model = glm::scale(model, glm::vec3(1.0f));
+			glm::mat4 RotationMatrix = glm::toMat4(quat);
+
+			model = model * RotationMatrix;
+			model = glm::scale(model, glm::vec3(0.25f));
 			cubeShader.setMat4("model", model);
-			
-			cubeShader.setVec3("lightColor", glm::vec3(0.25f));
+
+			//cubeShader.setVec3("lightColor", glm::vec3(0.25f));
 			//cubeShader.setFloat("material.type", 1);
 			//cubeShader.setVec4("uniColor", glm::vec4(0.2, 1.0, 0.2f, 1.0));
 			modelObject.Draw(cubeShader);
 		}
-		
-		
-		
+
+
+
 
 		#pragma endregion
 
@@ -405,12 +346,11 @@ int main() {
 		lightCubeShader.setVec3("uniColor2", lightColor);
 
 		glBindVertexArray(light_cube_VAO);
-		for (unsigned int i = 0; i < lineSegmentPoints.size(); i++)
+		for (unsigned int i = 0; i < splineObject.controlPoints.size(); i++)
 		{
 			glm::mat4 model_light_cube = glm::mat4(1.0f);
-			//model_light_cube = glm::translate(model_light_cube, modelObject.meshes[0].vertices[vertexIndex].Position);
-			model_light_cube = glm::translate(model_light_cube, lineSegmentPoints[i].Position);
-			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.001f)); // Make it a smaller cube
+			model_light_cube = glm::translate(model_light_cube, splineObject.controlPoints[i]);
+			model_light_cube = glm::scale(model_light_cube, glm::vec3(0.1f)); // Make it a smaller cube
 
 			if (ORBIT)
 			{
@@ -420,7 +360,7 @@ int main() {
 				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.1f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			//glDrawArrays(GL_TRIANGLES, 0, 36); Draws light Cubes
 		}
 
 		#pragma endregion
@@ -445,16 +385,6 @@ int main() {
 		ImGui::Text("HELLO THERE!");
 		ImGui::Checkbox("Draw Cubes", &drawCubes);
 		ImGui::Checkbox("Apply", &apply);
-		if (ImGui::Button("Reset"))
-		{
-			for (int i = 0; i < modelObject.meshes.size(); i++)
-			{
-				modelObject.meshes[i] = Mesh(cachedMeshes[i].vertices, cachedMeshes[i].indices, cachedMeshes[i].textures);
-			}
-			splineOffset = 0.0;
-		}
-		/*
-		
 		if (ImGui::Button("Add Spline Points"))
 		{
 			int random_number_x = rand() % 5 + 1;
@@ -471,8 +401,6 @@ int main() {
 			}
 			pause = false;
 		}
-		
-		
 		if (ImGui::Button("Remove control Points"))
 		{
 			if (splineObject.controlPoints.size() > 1)
@@ -508,12 +436,10 @@ int main() {
 		{
 			for (auto n : splineObject.meshAmount)
 			{
-				std::cout << "AMOUNT of meshes PER SPLINE: " << n << std::endl;
+				std::cout << "AMOUNT: " << n << "\n";
 			}
 		}
-		*/
 
-		/*
 		if (!splineObject.controlPoints.empty())
 		{
 			if (ImGui::BeginCombo("##combo", current_item.c_str())) // The second parameter is the label previewed before opening the combo.
@@ -539,43 +465,18 @@ int main() {
 		{
 			current_item = "0";
 		}
-		*/
-		if (ImGui::BeginCombo("##combo", current_line_item.c_str())) // The second parameter is the label previewed before opening the combo.
-		{
-			for (int n = 0; n < lineItems.size(); n++)
-			{
-				bool is_selected = (current_line_item == lineItems[n]); // You can store your selection however you want, outside or inside your objects
-				if (ImGui::Selectable(lineItems[n].c_str(), is_selected))
-				{
-					current_line_item = lineItems[n];
-				}
-
-				if (is_selected)
-				{
-					ImGui::SetItemDefaultFocus();   // You may set the initial focus when opening the combo (scrolling + for keyboard navigation support)
-				}
-
-			}
-			ImGui::EndCombo();
-		}
-		
-		lineIndex = std::stoi(current_line_item);
-
 
 		ImGui::SliderFloat("Cube Size", &cubeSize, 0.25f, 2.0f);
-
-		ImGui::SliderFloat("SplinePoint-X", &splineOffset, -0.01f, 0.01f);
-
-		ImGui::SliderInt("n", &n, 0, modelObject.meshes[0].vertices.size() / 4.0);
-
-
 		std::string s = current_item;
 		//std::cout << "String: " << s << std::endl;
 		if (!splineObject.controlPoints.empty())
 		{
 			spline_point_index = std::stoi(current_item);
+			ImGui::SliderFloat("point-x-component", &splineObject.controlPoints[spline_point_index].x, -10.0f, 10.0f);
+			ImGui::SliderFloat("point-y-component", &splineObject.controlPoints[spline_point_index].y, -10.0f, 10.0f);
+			ImGui::SliderFloat("point-z-component", &splineObject.controlPoints[spline_point_index].z, -10.0f, 10.0f);
 		}
-		
+
 
 		ImGui::End();
 
@@ -598,7 +499,7 @@ int main() {
 	glDeleteVertexArrays(1, &light_cube_VAO);
 	glDeleteBuffers(1, &main_cube_VBO);
 	glDeleteBuffers(1, &light_cube_VBO);
-	
+
 	#pragma endregion
 
 	glfwTerminate();
@@ -611,9 +512,9 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	if (InputHandler::Mouse_Two_Pressed)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		glfwSetCursorPos(window, SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f);
-		float xoffset = xposIn - SCREEN_WIDTH / 2.0f;
-		float yoffset = (SCREEN_HEIGHT / 2.0f) - yposIn; // reversed since y-coordinates go from bottom to to
+		glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+		float xoffset = xposIn - SCREEN_WIDTH / 2;
+		float yoffset = SCREEN_HEIGHT / 2 - yposIn; // reversed since y-coordinates go from bottom to to
 		//std::cout << "X :" << xoffset << " | Y: " << yoffset << std::endl;
 		camera.ProcessMouseMovement(xoffset, yoffset);
 	}
@@ -622,7 +523,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	{
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
-	
+
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
