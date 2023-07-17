@@ -130,7 +130,7 @@ int main() {
 	#pragma endregion
 
 	// *************** Model ***************
-	Model modelObject("../3D/Neon.fbx");
+	Model modelObject("./Resources/Neon.fbx");
 
 	bool drawCubes = true;
 	bool apply = true;
