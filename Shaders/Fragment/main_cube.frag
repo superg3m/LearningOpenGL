@@ -92,9 +92,10 @@ void main()
 
     if(material.type == 1)
     {
-        FragColor = uniColor; // Change this for texture
-    }
-    else
+        FragColor = uniColor; // Not for model objects
+    } else if (material.type == 2) {
+        FragColor = vec4(result, 1.0); // Change this for texture
+    } else
     {
         FragColor = vec4(ourColor, 1.0) * vec4(result, 1.0); // Change this for texture
     } 

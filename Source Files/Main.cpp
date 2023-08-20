@@ -129,7 +129,7 @@ int main() {
 	freeTypeObject.bind();
 	#pragma endregion
 
-	// *************** Model ***************
+	// *************** Spline Model ***************
 	Model modelObject("./Resources/Neon.fbx");
 
 	bool drawCubes = true;
@@ -157,6 +157,10 @@ int main() {
 
 	srand(time(NULL));
 	int splineIndex = 0;
+
+	// *************** Backpack Model ***************
+	Model backpackObject("./Resources/Backpack/backpack.obj");
+
 	// *************** Render Loop ***************
 	#pragma region Render Loop
 	while (!glfwWindowShouldClose(window))
@@ -215,7 +219,7 @@ int main() {
 		cubeShader.setMat4("model", model_main_cube);
 
 		cubeShader.setVec3("dirLight.direction", 0, -1.0f, 0); // The power of the sun in the palm of my hands
-		cubeShader.setVec3("dirLight.ambient", glm::vec3(1.05f));
+		cubeShader.setVec3("dirLight.ambient", glm::vec3(0.65f));
 		cubeShader.setVec3("dirLight.diffuse", glm::vec3(0.25f));
 		cubeShader.setVec3("dirLight.specular", glm::vec3(0.25f));
 
@@ -224,8 +228,8 @@ int main() {
 			std::string lightNode = "lightNode[" + std::to_string(i) + "]"; // Totally stole this one from kyle But I had the for loop prior
 			cubeShader.setVec3(lightNode + ".position", lightNodePositions[i]);
 			cubeShader.setVec3(lightNode + ".ambient", glm::vec3(2.0f));
-			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(0.25f));
-			cubeShader.setVec3(lightNode + ".specular", glm::vec3(3.0f));
+			cubeShader.setVec3(lightNode + ".diffuse", glm::vec3(10.25f));
+			cubeShader.setVec3(lightNode + ".specular", glm::vec3(10.0f));
 
 			cubeShader.setFloat(lightNode + ".constant", 1.0f);
 			cubeShader.setFloat(lightNode + ".linear", 0.09f);
@@ -333,8 +337,12 @@ int main() {
 			modelObject.Draw(cubeShader);
 		}
 
-
-
+		glm::mat4 model = glm::mat4(1.0f);
+		model = transformMatrix(model, 0, glm::vec3(0.0f, 0.0f, 2.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5));
+		cubeShader.setMat4("model", model);
+		cubeShader.setVec3("lightColor", glm::vec3(0.25f));
+		cubeShader.setFloat("material.type", 2);
+		backpackObject.Draw(cubeShader);
 
 		#pragma endregion
 
@@ -360,11 +368,10 @@ int main() {
 				model_light_cube = transformMatrix(model_light_cube,LIGHT_ROTATION_SPEED * currentTime, lightNodePositions[i], glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.1f));
 			}
 			lightCubeShader.setMat4("model", model_light_cube);
-			//glDrawArrays(GL_TRIANGLES, 0, 36); Draws light Cubes
+			glDrawArrays(GL_TRIANGLES, 0, 36);  // Draws light Cubes
 		}
 
 		#pragma endregion
-
 		// *************** Render Text ***************
 		#pragma region Render Text
 		glEnable(GL_BLEND);
