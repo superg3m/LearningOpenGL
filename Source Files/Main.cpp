@@ -414,6 +414,7 @@ int main() {
 			{
 				std::vector<glm::vec3>::iterator it = splineObject.controlPoints.end() - 1;
 				splineObject.controlPoints.erase(it);
+				current_item = "0";
 			}
 			else
 			{
